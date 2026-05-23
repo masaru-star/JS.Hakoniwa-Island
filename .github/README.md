@@ -1,4 +1,7 @@
 # M式箱庭ゲーム Ver.4.6
+
+[こちらから遊べます](https://masaru-star.github.io/JS.Hakoniwa-Island/)
+
 ![Good First Issue](https://img.shields.io/badge/good%20first--issue-welcome-blueviolet) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) ![Help Wanted](https://img.shields.io/badge/translation-welcome-brightgreen)
 
 ![Progress](https://img.shields.io/badge/Japanese-100%25-green) ![Progress](https://img.shields.io/badge/English-5%25-orange) ![Progress](https://img.shields.io/badge/German-0%25-red) ![Progress](https://img.shields.io/badge/Chinese-0%25-red) ![Progress](https://img.shields.io/badge/Korean-0%25-red) ![Progress](https://img.shields.io/badge/Spanish-0%25-red)
