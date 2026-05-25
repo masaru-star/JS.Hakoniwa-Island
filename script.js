@@ -1062,8 +1062,10 @@ function logAction(msg, options = {}) {
     entry.classList.add('log-whisper');
   } else if (msg.includes('失敗') || msg.includes('台風') || msg.includes('隕石') || msg.includes('不足') || msg.includes('廃墟') || msg.includes('壊滅') || msg.includes('踏み荒らしました') || msg.includes('怪獣が出現') || msg.includes('自爆') || msg.includes('攻撃されました') || msg.includes('砲撃') || msg.includes('破壊されました') || msg.includes('撃沈')|| msg.includes('枯渇')|| msg.includes('経済危機')|| msg.includes('隆起')|| msg.includes('噴火')|| msg.includes('津波')|| msg.includes('地震')) {
     entry.classList.add('log-red');
-  } else if (msg.includes('建設') || msg.includes('形成') || msg.includes('討伐') || msg.includes('初期化') || msg.includes('強化') || msg.includes('補給') || msg.includes('移動しました') || msg.includes('派遣') || msg.includes('帰還') || msg.includes('要請') || msg.includes('修理')) { // 修理を追加
+  } else if (msg.includes('建設') || msg.includes('形成') || msg.includes('討伐') || msg.includes('初期化') || msg.includes('強化') || msg.includes('補給') || msg.includes('移動しました') || msg.includes('派遣') || msg.includes('帰還') || msg.includes('要請') || msg.includes('修理')) {
     entry.classList.add('log-cyan');
+  } else if (msg.includes('【宣伝！】')) { 
+    entry.classList.add('log-status-muted');
   }
   if (statusLine2 && statusLine2.parentNode === log) {
     statusLine2.insertAdjacentElement('afterend', entry);
