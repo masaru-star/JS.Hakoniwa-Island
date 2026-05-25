@@ -29,6 +29,14 @@ SOFTWARE. -->
   </noscript>
 </head>
 <body>
+
+<label>
+  <input type="checkbox" id="PR"> 宣伝を表示する
+</label>
+<p id="prText" style="display: none;">
+【宣伝】<a href="https://docs.google.com/forms/d/e/1FAIpQLSfQbRL926EcXjSShoP-p6uQYG5tqiP5CFijHzJE3qK3sY3wHA/viewform">このゲームに関するアンケート</a>はお済みですか？<br>
+早めの回答をお願いします！！！</p>
+
 <div id="gameControls" style="margin-bottom: 1em;">
   <label for="islandNameInput">島の名前:</label>
   <input type="text" id="islandNameInput" value="MyIsland">
@@ -226,6 +234,15 @@ window.addEventListener('click', (e) => {
     modal.style.display = 'none';
   }
 });
+  const checkbox = document.getElementById('PR');
+  const text = document.getElementById('prText');
+  checkbox.addEventListener('change', function() {
+    if (this.checked) {
+      text.style.display = 'block'; // チェックONで表示
+    } else {
+      text.style.display = 'none';  // チェックOFFで非表示
+    }
+  });
 </script>
 </body>
 </html>
