@@ -1,6 +1,7 @@
 # M式箱庭ゲーム Ver.4.6
 
-[こちらから遊べます](https://masaru-star.github.io/JS.Hakoniwa-Island/)
+[こちらから遊べます](https://masaru-star.github.io/JS.Hakoniwa-Island/)<br>
+リポジトリ名が`M-Island`からリネームされました。
 
 ![Good First Issue](https://img.shields.io/badge/good%20first--issue-welcome-blueviolet) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) ![Help Wanted](https://img.shields.io/badge/translation-welcome-brightgreen)
 
