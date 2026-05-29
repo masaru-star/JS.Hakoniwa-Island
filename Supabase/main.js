@@ -38,9 +38,34 @@ export function startSupabaseHakoniwa(config) {
     onTurnComplete: async () => {
       await refreshIslandLists();
       const session = store.getSession();
-      if (session) await store.login({ serial: session.serial, password: session.password });
+      if (session) {
+        await store.login({ serial: session.serial, password: session.password });
+        showOwnIslandView();
+      }
     }
   });
+
+
+  function setGameAreaVisibility({ showPlans, showMap, showQueue }) {
+    const planControls = $('planControls');
+    const map = $('map');
+    const actionQueueDisplay = $('actionQueueDisplay');
+    if (planControls) planControls.style.display = showPlans ? '' : 'none';
+    if (map) map.style.display = showMap ? '' : 'none';
+    if (actionQueueDisplay) actionQueueDisplay.style.display = showQueue ? '' : 'none';
+  }
+
+  function showOwnIslandView() {
+    setGameAreaVisibility({ showPlans: true, showMap: true, showQueue: true });
+  }
+
+  function showTouristView() {
+    setGameAreaVisibility({ showPlans: true, showMap: true, showQueue: false });
+  }
+
+  function hideIslandView() {
+    setGameAreaVisibility({ showPlans: false, showMap: false, showQueue: false });
+  }
 
   async function refreshIslandLists() {
     const islands = await store.listIslands();
@@ -71,6 +96,7 @@ export function startSupabaseHakoniwa(config) {
       });
       $('supabaseSerialInput').value = serial;
       setStatus(`登録完了: 通し番号 No.${serial} が発行されました。`);
+      showOwnIslandView();
       await refreshIslandLists();
     } catch (error) {
       setStatus(`登録失敗: ${error.message}`);
@@ -84,6 +110,7 @@ export function startSupabaseHakoniwa(config) {
         password: $('supabasePasswordInput').value
       });
       setStatus(`ログイン中: No.${island.serial} ${island.islandName}`);
+      showOwnIslandView();
       await refreshIslandLists();
     } catch (error) {
       setStatus(`ログイン失敗: ${error.message}`);
@@ -102,6 +129,7 @@ export function startSupabaseHakoniwa(config) {
 
   $('supabaseLogoutBtn').addEventListener('click', () => {
     store.logout();
+    hideIslandView();
     setStatus('ログアウトしました（観光者モード可）。');
   });
 
@@ -110,6 +138,7 @@ export function startSupabaseHakoniwa(config) {
       const serial = $('supabaseTouristIslandSelect').value;
       if (!serial) throw new Error('観光する島を選択してください。');
       const island = await store.loadTourist(serial);
+      showTouristView();
       setStatus(`観光者モード: No.${island.serial} ${island.islandName}`);
     } catch (error) {
       setStatus(`観光失敗: ${error.message}`);
@@ -117,14 +146,21 @@ export function startSupabaseHakoniwa(config) {
   });
 
   $('supabaseReturnBtn').addEventListener('click', () => {
-    store.returnHome();
-    setStatus('自島に戻りました。');
+    const returned = store.returnHome();
+    if (returned) {
+      showOwnIslandView();
+      setStatus('自島に戻りました。');
+    } else {
+      hideIslandView();
+      setStatus('ログインしていないため、自島の表示を隠しました。');
+    }
   });
 
   $('supabaseOtherIslandSelect').addEventListener('change', async (event) => {
     if (!event.target.value) return;
     try {
       await store.loadTourist(event.target.value);
+      showTouristView();
       setStatus('行き先の島を観光者モードで表示しました。砲撃系計画のみ登録できます。');
     } catch (error) {
       setStatus(`行き先表示失敗: ${error.message}`);
@@ -140,7 +176,10 @@ export function startSupabaseHakoniwa(config) {
         return;
       }
       store.loadTourist(serial)
-        .then((island) => setStatus(`観光者モード: No.${island.serial} ${island.islandName}`))
+        .then((island) => {
+          showTouristView();
+          setStatus(`観光者モード: No.${island.serial} ${island.islandName}`);
+        })
         .catch((error) => setStatus(`行き先表示失敗: ${error.message}`));
       $('actionSelect').value = '';
       window.updateConfirmButton();
@@ -158,6 +197,7 @@ export function startSupabaseHakoniwa(config) {
     if (shouldShow) $('touristCodeInput').style.display = 'none';
   };
 
+  hideIslandView();
   scheduler.start();
   refreshIslandLists().catch((error) => setStatus(`島一覧取得失敗: ${error.message}`));
   $('supabaseTurnIntervalLabel').textContent = `${Math.round(TURN_INTERVAL_MS / 60000)}分`;
