@@ -92,6 +92,16 @@ begin
 end;
 $$;
 
+create or replace function public.hakoniwa_server_timestamp()
+returns bigint
+language sql
+volatile
+security definer
+set search_path = public
+as $$
+  select floor(extract(epoch from clock_timestamp()) * 1000)::bigint;
+$$;
+
 alter table public.hakoniwa_islands enable row level security;
 
 drop policy if exists "public tourist read" on public.hakoniwa_islands;
@@ -102,3 +112,4 @@ grant select on public.hakoniwa_public_islands to anon, authenticated;
 grant execute on function public.hakoniwa_register(text, text, jsonb) to anon, authenticated;
 grant execute on function public.hakoniwa_login(bigint, text) to anon, authenticated;
 grant execute on function public.hakoniwa_save(bigint, text, jsonb, boolean) to anon, authenticated;
+grant execute on function public.hakoniwa_server_timestamp() to anon, authenticated;

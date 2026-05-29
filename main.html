@@ -106,14 +106,8 @@ SOFTWARE. -->
     </div>
 </p></details>
 <p>陸地面積: <span id="landArea">0</span>Km² | 砲撃可能数上限: <span id="gunCount">0</span>回 | 実績Pt: <span id="achievementPoints">0</span>Pt<br>資金: <span id="money">1000</span>G | 食料: <span id="food">500</span> | 人口: <span id="population">0</span>人 | ターン: <span id="turn">0</span> | 島の名前: <span id="currentIslandName"></span></p>
-<div>
-    <label for="otherIslandActionInput">他島の行動:</label>
-    <input type="text" id="otherIslandActionInput" style="width: 400px; margin-bottom: 5px;" placeholder="ここに他島からの行動を入力してください">
-</div>
-<div>
-    <label for="actionForOtherIslandOutput">他島への行動:</label>
-    <input type="text" id="actionForOtherIslandOutput" style="width: 400px; margin-bottom: 5px;" readonly>
-</div>
+<input type="hidden" id="otherIslandActionInput" value="">
+<input type="hidden" id="actionForOtherIslandOutput" value="">
 <div style="margin-top: 2px;">
     <span id="keepOptionSettingControl">
       <input type="checkbox" id="keepOptionSelected">
@@ -125,8 +119,7 @@ SOFTWARE. -->
       <label for="pinFundingFailureTracking">トラッキングを固定</label>
     </span>
 </div>
-<button onclick="nextTurn()">▶ ターンを進める</button>
-<br>
+<div id="planControls">
 <select id="actionSelect" onchange="updateConfirmButton()">
   <option value="">計画一覧</option>
   <option value="buildFarm" data-myisland="true">農場建設 (100G)</option>
@@ -227,6 +220,7 @@ SOFTWARE. -->
 <button onclick="confirmAction()" id="confirmBtn" disabled>決定</button>
 <button onclick="clearTileSelection()" id="clearTileSelectionBtn" style="display: none;">タイル選択の解除</button>
 <span id="tileInfo"></span>
+</div>
 <div id="gameContainer" style="display: flex; gap: 5px;">
     <table id="map"></table>
     <div id="actionQueueDisplay" style="font-size: 0.7em;margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">

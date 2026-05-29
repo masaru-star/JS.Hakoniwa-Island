@@ -85,8 +85,13 @@ export function createStateStore(supabase, core) {
 
   function returnHome() {
     if (!currentState && session) currentState = core.getState();
-    if (currentState) core.setOwnIsland(currentState);
+    if (!currentState) {
+      viewingIsland = null;
+      return false;
+    }
+    core.setOwnIsland(currentState);
     viewingIsland = null;
+    return true;
   }
 
   function queueRemoteBombard({ action, count, x, y }) {
