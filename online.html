@@ -44,8 +44,6 @@ SOFTWARE. -->
   <input type="password" id="supabasePasswordInput" autocomplete="current-password">
   <button id="supabaseRegisterBtn" type="button">初回登録</button>
   <button id="supabaseLoginBtn" type="button">ログイン</button>
-  <button id="supabaseSaveBtn" type="button">サーバー保存</button>
-  <button id="supabaseLogoutBtn" type="button">ログアウト</button>
   <div style="margin-top: .5em;">
     <label for="supabaseSerialInput">通し番号:</label>
     <input type="number" id="supabaseSerialInput" min="1" style="width: 6em;">
@@ -66,6 +64,8 @@ SOFTWARE. -->
     初回登録で通し番号が発行され、次回以降は通し番号とパスワードでログインします。パスワードは変更できません。
   </p>
 </div>
+  <button id="supabaseSaveBtn" type="button">サーバー保存</button>
+  <button id="supabaseLogoutBtn" type="button">ログアウト</button>
 <button id="openBtn">諸設定/貢献者の一覧/ソースコード</button>
 <div id="modalOverlay" class="overlay">
   <div class="modal-content">
