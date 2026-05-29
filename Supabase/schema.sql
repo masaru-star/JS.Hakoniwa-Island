@@ -49,19 +49,26 @@ $$;
 create or replace function public.hakoniwa_login(
   p_serial bigint,
   p_password text
-) returns table(serial bigint, island_name text, population integer, turn integer, state jsonb)
+) returns table(
+  res_serial bigint,
+  res_island_name text,
+  res_population integer,
+  res_turn integer,
+  res_state jsonb
+)
 language sql
 security definer
 set search_path = public
 as $$
   select i.serial,
          i.island_name,
-         coalesce((i.state->>'population')::integer, 0) as population,
-         coalesce((i.state->>'turn')::integer, 0) as turn,
+         coalesce((i.state->>'population')::integer, 0),
+         coalesce((i.state->>'turn')::integer, 0),
          i.state
   from public.hakoniwa_islands i
   where i.serial = p_serial
     and i.deleted_at is null
+    -- 第2引数にテーブルのハッシュ値をそのまま渡す（これで正しく合致判定されます）
     and i.password_hash = crypt(p_password, i.password_hash);
 $$;
 
