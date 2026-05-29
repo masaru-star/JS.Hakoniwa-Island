@@ -1,5 +1,7 @@
 # Supabase版セットアップ
 
+> ！ 未完成であることを理解したうえで実行してください ！
+
 1. `schema.sql` を Supabase SQL Editor で実行します。
 2. `turn-worker/index.ts` を `hakoniwa-turn-worker` としてデプロイします。
 3. Edge Function に `SUPABASE_URL` と `SUPABASE_SERVICE_ROLE_KEY` を設定します。
