@@ -102,6 +102,10 @@ function factorial(n) {
     return result;
 }
 function getWarshipProgressStore() {
+    if (window.HAKONIWA_SUPABASE_MODE) {
+        window.__hakoniwaWarshipProgress = window.__hakoniwaWarshipProgress || {};
+        return window.__hakoniwaWarshipProgress;
+    }
     try {
         return JSON.parse(localStorage.getItem(MEDAL_PROGRESS_STORAGE_KEY)) || {};
     } catch (e) {
@@ -109,9 +113,17 @@ function getWarshipProgressStore() {
     }
 }
 function setWarshipProgressStore(store) {
+    if (window.HAKONIWA_SUPABASE_MODE) {
+        window.__hakoniwaWarshipProgress = store || {};
+        return;
+    }
     localStorage.setItem(MEDAL_PROGRESS_STORAGE_KEY, JSON.stringify(store || {}));
 }
 function resetWarshipProgressStore() {
+    if (window.HAKONIWA_SUPABASE_MODE) {
+        window.__hakoniwaWarshipProgress = {};
+        return;
+    }
     localStorage.removeItem(MEDAL_PROGRESS_STORAGE_KEY);
 }
 function getWarshipKey(ship) {
@@ -1275,11 +1287,26 @@ function saveMyIslandState() {
         frozenMoney: frozenMoney,
         volcanoTurns: volcanoTurns
     };
-    localStorage.setItem('myIslandState', JSON.stringify(myIslandState));
+    if (!window.HAKONIWA_SUPABASE_MODE) {
+        localStorage.setItem('myIslandState', JSON.stringify(myIslandState));
+    }
+    if (window.HakoniwaSupabase && typeof window.HakoniwaSupabase.onLocalStateChanged === 'function') {
+        window.HakoniwaSupabase.onLocalStateChanged(JSON.parse(JSON.stringify(myIslandState)));
+    }
 }
 
 // 自分の島の状態をロード
 function loadMyIslandState() {
+    if (window.HAKONIWA_SUPABASE_MODE) {
+        if (window.HakoniwaSupabase && typeof window.HakoniwaSupabase.loadCurrentIslandIntoCore === 'function') {
+            window.HakoniwaSupabase.loadCurrentIslandIntoCore();
+            return;
+        }
+        initMap();
+        renderMap();
+        updateStatus();
+        return;
+    }
     const storedState = localStorage.getItem('myIslandState');
     if (storedState) {
         myIslandState = JSON.parse(storedState);
@@ -1613,6 +1640,32 @@ window.confirmAction = function () {
 const keepOptionSelected = document.getElementById('keepOptionSelected').checked;
   if (isViewingOtherIsland) {
       if (action === 'bombard' || action === 'spreadBombard' || action === 'ppBombard' || action === 'randomBombard') {
+          if (window.HAKONIWA_SUPABASE_MODE && window.HakoniwaSupabase && typeof window.HakoniwaSupabase.queueRemoteBombard === 'function') {
+              if (action !== 'randomBombard' && !targetTileSelected) {
+                  logAction(`砲撃対象のタイルを選択してください`);
+                  return;
+              }
+              const count = parseInt(document.getElementById('bombardCount').value);
+              if (isNaN(count) || count <= 0) {
+                  logAction(`砲撃の数が正しく指定されていません`);
+                  return;
+              }
+              const guns = getGunCount();
+              if (guns === 0 || count > guns) {
+                  logAction(`砲撃に失敗しました（砲撃可能数を確認してください）`);
+                  return;
+              }
+              if (window.HakoniwaSupabase.queueRemoteBombard({
+                  action,
+                  count,
+                  x: action === 'randomBombard' ? null : selectedX,
+                  y: action === 'randomBombard' ? null : selectedY
+              })) {
+                  document.getElementById('actionSelect').value = "";
+                  updateConfirmButton();
+              }
+              return;
+          }
           if (action !== 'randomBombard' && !targetTileSelected) {
               logAction(`砲撃対象のタイルを選択してください`);
               return;
@@ -4206,9 +4259,90 @@ window.loadGame = function() {
         console.error(e);
     }
 }
+
+function createHakoniwaSerializableState() {
+    return {
+        map: JSON.parse(JSON.stringify(map)),
+        money, food, population, turn, achievementPoints,
+        tutorialMissions: JSON.parse(JSON.stringify(tutorialMissions)),
+        islandName,
+        monster: null,
+        monsters: JSON.parse(JSON.stringify(monsters || [])),
+        actionQueue: JSON.parse(JSON.stringify(actionQueue || [])),
+        warships: JSON.parse(JSON.stringify(warships || [])),
+        economicCrisisTurns, frozenMoney, volcanoTurns,
+        warshipProgress: JSON.parse(JSON.stringify(getWarshipProgressStore()))
+    };
+}
+
+function applyHakoniwaSerializableState(gameState, options = {}) {
+    if (!gameState) return;
+    map = JSON.parse(JSON.stringify(gameState.map || []));
+    money = Number(gameState.money || 0);
+    food = Number(gameState.food || 0);
+    population = Number(gameState.population || 0);
+    turn = Number(gameState.turn || 0);
+    achievementPoints = Number(gameState.achievementPoints || 0);
+    tutorialMissions = gameState.tutorialMissions || { '01': false, '02': false, '03': false, '04': false, '05': false, '06': false, '07': false, '08': false };
+    islandName = gameState.islandName || "MyIsland";
+    monsters = gameState.monsters ? JSON.parse(JSON.stringify(gameState.monsters)) : [];
+    if (gameState.monster && monsters.length === 0) {
+        monsters.push({ x: gameState.monster.x, y: gameState.monster.y, typeId: 1, hp: 1 });
+    }
+    monster = null;
+    actionQueue = JSON.parse(JSON.stringify(gameState.actionQueue || []));
+    warships = JSON.parse(JSON.stringify(gameState.warships || []));
+    economicCrisisTurns = Number(gameState.economicCrisisTurns || 0);
+    frozenMoney = Number(gameState.frozenMoney || 0);
+    volcanoTurns = Number(gameState.volcanoTurns || 0);
+    setWarshipProgressStore(gameState.warshipProgress || {});
+    if (!map.length) initMap();
+    map.forEach(row => row.forEach(tile => {
+        if (tile.enhanced === undefined) tile.enhanced = false;
+        if (tile.MonumentLevel === undefined) tile.MonumentLevel = 0;
+    }));
+    warships.forEach(ship => {
+        if (ship.isDispatched === undefined) ship.isDispatched = false;
+        if (ship.maxFuel === undefined) ship.maxFuel = 100;
+        if (ship.originalCost === undefined) ship.originalCost = 0;
+        if (ship.abnormality === undefined) ship.abnormality = null;
+        ensureWarshipFields(ship);
+    });
+    document.getElementById('islandNameInput').value = islandName;
+    isViewingOtherIsland = Boolean(options.viewingOtherIsland);
+    myIslandState = createHakoniwaSerializableState();
+    updateStatus();
+    renderMap();
+    renderActionQueue();
+    updateConfirmButton();
+}
+
+window.HakoniwaCore = {
+    getState: createHakoniwaSerializableState,
+    setState: applyHakoniwaSerializableState,
+    resetGame,
+    initMap,
+    renderMap,
+    updateStatus,
+    renderActionQueue,
+    logAction,
+    generateTouristCode,
+    nextTurn: () => window.nextTurn(),
+    setOtherIslandActionCode: (code) => { document.getElementById('otherIslandActionInput').value = code || ''; },
+    setViewingOtherIsland: (state, options = {}) => applyHakoniwaSerializableState(state, { ...options, viewingOtherIsland: true }),
+    setOwnIsland: (state) => applyHakoniwaSerializableState(state, { viewingOtherIsland: false })
+};
+
 // 初期化時に自分の島の状態をロード（または初期化）する　
 window.onload = function() {
     initializeSessionSettings();
-    loadMyIslandState(); // まず自分の島をロード/初期化
+    if (window.HAKONIWA_SUPABASE_MODE) {
+        initMap();
+        renderMap();
+        updateStatus();
+        renderActionQueue();
+    } else {
+        loadMyIslandState(); // まず自分の島をロード/初期化
+    }
     updateConfirmButton(); // 初回UI更新
 };

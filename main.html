@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<!-- MIT License
+Copyright (c) 2025-2026 masaru-ster
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE. -->
+<html><head>
+  <meta charset="UTF-8">
+  <title>MSR式箱庭ゲーム Supabase版</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:,">
+  <noscript>
+  <meta http-equiv="refresh" content="0; url=NoScript.html">
+  </noscript>
+</head>
+<body>
+<script>window.HAKONIWA_SUPABASE_MODE = true;</script>
+<div style="margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">
+<label>  <input type="checkbox" id="PR"> 宣伝を表示する</label>
+<p id="prText" style="display: none;">
+【宣伝】<a href="https://docs.google.com/forms/d/e/1FAIpQLSfQbRL926EcXjSShoP-p6uQYG5tqiP5CFijHzJE3qK3sY3wHA/viewform">このゲームに関するアンケート</a>はお済みですか？<br>
+早めの回答をお願いします！！！</p>
+</div>
+<div id="gameControls" class="supabase-panel" style="margin-bottom: 1em;">
+  <h3>Supabaseオンライン島管理</h3>
+  <label for="islandNameInput">島の名前:</label>
+  <input type="text" id="islandNameInput" value="MyIsland">
+  <label for="supabasePasswordInput">パスワード:</label>
+  <input type="password" id="supabasePasswordInput" autocomplete="current-password">
+  <button id="supabaseRegisterBtn" type="button">初回登録</button>
+  <button id="supabaseLoginBtn" type="button">ログイン</button>
+  <button id="supabaseSaveBtn" type="button">サーバー保存</button>
+  <button id="supabaseLogoutBtn" type="button">ログアウト</button>
+  <div style="margin-top: .5em;">
+    <label for="supabaseSerialInput">通し番号:</label>
+    <input type="number" id="supabaseSerialInput" min="1" style="width: 6em;">
+    <span id="supabaseAuthStatus">未ログイン（観光者モード可）</span>
+  </div>
+  <div style="margin-top: .5em;">
+    次のターンまで: <strong id="supabaseTurnCountdown">--:--</strong>
+    <small>（間隔: <span id="supabaseTurnIntervalLabel">5分</span> / Supabase/turn.js の TURN_INTERVAL_MS で変更）</small>
+  </div>
+  <div style="margin-top: .5em;">
+    <label for="supabaseTouristIslandSelect">観光する島:</label>
+    <select id="supabaseTouristIslandSelect"><option value="">登録済みの島を選択</option></select>
+    <button id="supabaseVisitBtn" type="button">観光者モードで見る</button>
+    <button id="supabaseReturnBtn" type="button">自島に戻る</button>
+  </div>
+  <p style="font-size: 0.8em; color: gray;">
+    このページはブラウザストレージを使用しません。島データ・計画キュー・ログイン情報はSupabaseに保存されます。<br>
+    初回登録で通し番号が発行され、次回以降は通し番号とパスワードでログインします。パスワードは変更できません。
+  </p>
+</div>
+<button id="openBtn">諸設定/貢献者の一覧/ソースコード</button>
+<div id="modalOverlay" class="overlay">
+  <div class="modal-content">
+    <h2>諸設定</h2>
+    <p class="settings-note">この諸設定は現在開いている画面でのみ有効です。ブラウザストレージには保存しません。</p>
+    <div id="settingsList" class="settings-list">
+      <label><input type="checkbox" id="settingShowClearTileSelection">「タイル選択の解除」ボタンを表示する</label>
+      <label><input type="checkbox" id="settingShowKeepOptionSelected" checked>「オプションを先頭に戻さない」チェックボックスを表示する</label>
+      <label><input type="checkbox" id="settingShowFundingTrackingControls">「トラッキング解除」「トラッキングを固定」を表示する</label>
+      <label><input type="checkbox" id="settingShowEconomicCrisisRate">「経済危機発生率」を表示する</label>
+      <label><input type="checkbox" id="settingEnablePlanTracking">「計画トラッキング」を実行し、表示する</label>
+      <label><input type="checkbox" id="settingEnhanceWarshipToExpLimit">軍艦増強を実行したとき、経験値の限界まで実行する</label>
+      <label><input type="checkbox" id="settingAutoBombardCountToGuns">砲撃数を選択したとき入力される値は常に可能台数に合わせる</label>
+      <label><input type="checkbox" id="settingAutoExportFoodMax">食料輸出を選択したとき入力される値は常に限界値にする</label>
+      <label><input type="checkbox" id="settingAutoSupplyMax">燃料および弾薬補給を選択したとき入力される値は常に限界値にする</label>
+    </div>
+    <hr>
+    <h2>List of contributors</h2>
+        <p>本作は「箱庭諸島」のリスペクト作品です。<br>This work is a tribute to "箱庭諸島".<br><br>
+        Original Inspired by: 徳岡宏樹（箱庭諸島）<br>
+        Developer: <a href="https://github.com/masaru-star" target="_blank" rel="noopener noreferrer">masaru-star</a>
+        </p>
+        <a href="https://codeberg.org/masaru-star/M-Island" target="_blank" rel="noopener noreferrer"><img alt="Static Badge" src="https://img.shields.io/badge/Codeberg-%232185D0?style=flat&logo=codeberg&logoColor=white"></a>
+        <a href="https://github.com/masaru-star/JS.Hakoniwa-Island" target="_blank" rel="noopener noreferrer"><img alt="Static Badge" src="https://img.shields.io/badge/GitHub-%23000?style=flat&logo=github&logoColor=white"></a>
+    <br><button id="closeBtn">close</button>
+  </div>
+</div>
+<details>
+  <summary>Ver.4.7.0リリースノート</summary><p>
+    <div style="margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">
+    [追加]良い影響をもたらす3種の怪獣を追加<br>
+    [追加]砲台も設備強化が可能になりました<br>
+    [追加]命中する場所がわからない「ランダム弾砲撃」を追加<br>
+    [修正]経済危機の際の維持費を16倍から12倍に修正<br>
+    [修正]既存の怪獣の出現率を引き上げ<br>
+    [修正]防衛施設が砲撃を防いだ際に発生するエラーを修正<br><br>
+    [未完成]集中砲撃を追加
+    </div>
+</p></details>
+<p>陸地面積: <span id="landArea">0</span>Km² | 砲撃可能数上限: <span id="gunCount">0</span>回 | 実績Pt: <span id="achievementPoints">0</span>Pt<br>資金: <span id="money">1000</span>G | 食料: <span id="food">500</span> | 人口: <span id="population">0</span>人 | ターン: <span id="turn">0</span> | 島の名前: <span id="currentIslandName"></span></p>
+<div>
+    <label for="otherIslandActionInput">他島の行動:</label>
+    <input type="text" id="otherIslandActionInput" style="width: 400px; margin-bottom: 5px;" placeholder="ここに他島からの行動を入力してください">
+</div>
+<div>
+    <label for="actionForOtherIslandOutput">他島への行動:</label>
+    <input type="text" id="actionForOtherIslandOutput" style="width: 400px; margin-bottom: 5px;" readonly>
+</div>
+<div style="margin-top: 2px;">
+    <span id="keepOptionSettingControl">
+      <input type="checkbox" id="keepOptionSelected">
+      <label for="keepOptionSelected">オプションを先頭に戻さない</label>
+    </span>
+    <span id="fundingTrackingControls" style="display: none;">
+      <button onclick="clearFundingFailureTracking()" style="margin-left: 8px;">トラッキング解除</button>
+      <input type="checkbox" id="pinFundingFailureTracking" style="margin-left: 8px;">
+      <label for="pinFundingFailureTracking">トラッキングを固定</label>
+    </span>
+</div>
+<button onclick="nextTurn()">▶ ターンを進める</button>
+<br>
+<select id="actionSelect" onchange="updateConfirmButton()">
+  <option value="">計画一覧</option>
+  <option value="buildFarm" data-myisland="true">農場建設 (100G)</option>
+  <option value="buildFactory" data-myisland="true">工場建設 (100G)</option>
+  <option value="enhanceFacility" data-myisland="true">設備強化 (10000G)</option>
+  <option value="buildPort" data-myisland="true">港建設 (3000G)</option>
+  <option value="buildGun" data-myisland="true">砲台建設 (1200G)</option>
+  <option value="buildDefenseFacility" data-myisland="true">防衛施設建設 (5000G)</option>
+  <option value="flatten" data-myisland="true">整地 (20G)</option>
+  <option value="landfill" data-myisland="true">埋め立て (600G)</option>
+  <option value="dig" data-myisland="true">掘削 (300G)</option>
+  <option value="cutForest" data-myisland="true">伐採 (無料)</option>
+  <option value="plantForest" data-myisland="true">植林 (200G)</option>
+  <option value="exportFood" data-myisland="true">食料輸出 (食料20)</option>
+  <option value="bombard" data-anyisland="true">砲撃 (120G)</option>
+  <option value="spreadBombard" data-anyisland="true">拡散弾砲撃 (500G)</option>
+  <option value="ppBombard" data-anyisland="true">PP弾砲撃 (10000000G)</option>
+  <option value="randomBombard" data-anyisland="true">ランダム弾砲撃 (500000G)</option>
+  <option value="concentratedFire" data-myisland="true">集中砲撃</option>
+  <option value="selfDestructMilitaryFacility" data-myisland="true">軍事施設自爆 (無料)</option>
+  <option value="goToOtherIsland" data-myisland="true">他の島に行く</option>
+  <option value="returnToMyIsland" data-anyisland="true">自島に戻る</option>
+  <option value="delayAction" data-myisland="true">遅延行動</option>
+  <option value="buildWarship" data-myisland="true">軍艦建造</option>
+  <option value="warshipTool" data-myisland="true">軍艦ツール</option>
+  <option value="buildMonument" data-myisland="true">石碑建設 (500000000G)</option>
+  <option value="upgradeMonument" data-myisland="true">石碑強化 (500000000G)</option>
+  <option value="sellMonument" data-myisland="true">石碑売却 (無料)</option>
+  <option value="initializeIsland" data-myisland="true">島の初期化</option>
+</select><select id="warshipSubSelect" onchange="updateConfirmButton()" style="width: 140px; display: none;">
+  <option value="">軍艦ツールを選択</option>
+  <option value="refuelWarship" data-myisland="true">燃料補給</option>
+  <option value="resupplyWarshipAmmo" data-myisland="true">弾薬補給</option>
+  <option value="repairWarship" data-myisland="true">軍艦修理</option>
+  <option value="setWarshipNickname" data-myisland="true">二つ名指定 (100000G)</option>
+  <option value="convertAchievementToExp" data-myisland="true">実績pt変換</option>
+  <option value="remodelWarshipWeapon" data-myisland="true">武器換装</option>
+  <option value="enhanceWarship" data-myisland="true">軍艦増強</option>
+  <option value="decommissionWarship" data-myisland="true">軍艦除籍</option>
+  <option value="dispatchWarship" data-myisland="true">軍艦派遣</option>
+  <option value="requestWarshipReturn" data-myisland="true">軍艦帰還要請</option>
+</select><!-- <select id="AutocommandSubSelect" onchange="updateConfirmButton()" style="width: 140px; display: none;">
+  <option value="">自動送信ツールを選択</option>
+  <option value="autoflatten" data-myisland="true">整地自動送信</option>
+  <option value="autofarm" data-myisland="true">農場整備自動送信</option>
+  <option value="autofactory" data-myisland="true">工場建設自動送信</option>
+  <option value="autolandfill" data-myisland="true">埋め立て自動送信</option>
+</select> -->
+<input type="number" id="exportAmount" placeholder="輸出数" min="1" style="width: 60px; display: none;">
+<input type="number" id="bombardCount" placeholder="攻撃数" min="1" style="width: 60px; display: none;">
+<input type="number" id="refuelAmount" placeholder="補給数" min="1" style="width: 60px; display: none;">
+<input type="number" id="resupplyAmmoAmount" placeholder="補給数" min="1" style="width: 60px; display: none;">
+<input type="number" id="repairAmount" placeholder="回復耐久値" min="1" style="width: 90px; display: none;">
+<input type="text" id="warshipNicknameInput" placeholder="二つ名(10文字以内)" maxlength="10" style="width: 150px; display: none;">
+<input type="number" id="achievementConvertAmount" placeholder="消費Pt" min="1" style="width: 70px; display: none;">
+<select id="weaponRemodelType" style="display: none;">
+  <option value="mainGun">主砲+1</option>
+  <option value="torpedo">魚雷+1</option>
+</select>
+<input type="number" id="oilDrillFactor" placeholder="発掘率(任意)" min="1" max="10" value="" style="width: 90px; display: none;">
+<input type="text" id="touristCodeInput" placeholder="観光者コードを入力" style="width: 250px; display: none;">
+<select id="supabaseOtherIslandSelect" style="display: none;"><option value="">行き先の島を選択</option></select>
+<div id="warshipBuildInputs">
+    <h3>軍艦建造パラメータ</h3>
+    <div>
+        <label for="warshipName">艦名:</label>
+        <input type="text" id="warshipName" maxlength="15" value="無銘艦">
+    </div>
+    <div>
+        <label for="warshipDurability">耐久度:</label>
+        <input type="number" id="warshipDurability" min="2" max="15" value="2"> (2～15, 1あたり10,000,000G)
+    </div>
+    <div>
+        <label for="warshipMainGun">主砲:</label>
+        <input type="number" id="warshipMainGun" min="1" max="5" value="1"> (1～5, 1あたり12,000,000G)
+    </div>
+    <div>
+        <label for="warshipTorpedo">魚雷:</label>
+        <input type="number" id="warshipTorpedo" min="0" max="3" value="0"> (0～3, 1あたり10,000,000G)
+    </div>
+    <div>
+        <label for="warshipAntiAir">対空砲:</label>
+        <input type="number" id="warshipAntiAir" min="1" max="6" value="1"> (1～6, 1あたり5,000,000G)
+    </div>
+    <div>
+        <label for="warshipAmmo">弾薬庫:</label>
+        <input type="number" id="warshipAmmo" min="10" max="500" value="10"> (10～500, 1あたり100,000G)
+    </div>
+    <div>
+        <label for="warshipRecon">偵察機:</label>
+        <input type="number" id="warshipRecon" min="0" max="2" value="0"> (0～2, 1あたり12,500,000G)
+    </div>
+    <div>
+        <label for="warshipAccuracy">射撃精度向上:</label>
+        <input type="number" id="warshipAccuracy" min="0" max="2" value="0"> (0～2, 1あたり50,000,000G)
+    </div>
+</div>
+<button onclick="confirmAction()" id="confirmBtn" disabled>決定</button>
+<button onclick="clearTileSelection()" id="clearTileSelectionBtn" style="display: none;">タイル選択の解除</button>
+<span id="tileInfo"></span>
+<div id="gameContainer" style="display: flex; gap: 5px;">
+    <table id="map"></table>
+    <div id="actionQueueDisplay" style="font-size: 0.7em;margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">
+      <h4>計画キュー</h4><ul id="actionQueueList" style="list-style-type: none; padding: 0;"></ul>設定した計画はクリックで撤回可能です。
+    </div>
+</div>
+<div id="log" style="margin-top:1em;">
+  <div id="logStatusLine1"></div>
+  <div id="logStatusLine2"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+<script type="module">
+  // main.html で編集するSupabase接続情報は以下の2変数だけです。
+  const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
+  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  import { startSupabaseHakoniwa } from "./Supabase/main.js";
+  startSupabaseHakoniwa({ supabaseUrl: SUPABASE_URL, supabaseAnonKey: SUPABASE_ANON_KEY });
+</script>
+<script>
+  const openBtn = document.getElementById('openBtn');
+  const closeBtn = document.getElementById('closeBtn');
+  const modal = document.getElementById('modalOverlay');
+openBtn.addEventListener('click', () => {
+  modal.style.display = 'flex';
+});
+closeBtn.addEventListener('click', () => {
+  modal.style.display = 'none';
+});
+window.addEventListener('click', (e) => {
+  if (e.target === modal) {
+    modal.style.display = 'none';
+  }
+});
+  const checkbox = document.getElementById('PR');
+  const text = document.getElementById('prText');
+  checkbox.addEventListener('change', function() {
+    if (this.checked) {
+      text.style.display = 'block'; // チェックONで表示
+    } else {
+      text.style.display = 'none';  // チェックOFFで非表示
+    }
+  });
+</script>
+</body>
+</html>
