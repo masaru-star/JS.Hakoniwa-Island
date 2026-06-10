@@ -277,7 +277,7 @@ function getActionName(action, x, y, extraData) {
         goToOtherIsland: '他の島に行く', returnToMyIsland: '自島に戻る', buildWarship: '軍艦建造',
         refuelWarship: '燃料補給', resupplyWarshipAmmo: '弾薬補給', repairWarship: '軍艦修理',
         enhanceWarship: '軍艦増強', decommissionWarship: '軍艦除籍', dispatchWarship: '軍艦派遣',
-        requestWarshipReturn: '軍艦帰還要請', setWarshipNickname: '二つ名指定', convertAchievementToExp: '実績pt変換', remodelWarshipWeapon: '武器換装', buildMonument: '石碑建設', upgradeMonument: '石碑強化',
+        requestWarshipReturn: '軍艦帰還要請', setWarshipNickname: '二つ名指定', showWarshipDetails: '詳細情報提示', convertAchievementToExp: '実績pt変換', remodelWarshipWeapon: '武器換装', buildMonument: '石碑建設', upgradeMonument: '石碑強化',
         sellMonument: '石碑売却', initializeIsland: '島の初期化', delayAction: '遅延行動' 
     };
     name = actionNames[action] || action;
@@ -360,6 +360,16 @@ function setElementDisplayById(elementId, isVisible, displayValue = '') {
 function getSelectedTileWarship() {
     if (selectedX === null || selectedY === null) return null;
     return warships.find(ship => ship.x === selectedX && ship.y === selectedY) || null;
+}
+function logSelectedWarshipDetails() {
+    const warship = getSelectedTileWarship();
+    if (!warship) {
+        logAction(`選択したタイルに軍艦がいません。`);
+        return false;
+    }
+    ensureWarshipFields(warship);
+    logAction(`軍艦「${getWarshipDisplayName(warship)}」の詳細情報: 主砲 ${warship.mainGun} / 魚雷 ${warship.torpedo} / 対空砲 ${warship.antiAir} / 偵察機 ${warship.reconnaissance} / 射撃精度 ${warship.accuracyImprovement}`);
+    return true;
 }
 function getMaxExportFoodAmount() {
     return Math.max(1, Math.floor(food / 20));
@@ -1632,6 +1642,18 @@ window.confirmAction = function () {
         return;
     }
   const targetTileSelected = (selectedX !== null && selectedY !== null);
+  if (action === 'showWarshipDetails') {
+      if (!targetTileSelected) {
+          logAction(`詳細情報を提示する軍艦のタイルを選択してください。`);
+          return;
+      }
+      logSelectedWarshipDetails();
+      if (!document.getElementById('keepOptionSelected').checked) {
+          document.getElementById('actionSelect').value = "";
+      }
+      updateConfirmButton();
+      return;
+  }
   const MAX_QUEUE_SIZE = 20;
     if (actionQueue.length >= MAX_QUEUE_SIZE) {
         logAction(`計画キューが満杯です（最大${MAX_QUEUE_SIZE}個）。`);
