@@ -92,9 +92,6 @@ td {
   .warship-name-cap-5 {
     color: red;
   }
- .warship-sp {
-    color: orange;
-  }
 
 /* 背景のオーバーレイ */
 .overlay {
@@ -167,4 +164,12 @@ noscript {
 .settings-list label {
   display: block;
   margin: 0.45em 0;
+}
+
+.island-public-key {
+  width: 100%;
+  min-height: 8em;
+  font-family: monospace;
+  font-size: 0.85em;
+  box-sizing: border-box;
 }
