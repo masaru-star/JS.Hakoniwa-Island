@@ -26,6 +26,95 @@ const KING_MONSTER_CODE = 'KING_MONSTER';
   let actionQueue = [];
   let islandName = "MyIsland";
   let warships = []; // 軍艦の配列を追加
+
+  let islandSigningKeyPair = null; // P-256署名鍵ペア(JWK形式)
+
+function arrayBufferToBase64(buffer) {
+    return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+}
+function base64ToArrayBuffer(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.buffer;
+}
+function isCryptoSigningAvailable() {
+    return !!(window.crypto && window.crypto.subtle);
+}
+async function generateIslandSigningKeyPair() {
+    if (!isCryptoSigningAvailable()) {
+        logAction('この環境では署名鍵を作成できません（Web Crypto API非対応）。');
+        return null;
+    }
+    const keyPair = await crypto.subtle.generateKey(
+        { name: 'ECDSA', namedCurve: 'P-256' },
+        true,
+        ['sign', 'verify']
+    );
+    return {
+        algorithm: 'ECDSA-P-256-SHA-256',
+        publicKey: await crypto.subtle.exportKey('jwk', keyPair.publicKey),
+        privateKey: await crypto.subtle.exportKey('jwk', keyPair.privateKey)
+    };
+}
+async function importSigningPrivateKey(keyPair = islandSigningKeyPair) {
+    if (!keyPair || !keyPair.privateKey || !isCryptoSigningAvailable()) return null;
+    return crypto.subtle.importKey('jwk', keyPair.privateKey, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+}
+async function importSigningPublicKey(publicKeyJwk) {
+    if (!publicKeyJwk || !isCryptoSigningAvailable()) return null;
+    return crypto.subtle.importKey('jwk', publicKeyJwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+}
+async function signWarshipName(ship) {
+    if (!ship || !islandSigningKeyPair) return;
+    const privateKey = await importSigningPrivateKey();
+    if (!privateKey) return;
+    const signature = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, privateKey, new TextEncoder().encode(ship.name));
+    ship.nameSignature = arrayBufferToBase64(signature);
+    ship.signaturePublicKey = JSON.parse(JSON.stringify(islandSigningKeyPair.publicKey));
+}
+async function signOwnedWarships() {
+    const targets = warships.filter(ship => ship.homePort === islandName);
+    await Promise.all(targets.map(signWarshipName));
+}
+async function ensureIslandSigningKeyPair(options = {}) {
+    if (islandSigningKeyPair && islandSigningKeyPair.publicKey && islandSigningKeyPair.privateKey) {
+        updatePublicKeyDisplay();
+        return islandSigningKeyPair;
+    }
+    islandSigningKeyPair = await generateIslandSigningKeyPair();
+    if (islandSigningKeyPair) {
+        await signOwnedWarships();
+        if (!options.silent) logAction('自島のP-256署名鍵ペアを作成し、保有軍艦に署名しました。');
+        updatePublicKeyDisplay();
+    }
+    return islandSigningKeyPair;
+}
+async function resetIslandSigningKeyPair() {
+    islandSigningKeyPair = await generateIslandSigningKeyPair();
+    if (islandSigningKeyPair) {
+        await signOwnedWarships();
+        updatePublicKeyDisplay();
+    }
+}
+async function hasValidWarshipNameSignature(ship) {
+    if (!ship || !ship.nameSignature || !ship.signaturePublicKey) return false;
+    try {
+        const publicKey = await importSigningPublicKey(ship.signaturePublicKey);
+        if (!publicKey) return false;
+        return crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, publicKey, base64ToArrayBuffer(ship.nameSignature), new TextEncoder().encode(ship.name));
+    } catch (e) {
+        console.warn('軍艦署名の検証に失敗しました。', e);
+        return false;
+    }
+}
+function updatePublicKeyDisplay() {
+    const el = document.getElementById('islandPublicKeyDisplay');
+    if (!el) return;
+    el.value = islandSigningKeyPair && islandSigningKeyPair.publicKey
+        ? JSON.stringify(islandSigningKeyPair.publicKey, null, 2)
+        : '公開鍵はまだ作成されていません。';
+}
   let economicCrisisTurns = 0; // 経済危機の残りターン数
   let frozenMoney = 0; // 経済危機による凍結資金
   let volcanoTurns = 0; // 火山の噴火 残りターン数
@@ -559,13 +648,10 @@ function checkAndCompleteMission(missionId, pt, foodReward, moneyReward, checkFu
       if (ship.antiAir >= WARSHIP_CAPS.antiAir) cappedCount++;
       if (ship.maxFuel >= WARSHIP_CAPS.maxFuel) cappedCount++;
       if (ship.maxAmmo >= WARSHIP_CAPS.maxAmmo) cappedCount++;
-      if (ship.exp === "NaN") cappedCount = 10;
-
       if (cappedCount === 2) return 'warship-name-cap-2';
       if (cappedCount === 3) return 'warship-name-cap-3';
       if (cappedCount === 4) return 'warship-name-cap-4';
       if (cappedCount === 5) return 'warship-name-cap-5';
-      if (cappedCount === 10) return 'warship-sp';
       return ''; // 上限到達が2つ未満の場合は色を付けない
   }
 let myIslandState = null; // 自分の島の状態を保存する変数
@@ -1146,7 +1232,9 @@ function encodeWarshipData(warship) {
         originalCost: warship.originalCost || 0, // 追加
         abnormality: warship.abnormality || 0,
         nickname: warship.nickname || '',
-        medalsEarned: warship.medalsEarned || {}
+        medalsEarned: warship.medalsEarned || {},
+        nameSignature: warship.nameSignature || '',
+        signaturePublicKey: warship.signaturePublicKey || null
     };
     const jsonString = JSON.stringify(data);
     return btoa(encodeURIComponent(jsonString));
@@ -1162,6 +1250,8 @@ function decodeWarshipData(encodedData) {
     if (data.originalCost === undefined) data.originalCost = 0; // 追加
     if (data.nickname === undefined) data.nickname = '';
     if (data.medalsEarned === undefined) data.medalsEarned = {};
+    if (data.nameSignature === undefined) data.nameSignature = '';
+    if (data.signaturePublicKey === undefined) data.signaturePublicKey = null;
     return data;
 }
 
@@ -1180,7 +1270,8 @@ function saveGame() {
         monster: null,
         monsters: JSON.parse(JSON.stringify(monsters)), // 新しい配列を保存
         actionQueue: JSON.parse(JSON.stringify(actionQueue)),
-        warships: JSON.parse(JSON.stringify(warships)) // 軍艦データを保存
+        warships: JSON.parse(JSON.stringify(warships)), // 軍艦データを保存
+        islandSigningKeyPair: JSON.parse(JSON.stringify(islandSigningKeyPair))
     };
     const jsonString = JSON.stringify(gameState);
     // 新しいエンコード方式 (btoaとencodeURIComponentを組み合わせる)
@@ -1188,7 +1279,7 @@ function saveGame() {
     logAction("ゲームがセーブされました。データをテキストエリアからコピーしてください。");
 }
 
-function loadGame() {
+async function loadGame() {
     const encodedData = document.getElementById('saveLoadData').value;
     if (!encodedData) {
         logAction("ロードするセーブデータがありません。");
@@ -1231,6 +1322,7 @@ function loadGame() {
 
         actionQueue = gameState.actionQueue || []; // ロード時にactionQueueがない場合に対応
         warships = gameState.warships || []; // 軍艦データをロード
+        islandSigningKeyPair = gameState.islandSigningKeyPair || null;
 
         // 過去のセーブデータにenhancedプロパティがない場合のために初期化
         map.forEach(row => row.forEach(tile => {
@@ -1264,6 +1356,7 @@ function loadGame() {
         document.getElementById('islandNameInput').value = islandName; // UIにロードした名前を反映
         isViewingOtherIsland = false; // ロード時は自分の島にいる
         resetWarshipProgressStore(); // 手動ロード時は進捗をリセット（勲章獲得済みのみ維持）
+        await ensureIslandSigningKeyPair({ silent: true });
         saveMyIslandState(); // ロードした状態を自分の島の状態として保存
         logAction("ゲームがロードされました。");
         renderMap();
@@ -1295,7 +1388,8 @@ function saveMyIslandState() {
         warships: JSON.parse(JSON.stringify(warships)),
         economicCrisisTurns: economicCrisisTurns,
         frozenMoney: frozenMoney,
-        volcanoTurns: volcanoTurns
+        volcanoTurns: volcanoTurns,
+        islandSigningKeyPair: JSON.parse(JSON.stringify(islandSigningKeyPair))
     };
     if (!window.HAKONIWA_SUPABASE_MODE) {
         localStorage.setItem('myIslandState', JSON.stringify(myIslandState));
@@ -1368,6 +1462,7 @@ function loadMyIslandState() {
     economicCrisisTurns = myIslandState.economicCrisisTurns || 0;
     frozenMoney = myIslandState.frozenMoney || 0;
     volcanoTurns = myIslandState.volcanoTurns || 0;
+    islandSigningKeyPair = myIslandState.islandSigningKeyPair || null;
     // isDispatchedプロパティがない場合の初期化
     warships.forEach(ship => {
         if (ship.isDispatched === undefined) {
@@ -1404,7 +1499,7 @@ function loadMyIslandState() {
 
 
 // ゲームを初期設定に戻す関数
-function resetGame() {
+async function resetGame() {
     money = 2500;
     food = 1000;
     population = 0;
@@ -1414,6 +1509,7 @@ function resetGame() {
     monsters = [];
     actionQueue = [];
     warships = []; // 軍艦データをリセット
+    islandSigningKeyPair = null;
     resetWarshipProgressStore();
     economicCrisisTurns = 0;
     frozenMoney = 0;
@@ -1427,6 +1523,7 @@ function resetGame() {
     document.getElementById('touristCodeInput').value = '';
 
     initMap(); // マップを再初期化
+    await resetIslandSigningKeyPair();
     saveMyIslandState(); // 初期化された状態を保存
     updateStatus();
     renderMap();
@@ -1454,14 +1551,14 @@ function getProtectingDefenseFacility(targetX, targetY) {
     return null; // 保護されていない場合はnullを返す
 }
 
-function handleWarshipAttacks() {
+async function handleWarshipAttacks() {
     const currentMap = map;
-    const currentIslandName = islandName;
-    const activeAttackingWarships = warships.filter(ship =>
-        ship.currentDurability > 0 &&
-        ship.currentAmmo > 0 &&
-        ship.homePort !== currentIslandName
-    );
+    const activeAttackingWarships = [];
+    for (const ship of warships) {
+        if (ship.currentDurability > 0 && ship.currentAmmo > 0 && !(await hasValidWarshipNameSignature(ship))) {
+            activeAttackingWarships.push(ship);
+        }
+    }
 
     activeAttackingWarships.forEach(warship => {
         let attacksPerformed = 0;
@@ -2276,7 +2373,7 @@ if (!keepOptionSelected) {
 }
 
 // nextTurn関数をグローバルスコープで定義
-window.nextTurn = function () {
+window.nextTurn = async function () {
 turn++;
     initWarshipTurnStats();
     warships.forEach(warship => {
@@ -2523,6 +2620,8 @@ turn++;
                   existingWarship.currentAmmo = returnedWarshipData.currentAmmo;
                   existingWarship.reconnaissance = returnedWarshipData.reconnaissance;
                   existingWarship.accuracyImprovement = returnedWarshipData.accuracyImprovement;
+                  existingWarship.nameSignature = returnedWarshipData.nameSignature || existingWarship.nameSignature || '';
+                  existingWarship.signaturePublicKey = returnedWarshipData.signaturePublicKey || existingWarship.signaturePublicKey || null;
 
                   existingWarship.isDispatched = false; // 派遣状態を解除
 
@@ -2545,7 +2644,7 @@ turn++;
       document.getElementById('actionForOtherIslandOutput').value = ''; // 他島への行動をクリア
       logAction("ターンが進んだため、自島に戻りました。");
   }
-  handleWarshipAttacks()
+  await handleWarshipAttacks()
   let foodChange = 0, moneyChange = 0;
   let prevPopulation = population; // 前ターンの人口を保存
   let currentTurnPopulationGrowth = 0; // 現在のターンでの人口増加をリセット
@@ -2598,6 +2697,7 @@ const newWarship = {
         originalCost: totalCost // 建造コストを保存
     };
   warships.push(newWarship);
+  signWarshipName(newWarship);
   money -= warshipData.originalCost;
         map[currentAction.y][currentAction.x].facility = 'warship'; // 地図タイルに軍艦が建設されたことを記録
   logAction(`(${x},${y}) に軍艦「${newWarship.name}」を建造しました。`);
@@ -2813,7 +2913,10 @@ const newWarship = {
       } else logAction(`(${x},${y}) の防衛施設建設は失敗しました（条件不適合または資金不足）`);
     }
     else if (action === 'landfill') {
-      if (tile && tile.terrain === 'sea' && money >= 600) {
+      const warshipOnTile = warships.find(ship => ship.x === x && ship.y === y && ship.currentDurability > 0);
+      if (warshipOnTile) {
+        logAction(`(${x},${y}) の埋め立ては失敗しました（軍艦がいます）`);
+      } else if (tile && tile.terrain === 'sea' && money >= 600) {
         tile.terrain = 'waste'; money -= 600; tile.enhanced = false; // 強化状態もリセット
         logAction(`(${x},${y}) を埋め立てて荒地にしました`);
       } else logAction(`(${x},${y}) の埋め立ては失敗しました（海ではありませんまたは資金不足）`);
@@ -4183,8 +4286,9 @@ function addBulkPlans(action, targetTerrain, targetFacility) {
 }
 
 // セーブ機能
-window.saveGame = function() {
+window.saveGame = async function() {
     islandName = document.getElementById('islandNameInput').value; // UIから名前を取得
+    await ensureIslandSigningKeyPair({ silent: true });
     saveMyIslandState(); // 自分の島の最新の状態を保存
 
     const gameState = {
@@ -4198,7 +4302,9 @@ window.saveGame = function() {
         islandName: myIslandState.islandName,
         monster: myIslandState.monster,
         actionQueue: myIslandState.actionQueue,
+        monsters: myIslandState.monsters || [],
         warships: myIslandState.warships,
+        islandSigningKeyPair: myIslandState.islandSigningKeyPair,
         economicCrisisTurns: myIslandState.economicCrisisTurns,
         frozenMoney: myIslandState.frozenMoney,
         volcanoTurns: myIslandState.volcanoTurns
@@ -4214,7 +4320,7 @@ window.saveGame = function() {
 }
 
 // ロード機能
-window.loadGame = function() {
+window.loadGame = async function() {
     const encodedData = document.getElementById('saveLoadData').value;
     if (!encodedData) {
         logAction("ロードするデータがありません。テキストエリアにデータを貼り付けてください。");
@@ -4237,9 +4343,14 @@ window.loadGame = function() {
             '01': false, '02': false, '03': false, '04': false, '05': false, '06': false, '07': false, '08': false
         };
         islandName = gameState.islandName || "MyIsland";
-        monster = gameState.monster;
+        monsters = gameState.monsters ? JSON.parse(JSON.stringify(gameState.monsters)) : [];
+        if (gameState.monster && monsters.length === 0) {
+            monsters.push({ x: gameState.monster.x, y: gameState.monster.y, typeId: 1, hp: 1 });
+        }
+        monster = null;
         actionQueue = gameState.actionQueue || []; // ロード時にactionQueueがない場合に対応
         warships = gameState.warships || []; // 軍艦データをロード
+        islandSigningKeyPair = gameState.islandSigningKeyPair || null;
         economicCrisisTurns = gameState.economicCrisisTurns || 0;
         frozenMoney = gameState.frozenMoney || 0;
         volcanoTurns = gameState.volcanoTurns || 0;
@@ -4270,6 +4381,7 @@ window.loadGame = function() {
         document.getElementById('islandNameInput').value = islandName; // UIにロードした名前を反映
         isViewingOtherIsland = false; // ロード時は自分の島にいる
         resetWarshipProgressStore(); // 手動ロード時は進捗をリセット
+        await ensureIslandSigningKeyPair({ silent: true });
         saveMyIslandState(); // ロードした状態を自分の島の状態として保存
         logAction("ゲームがロードされました。");
         renderMap();
@@ -4293,6 +4405,7 @@ function createHakoniwaSerializableState() {
         actionQueue: JSON.parse(JSON.stringify(actionQueue || [])),
         warships: JSON.parse(JSON.stringify(warships || [])),
         economicCrisisTurns, frozenMoney, volcanoTurns,
+        islandSigningKeyPair: JSON.parse(JSON.stringify(islandSigningKeyPair)),
         warshipProgress: JSON.parse(JSON.stringify(getWarshipProgressStore()))
     };
 }
@@ -4318,6 +4431,7 @@ function applyHakoniwaSerializableState(gameState, options = {}) {
     frozenMoney = Number(gameState.frozenMoney || 0);
     volcanoTurns = Number(gameState.volcanoTurns || 0);
     setWarshipProgressStore(gameState.warshipProgress || {});
+    islandSigningKeyPair = gameState.islandSigningKeyPair || null;
     if (!map.length) initMap();
     map.forEach(row => row.forEach(tile => {
         if (tile.enhanced === undefined) tile.enhanced = false;
@@ -4330,6 +4444,7 @@ function applyHakoniwaSerializableState(gameState, options = {}) {
         if (ship.abnormality === undefined) ship.abnormality = null;
         ensureWarshipFields(ship);
     });
+    ensureIslandSigningKeyPair({ silent: true });
     document.getElementById('islandNameInput').value = islandName;
     isViewingOtherIsland = Boolean(options.viewingOtherIsland);
     myIslandState = createHakoniwaSerializableState();
@@ -4365,6 +4480,7 @@ window.onload = function() {
         renderActionQueue();
     } else {
         loadMyIslandState(); // まず自分の島をロード/初期化
+        ensureIslandSigningKeyPair({ silent: true });
     }
     updateConfirmButton(); // 初回UI更新
 };
