@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. -->
 <html><head>
   <meta charset="UTF-8">
-  <title>MSR式箱庭ゲーム　Ver.4.6</title>
+  <title>MSR式箱庭ゲーム　Ver.5.0-Beta.1</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="data:,">
   <noscript>
@@ -63,8 +63,8 @@ SOFTWARE. -->
       <label><input type="checkbox" id="settingAutoSupplyMax">燃料および弾薬補給を選択したとき入力される値は常に限界値にする</label>
     </div>
     <hr>
-    <h2>自島の公開鍵</h2>
-    <p class="settings-note">軍艦名署名の検証に使われるP-256公開鍵です。</p>
+    <h2>自島の公開鍵(島ID)</h2>
+    <p class="settings-note">軍艦名署名の検証に使われる公開鍵です。</p>
     <textarea id="islandPublicKeyDisplay" class="island-public-key" readonly>公開鍵はまだ作成されていません。</textarea>
     <hr>
     <h2>List of contributors</h2>
@@ -78,15 +78,19 @@ SOFTWARE. -->
   </div>
 </div>
 <details>
-  <summary>Ver.4.7.0リリースノート</summary><p>
+  <summary>Ver.5.0-Beta.1 リリースノート</summary><p>
     <div style="margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">
+    [追加]島にIDを追加、軍艦の保有状況を割り当て<br>
     [追加]良い影響をもたらす3種の怪獣を追加<br>
+    [追加]集中砲撃を追加<br>
     [追加]砲台も設備強化が可能になりました<br>
     [追加]命中する場所がわからない「ランダム弾砲撃」を追加<br>
     [修正]経済危機の際の維持費を16倍から12倍に修正<br>
     [修正]既存の怪獣の出現率を引き上げ<br>
-    [修正]防衛施設が砲撃を防いだ際に発生するエラーを修正<br><br>
-    [未完成]集中砲撃を追加
+    [修正]防衛施設が砲撃を防いだ際に発生するエラーを修正<br>
+    [修正]軍艦を埋め立てられなくなります<br>
+    [修正]怪獣をセーブコードに含める<br>
+    [廃止]Ver.4.7以前の金軍艦(管理者配布艦)を削除<br>
     </div>
 </p></details>
 <p>陸地面積: <span id="landArea">0</span>Km² | 砲撃可能数上限: <span id="gunCount">0</span>回 | 実績Pt: <span id="achievementPoints">0</span>Pt<br>資金: <span id="money">1000</span>G | 食料: <span id="food">500</span> | 人口: <span id="population">0</span>人 | ターン: <span id="turn">0</span> | 島の名前: <span id="currentIslandName"></span></p>
@@ -241,9 +245,9 @@ window.addEventListener('click', (e) => {
   const text = document.getElementById('prText');
   checkbox.addEventListener('change', function() {
     if (this.checked) {
-      text.style.display = 'block'; // チェックONで表示
+      text.style.display = 'block';
     } else {
-      text.style.display = 'none';  // チェックOFFで非表示
+      text.style.display = 'none';
     }
   });
 </script>
