@@ -1,7 +1,7 @@
 # M式箱庭ゲーム Ver.4.6
 
 [こちらから遊べます](https://masaru-star.github.io/JS.Hakoniwa-Island/)<br>
-リポジトリ名が`M-Island`からリネームされました。
+> **important!:** Ver.4.7以前のデータは、島管理方式が根本的に変更されるため、旧バージョンのデータとの互換性を維持できなくなります。9月中旬頃に失効する予定なのでダウンロードをしてプレイしている方は早めに`Ver.5.0-Beta.1`など新データへの移行をお願いします。
 
 ![Good First Issue](https://img.shields.io/badge/good%20first--issue-welcome-blueviolet) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) ![Help Wanted](https://img.shields.io/badge/translation-welcome-brightgreen)
 
@@ -45,7 +45,7 @@ Interact with other islands, battle monsters that suddenly appear, and overcome 
   **ログを確認:** 画面下の「ログ」を見て、各ターンに何が起きたか（災害やイベントなど）を確認しましょう。
 
 ## Contributors
-> **Note**: 本プロジェクトのソースコードは完全に新規に書き起こされたものであり、オリジナルのCGIプログラムのコードは含んでおりません。
+> 本プロジェクトのソースコードは完全に新規に書き起こされたものであり、オリジナルのCGIプログラムのコードは含んでおりません。
 ### We welcome translations and extension suggestions.
 本作は「箱庭諸島」のリスペクト作品です。 This work is a tribute to "箱庭諸島".
 
