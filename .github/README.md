@@ -1,22 +1,18 @@
-# M式箱庭ゲーム Ver.4.6
+# M式箱庭ゲーム Ver.5.0-Beta.1
 
 [こちらから遊べます](https://masaru-star.github.io/JS.Hakoniwa-Island/)<br>
 > **important!:** Ver.4.7以前のデータは、島管理方式が根本的に変更されるため、旧バージョンのデータとの互換性を維持できなくなります。9月中旬頃に失効する予定なのでダウンロードをしてプレイしている方は早めに`Ver.5.0-Beta.1`など新データへの移行をお願いします。
 
 ![Good First Issue](https://img.shields.io/badge/good%20first--issue-welcome-blueviolet) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) ![Help Wanted](https://img.shields.io/badge/translation-welcome-brightgreen)
 
-![Progress](https://img.shields.io/badge/Japanese-100%25-green) ![Progress](https://img.shields.io/badge/English-5%25-orange) ![Progress](https://img.shields.io/badge/German-0%25-red) ![Progress](https://img.shields.io/badge/Chinese-0%25-red) ![Progress](https://img.shields.io/badge/Korean-0%25-red) ![Progress](https://img.shields.io/badge/Spanish-0%25-red)
-
 ## Please cooperate with our survey
-If you enter your GitHub username in the free text field, we'll add it to the contributor list.
-
 [Click here for the survey](https://docs.google.com/forms/d/e/1FAIpQLSfQbRL926EcXjSShoP-p6uQYG5tqiP5CFijHzJE3qK3sY3wHA/viewform?usp=dialog)
 
 ## Overview
 This is a management simulation game in which you take on the role of island governor and develop your island by shaping the terrain, constructing facilities, and increasing the population.<br>
 Interact with other islands, battle monsters that suddenly appear, and overcome numerous disasters as you build your own ideal island.
 
-島の知事となり、地形を整え、施設を建設し、人口を増やしながら島を発展させていく経営シミュレーションゲームです。<br>
+島主となり、地形を整え、施設を建設し、人口を増やしながら島を発展させていく経営シミュレーションゲームです。<br>
 他の島と交流し、突如現れるモンスターと戦い、数々の災害を乗り越えながら、自分だけの理想の島を築き上げていきましょう。
 
 ## How to Play
