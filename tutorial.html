@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<!-- 未完成だよ！ -->
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>箱庭諸島風ゲーム チュートリアル</title>
+    <!-- Tailwind CSS for modern layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ご指定のタイルスタイル */
+        .sea { background-color: #66b3ff; }
+        .port { background-color: #1f78b4; }
+        .oilRig { background: linear-gradient(#66b3ff, #004b8d); }
+        .plain { background-color: #dfffcc; }
+        .waste { background-color: #bbbbbb; }
+        .forest { background-color: #228B22; }
+        .mountain { background: linear-gradient(#705335, #4b3621); }
+        .farm { background-color: #b5e07a; }
+        .house { background-color: #fff3c4; }
+        .factory { background-color: #ccccff; }
+        .gun { background-color: #666666; }
+        .defenseFacility { background-color: #ff77aa; }
+        .Monument { background-color: #d4c17d; }
+        .warship { background: linear-gradient(#66b3ff, #4682B4); }
+        .warship-dispatched { background-color: #002f5f; color: #fff; }
+        .warship-wreckage { background-color: #333; color: #ccc; }
+
+        /* グリッドコンテナとセルのホバー設定 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(16, minmax(0, 1fr));
+            aspect-ratio: 1 / 1;
+        }
+        .map-cell {
+            aspect-ratio: 1 / 1;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            position: relative;
+        }
+        .map-cell:hover {
+            filter: brightness(1.2);
+            transform: scale(1.08);
+            z-index: 20;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 建築時などのピカッと光り弾けるアニメーション */
+        @keyframes tile-pop {
+            0% { transform: scale(1); filter: brightness(1); }
+            40% { transform: scale(1.25); filter: brightness(1.8) saturate(1.3); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+        .animate-build {
+            animation: tile-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            z-index: 30;
+        }
+
+        /* 文字送りアニメーション用のカーソル */
+        @keyframes blink {
+            50% { border-color: transparent }
+        }
+        .typing-cursor::after {
+            content: '';
+            border-right: 2px solid #3b82f6;
+            animation: blink 0.7s step-end infinite;
+            margin-left: 2px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans selection:bg-blue-600 selection:text-white">
+
+    <!-- ヘッダー -->
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl">🏝️</span>
+                <h1 class="text-xl font-bold tracking-wider">箱庭諸島 開発チュートリアル</h1>
+            </div>
+            <div class="text-sm bg-blue-900/50 border border-blue-700 px-3 py-1 rounded-full text-blue-300 font-semibold flex items-center gap-1.5 animate-pulse">
+                <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                Tutorial Mode
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="max-w-7xl mx-auto w-full p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow items-start">
+        
+        <!-- 左側：16x16 マップ (グリッド) -->
+        <div class="lg:col-span-7 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-xl flex flex-col items-center">
+            <div class="w-full flex justify-between items-center mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs bg-slate-750 px-2 py-1 rounded text-slate-400 font-mono">GRID: 16×16</span>
+                    <span id="active-mode-badge" class="text-xs bg-emerald-900/60 border border-emerald-700 text-emerald-300 px-2 py-1 rounded font-semibold">🔍 観測モード</span>
+                </div>
+                <span id="hovered-tile-info" class="text-sm font-semibold text-blue-400">セルを選択、またはホバーしてください</span>
+            </div>
+            
+            <div id="game-map" class="grid-container w-full border-2 border-slate-700 rounded overflow-hidden shadow-2xl">
+                <!-- JSで16x16=256個のセルを動的生成します -->
+            </div>
+        </div>
+
+        <!-- 右側：チュートリアル管理・コマンド -->
+        <div class="lg:col-span-5 flex flex-col gap-6 h-full">
+            
+            <!-- チュートリアルナビゲーター -->
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl flex-grow">
+                <h2 class="text-lg font-bold mb-3 text-blue-400 flex items-center gap-2">
+                    <span>🧭</span> チュートリアル進行
+                </h2>
+                
+                <!-- 進捗バー -->
+                <div class="w-full bg-slate-750 rounded-full h-2 mb-4 overflow-hidden">
+                    <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 20%"></div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-750 min-h-[140px]">
+                        <div class="text-xs text-blue-500 font-bold uppercase tracking-wider mb-1">現在の課題</div>
+                        <div id="step-title" class="font-bold text-base mb-2">島の様子を観察しよう</div>
+                        <p id="step-task" class="text-sm text-slate-300 leading-relaxed">
+                            島には様々な地形があります。まずはマップ上の色々なタイルをクリックして、どのような地形があるか情報を確認してみましょう。
+                        </p>
+                    </div>
+
+                    <!-- 操作ボタン -->
+                    <div class="flex gap-3">
+                        <button id="btn-prev" onclick="changeStep(-1)" class="flex-1 bg-slate-750 hover:bg-slate-700 active:scale-95 transition text-white font-medium py-2.5 px-4 rounded-lg border border-slate-650 disabled:opacity-40 disabled:pointer-events-none disabled:transform-none">
+                            戻る
+                        </button>
+                        <button id="btn-next" onclick="changeStep(1)" class="flex-1 bg-blue-650 hover:bg-blue-500 active:scale-95 transition text-white font-medium py-2.5 px-4 rounded-lg shadow-lg shadow-blue-950/50 flex items-center justify-center gap-2">
+                            <span>次へ進む</span> <span>➔</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- 地形凡例 -->
+            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">地形凡例（タイル一覧）</h3>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded sea inline-block border border-black/10 flex items-center justify-center"></span>海</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded port inline-block border border-black/10 flex items-center justify-center text-[10px]">⚓</span>港</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded oilRig inline-block border border-black/10 flex items-center justify-center text-[10px]">🛢️</span>海底油田</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded plain inline-block border border-black/10 flex items-center justify-center"></span>平地</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded waste inline-block border border-black/10 flex items-center justify-center"></span>荒れ地</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded forest inline-block border border-black/10 flex items-center justify-center text-[10px]">🌲</span>森</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded mountain inline-block border border-black/10 flex items-center justify-center text-[10px]">⛰️</span>山</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded farm inline-block border border-black/10 flex items-center justify-center text-[10px]">🌾</span>農耕地</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded house inline-block border border-black/10 flex items-center justify-center text-[10px]">🏠</span>住宅</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded factory inline-block border border-black/10 flex items-center justify-center text-[10px]">🏭</span>工場</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded gun inline-block border border-black/10 flex items-center justify-center text-[10px]">🔫</span>ミサイル基地</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded defenseFacility inline-block border border-black/10 flex items-center justify-center text-[10px]">🛡️</span>防衛施設</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded Monument inline-block border border-black/10 flex items-center justify-center text-[10px]">🗿</span>記念碑</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded warship inline-block border border-black/10 flex items-center justify-center text-[10px]">🚢</span>艦船</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded warship-dispatched inline-block border border-black/10 flex items-center justify-center text-[10px]">🛳️</span>出撃中艦船</div>
+                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded warship-wreckage inline-block border border-black/10 flex items-center justify-center text-[10px]">🛟</span>難破船跡</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 下部：解説メッセージ用スペース -->
+    <footer class="bg-slate-950 border-t border-slate-800 p-4 md:p-6 w-full shadow-[0_-10px_20px_rgba(0,0,0,0.3)]">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-4 items-center">
+            <!-- 進行アシスタント（ナビゲーターキャラ風） -->
+            <div class="flex items-center gap-3 self-start md:self-center">
+                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-xl shadow-inner border-2 border-blue-400 shrink-0">
+                    🤖
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm text-blue-400">開発助手 A.I.</h4>
+                    <p class="text-[10px] text-slate-500 font-mono">STATUS: ACTIVE</p>
+                </div>
+            </div>
+            
+            <!-- メッセージ表示エリア -->
+            <div class="flex-grow w-full bg-slate-900 border border-slate-800 p-4 rounded-xl min-h-[80px] flex items-center relative overflow-hidden">
+                <div class="absolute top-2 right-3 text-[10px] font-mono text-slate-600 select-none">MESSAGE LOG</div>
+                <!-- この中にアニメーション関数でテキストが送り込まれます -->
+                <p id="explain-box" class="text-sm md:text-base leading-relaxed text-slate-200 font-medium tracking-wide typing-cursor select-none"></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+      /* 
+        // --- 1. タイル種類と定義 ---
+        const TILE_TYPES = {
+            sea: { name: '海', desc: '島の周囲を囲む海です。船の移動経路や海底油田の建設対象になります。' },
+            port: { name: '港', desc: '海に面した輸送・補給基地。艦船を生産することができます。' },
+            oilRig: { name: '海底油田', desc: '海上に設置された採掘施設。毎ターン島に多額の資金を供給します。' },
+            plain: { name: '平地', desc: '何もない平原。あらゆる陸上建造物の基礎となる最も重要な土地です。' },
+            waste: { name: '荒れ地', desc: '荒廃した土地。そのままでは建設ができません。まずは整地を行いましょう。' },
+            forest: { name: '森', desc: '豊かな自然。伐採して資金にするか、災害からの防風林になります。' },
+            mountain: { name: '山', desc: '険しい山岳。しばらくの間は開発することは難しいでしょう。' },
+            farm: { name: '農場', desc: '食料を生産する場所。島民が生活を維持するために不可欠なエリアです。' },
+            house: { name: '住宅', desc: '島民が暮らすエリア。多いほどより高い収入が期待できますが…？' },
+            factory: { name: '工場', desc: '産業の中心。人口に応じて資金を提供します。' },
+            gun: { name: '砲台', desc: '国防、または他島への攻撃用。' },
+            defenseFacility: { name: '防衛施設', desc: 'それぞれのタイルは単体では無防備、これで周囲のタイルを守ります。' },
+            Monument: { name: '記念碑', desc: '島の発展を象徴する巨大建造物。軍艦に良い影響を与えるとか？。' },
+            warship: { name: '軍艦', desc: '港の近くに配備できる護衛・哨戒用の艦です。' },
+            'warship-dispatched': { name: '出撃中軍艦', desc: '遠洋の哨戒や他エリアへの進行任務に就いている軍艦。' },
+            'warship-wreckage': { name: '軍艦の残骸', desc: '戦闘によって沈没した船の残骸。放置すると航行の邪魔になります。' }
+        };
+
+        // 16x16の箱庭アイランド初期マップ設計（サンプル配列）
+        const INITIAL_MAP = [
+            ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
+            ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
+            ['sea','sea','sea','sea','plain','plain','plain','forest','mountain','plain','sea','sea','sea','sea','sea','sea'],
+            ['sea','sea','sea','plain','plain','farm','farm','forest','mountain','mountain','plain','sea','sea','sea','sea','sea'],
+            ['sea','sea','plain','plain','house','house','farm','forest','plain','plain','plain','sea','sea','sea','sea','sea'],
+            ['sea','sea','plain','house','house','house','plain','plain','plain','waste','plain','plain','sea','sea','sea','sea'],
+            ['sea','port','plain','factory','house','plain','plain','Monument','plain','waste','plain','plain','sea','sea','sea','sea'],
+            ['sea','warship','plain','factory','plain','plain','plain','plain','plain','plain','plain','plain','plain','sea','sea','sea'],
+            ['sea','sea','plain','plain','plain','plain','plain','defenseFacility','plain','plain','plain','plain','plain','sea','sea','sea'],
+            ['sea','sea','plain','plain','plain','plain','gun','plain','plain','plain','plain','plain','plain','sea','sea','sea'],
+            ['sea','sea','plain','plain','plain','plain','plain','plain','plain','plain','plain','plain','sea','sea','sea','sea'],
+            ['sea','sea','sea','plain','plain','plain','plain','plain','plain','plain','plain','sea','sea','sea','sea','sea'],
+            ['sea','sea','sea','sea','sea','plain','plain','plain','plain','sea','sea','sea','sea','sea','sea','sea'],
+            ['sea','sea','sea','sea','oilRig','sea','sea','sea','sea','sea','sea','sea','warship-wreckage','sea','sea','sea'],
+            ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
+            ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea']
+        ];
+
+        // 動的に変更可能な現在のマップデータを保持
+        let currentMapState = [];
+        let currentStep = 0;
+        let typingTimeout = null;
+        let activeCommand = 'inspect'; // 選択中の開拓コマンド ('inspect' = 観測モード)
+
+        const EMOJI_MAP = {
+            'port': '⚓',
+            'oilRig': '🛢️',
+            'forest': '🌲',
+            'mountain': '⛰️',
+            'farm': '🌾',
+            'house': '🏠',
+            'factory': '🏭',
+            'gun': '🔫',
+            'defenseFacility': '🛡️',
+            'Monument': '🗿',
+            'warship': '🚢',
+            'warship-dispatched': '🛳️',
+            'warship-wreckage': '🛟'
+        };
+
+        // --- 2. チュートリアルシナリオのステップ定義 ---
+        const TUTORIAL_STEPS = [
+            {
+                title: "ようこそ、箱庭諸島へ！",
+                task: "まずは島内の土地を確認しましょう。マップ上の気になる土地をいくつかクリックしてみてください。",
+                message: "司令官、着任おめでとうございます！ここはあなたの管轄となる「16×16」の小さな箱庭です。現在の人口はごく僅か。これからこの地を大都市へと発展させましょう！"
+            },
+            {
+                title: "資金と産業の基盤を作ろう",
+                task: "【開発デモ稼働！】「平地」を「農耕地」や「工場」にしてみましょう。また「海」には「海底油田」が有効です。",
+                message: "発展には予算が必要です。平地を開発して【農耕地】🌾で食料を蓄え、【工場】🏭や【海底油田】🛢️を建設して毎ターンの資金供給源を確保するのが第一歩です。デモとしていくつか新設しました！"
+            },
+            {
+                title: "島民の受け入れと人口増加",
+                task: "【開発デモ稼働！】「平地」に「住宅」を建ててみましょう。人が増えると「税収」が発生します。",
+                message: "働く人間がいなければ島は回りません。【住宅】🏠を建てると島民が移住してきます。彼らから徴収する「所得税」もまた、重要な開発原資になります。住宅区画が拡張されました！"
+            },
+            {
+                title: "国防と防衛の準備",
+                task: "【開発デモ稼働！】「ミサイル基地」や「防衛施設」を配備する計画を練りましょう。",
+                message: "平和を守るため、ミサイル攻撃や突如襲い来る災害（怪獣や台風）から島を守る必要があります。司令部横に【ミサイル基地】🔫と、都市部に【防衛施設】🛡️が配備されました！"
+            },
+            {
+                title: "チュートリアル完了！",
+                task: "基本はマスターです。右側の「開発テストツール」を使って、自由に島を切り拓いてみましょう！",
+                message: "素晴らしい！すべてのカリキュラムが完了しました。右下の「開発テストツール」で農地を開拓したり、住宅を建てたりして自由に箱庭開発をシミュレーションしてみましょう！"
+            }
+        ];
+
+        // --- 3. アニメーション付き解説文字送り関数 (Typewriter Effect) ---
+        function typeMessage(text, speed = 30) {
+            const explainBox = document.getElementById('explain-box');
+            
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+
+            explainBox.innerText = '';
+            let index = 0;
+
+            function nextChar() {
+                if (index < text.length) {
+                    explainBox.innerText += text.charAt(index);
+                    index++;
+                    const randomDelay = speed + (Math.random() * 15 - 7);
+                    typingTimeout = setTimeout(nextChar, Math.max(10, randomDelay));
+                } else {
+                    typingTimeout = null;
+                }
+            }
+            nextChar();
+        }
+
+        // --- 4. 所定のタイルを小さなアニメーション付きで変更する関数 ---
+        function updateTileWithAnim(r, c, newType) {
+            const cell = document.querySelector(`.map-cell[data-row="${r}"][data-col="${c}"]`);
+            if (!cell) return;
+
+            // 1. マップデータ配列(現在の状態)を更新
+            currentMapState[r][c] = newType;
+
+            // 2. アニメーション演出クラスと枠線の適用
+            cell.classList.remove('animate-build'); // 重複除去用のリセット
+            void cell.offsetWidth; // リフローを起こしてアニメーションを再トリガー
+            cell.classList.add('animate-build', 'ring-4', 'ring-amber-400');
+
+            // 3. アニメーションの頂点あたりで見た目を切り替える (約 150ms 後)
+            setTimeout(() => {
+                // 古いクラスをすべて削除
+                Object.keys(TILE_TYPES).forEach(key => {
+                    cell.classList.remove(key);
+                });
+                
+                // 新しいクラスを割り当て、データ属性を更新
+                cell.classList.add(newType);
+                cell.dataset.type = newType;
+                
+                // 絵文字テキストを割り当て
+                cell.textContent = EMOJI_MAP[newType] || '';
+            }, 150);
+
+            // 4. アニメーション終了後に演出枠線を除外
+            setTimeout(() => {
+                cell.classList.remove('ring-4', 'ring-amber-400');
+            }, 600);
+        }
+
+        // --- 5. マップの生成と描画 ---
+        function initMapData(resetToDefault = true) {
+            if (resetToDefault || currentMapState.length === 0) {
+                // INITIAL_MAP をディープコピーして現在の状態とする
+                currentMapState = JSON.parse(JSON.stringify(INITIAL_MAP));
+            }
+        }
+
+        function generateMap() {
+            const mapContainer = document.getElementById('game-map');
+            mapContainer.innerHTML = '';
+
+            for (let r = 0; r < 16; r++) {
+                for (let c = 0; c < 16; c++) {
+                    const tileType = currentMapState[r][c];
+                    const cell = document.createElement('div');
+                    
+                    cell.className = `map-cell ${tileType} border border-slate-900/10 flex items-center justify-center text-xs sm:text-sm select-none`;
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.dataset.type = tileType;
+
+                    // 初期絵文字挿入
+                    cell.textContent = EMOJI_MAP[tileType] || '';
+
+                    // ホバーイベント
+                    cell.addEventListener('mouseenter', () => {
+                        const currentType = cell.dataset.type;
+                        const info = TILE_TYPES[currentType] || { name: '未知', desc: '詳細不明のエリア。' };
+                        document.getElementById('hovered-tile-info').innerHTML = 
+                            `座標: (${c}, ${r}) | <span class="text-white font-bold underline">${info.name}</span>`;
+                    });
+
+                    // クリックイベント (開発コマンドモードと観測モードの分岐)
+                    cell.addEventListener('click', () => {
+                        const currentType = cell.dataset.type;
+                        
+                        if (activeCommand === 'inspect') {
+                            // 通常の観測モード
+                            const info = TILE_TYPES[currentType] || { name: '未知', desc: '詳細不明のエリア。' };
+                            const customMsg = `【${info.name}】座標 (${c}, ${r}): ${info.desc}`;
+                            typeMessage(customMsg, 15);
+                        } else {
+                            // 開発テスト（コマンド配置）モード
+                            // 海岸や海への配置制限など簡単なルールを持たせると雰囲気が出ます
+                            if (activeCommand === 'oilRig' && currentType !== 'sea') {
+                                typeMessage(`[システム警告] 海底油田 🛢️ は「海」のタイルにしか建設できません。`, 10);
+                                return;
+                            }
+                            if (activeCommand !== 'oilRig' && currentType === 'sea') {
+                                typeMessage(`[システム警告] 陸上施設は「海」のタイルには建設できません。埋め立てるか陸地を選んでください。`, 10);
+                                return;
+                            }
+
+                            // アニメーション付きでタイルを更新！
+                            updateTileWithAnim(r, c, activeCommand);
+                            
+                            const info = TILE_TYPES[activeCommand];
+                            typeMessage(`[開発命令成功] 座標 (${c}, ${r}) を「${info.name}」へ開拓・設営しました！`, 15);
+                        }
+                    });
+
+                    mapContainer.appendChild(cell);
+                }
+            }
+        }
+
+        // --- 6. 開発テストツール コマンドの切り替え ---
+        function setBuildCommand(command) {
+            activeCommand = command;
+            
+            // UIボタンのアクティブクラス切り替え
+            const buttons = document.querySelectorAll('.cmd-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'border-blue-400', 'text-white');
+                btn.classList.add('bg-slate-750', 'hover:bg-slate-700', 'text-slate-300');
+            });
+
+            const activeBtn = document.getElementById(`cmd-${command}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-750', 'hover:bg-slate-700', 'text-slate-300');
+                activeBtn.classList.add('bg-blue-600', 'border-blue-400', 'text-white');
+            }
+
+            // バッジの更新
+            const badge = document.getElementById('active-mode-badge');
+            if (command === 'inspect') {
+                badge.innerText = "🔍 観測モード";
+                badge.className = "text-xs bg-emerald-900/60 border border-emerald-700 text-emerald-300 px-2 py-1 rounded font-semibold";
+            } else {
+                const info = TILE_TYPES[command];
+                badge.innerText = `🛠️ 設営: ${info.name}`;
+                badge.className = "text-xs bg-amber-900/60 border border-amber-700 text-amber-300 px-2 py-1 rounded font-semibold animate-bounce";
+            }
+        }
+
+        // --- 7. ステップ進行管理とアニメーションデモ実行 ---
+        function changeStep(direction) {
+            const targetStep = currentStep + direction;
+            if (targetStep >= 0 && targetStep < TUTORIAL_STEPS.length) {
+                currentStep = targetStep;
+                updateStepUI(direction);
+            }
+        }
+
+        function updateStepUI(direction = 0) {
+            const step = TUTORIAL_STEPS[currentStep];
+            
+            // UIテキスト更新
+            document.getElementById('step-title').innerText = step.title;
+            document.getElementById('step-task').innerText = step.task;
+            
+            // 進捗バー更新
+            const progressPercent = ((currentStep + 1) / TUTORIAL_STEPS.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // ボタン活性化/非活性化
+            document.getElementById('btn-prev').disabled = (currentStep === 0);
+            document.getElementById('btn-next').innerHTML = (currentStep === TUTORIAL_STEPS.length - 1) ? "<span>最初からリセット</span> <span>🔄</span>" : "<span>次へ進む</span> <span>➔</span>";
+
+            // 最後のステップで「次へ（最初からリセット）」を押したときの挙動
+            if (currentStep === TUTORIAL_STEPS.length - 1) {
+                document.getElementById('btn-next').onclick = () => {
+                    currentStep = 0;
+                    initMapData(true); // 完全初期リセット
+                    generateMap();
+                    updateStepUI();
+                    setBuildCommand('inspect');
+                };
+            } else {
+                document.getElementById('btn-next').onclick = () => changeStep(1);
+            }
+
+            // 解説エリアに文字送りアニメーション実行
+            typeMessage(step.message, 25);
+
+            // --- ステップごとの自動アニメーションデモ効果の実行 ---
+            triggerStepDemo(currentStep, direction);
+        }
+
+        // ステップ遷移時に、自動で該当タイルがピカピカ変化して見せるデモ
+        function triggerStepDemo(stepIdx, direction) {
+            // 「戻る」で遷移した場合は、そこまでのステップに合うようにマップ状態を初期から再構成する
+            if (direction < 0) {
+                initMapData(true); // 初期化
+                // 各ステップに応じた確定分を裏で適用
+                if (stepIdx >= 1) {
+                    currentMapState[4][10] = 'farm';
+                    currentMapState[6][9] = 'factory';
+                    currentMapState[13][11] = 'oilRig';
+                }
+                if (stepIdx >= 2) {
+                    currentMapState[5][8] = 'house';
+                    currentMapState[5][10] = 'house';
+                }
+                if (stepIdx >= 3) {
+                    currentMapState[10][6] = 'gun';
+                    currentMapState[8][10] = 'defenseFacility';
+                }
+                generateMap();
+                return;
+            }
+
+            // 「進む」場合の華やかなアニメーションデモ
+            if (stepIdx === 1) {
+                // 平地 -> 農地、工場、油田へ
+                setTimeout(() => updateTileWithAnim(4, 10, 'farm'), 400);
+                setTimeout(() => updateTileWithAnim(6, 9, 'factory'), 1000);
+                setTimeout(() => updateTileWithAnim(13, 11, 'oilRig'), 1600);
+            } 
+            else if (stepIdx === 2) {
+                // 平地 -> 住宅へ
+                setTimeout(() => updateTileWithAnim(5, 8, 'house'), 500);
+                setTimeout(() => updateTileWithAnim(5, 10, 'house'), 1100);
+            }
+            else if (stepIdx === 3) {
+                // 平地 -> 防衛施設、ミサイル基地へ
+                setTimeout(() => updateTileWithAnim(10, 6, 'gun'), 500);
+                setTimeout(() => updateTileWithAnim(8, 10, 'defenseFacility'), 1200);
+            }
+        }
+
+        // ページ読み込み完了時の初期化
+        window.onload = function() {
+            initMapData(true);
+            generateMap();
+            updateStepUI();
+        };
+      */
+    </script>
+</body>
+</html>
