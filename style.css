@@ -173,3 +173,26 @@ noscript {
   font-size: 0.85em;
   box-sizing: border-box;
 }
+
+.warship-dock-display {
+  min-width: 260px;
+  max-width: 360px;
+  font-size: 0.75em;
+  margin-top: 1em;
+  border: 1px solid #8aa0b8;
+  padding: 10px;
+  background: linear-gradient(135deg, #eef6ff, #f8fbff);
+}
+.warship-dock-display h4 { margin: 0 0 8px; }
+.dock-empty { color: #667; margin: 0; }
+.warship-card-list { display: grid; gap: 8px; }
+.warship-card {
+  border: 2px solid #2b4c7e;
+  border-radius: 10px;
+  padding: 8px;
+  background: linear-gradient(160deg, #ffffff 0%, #dcecff 100%);
+  box-shadow: 0 2px 4px rgba(0,0,0,.18);
+}
+.warship-card-title { font-weight: bold; border-bottom: 1px solid #9db5d1; margin-bottom: 5px; padding-bottom: 3px; }
+.warship-card-port, .warship-card-stats, .warship-card-signature { line-height: 1.45; }
+.warship-card-signature { color: #31527a; font-size: .9em; }

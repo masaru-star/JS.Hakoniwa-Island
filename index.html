@@ -158,6 +158,8 @@ SOFTWARE. -->
   <option value="decommissionWarship" data-myisland="true">軍艦除籍</option>
   <option value="dispatchWarship" data-myisland="true">軍艦派遣</option>
   <option value="requestWarshipReturn" data-myisland="true">軍艦帰還要請</option>
+  <option value="moveWarshipToDock" data-myisland="true">船渠へ移動</option>
+  <option value="returnWarshipFromDock" data-myisland="true">海域へ復帰</option>
 </select><!-- <select id="AutocommandSubSelect" onchange="updateConfirmButton()" style="width: 140px; display: none;">
   <option value="">自動送信ツールを選択</option>
   <option value="autoflatten" data-myisland="true">整地自動送信</option>
@@ -221,6 +223,7 @@ SOFTWARE. -->
     <div id="actionQueueDisplay" style="font-size: 0.7em;margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">
       <h4>計画キュー</h4><ul id="actionQueueList" style="list-style-type: none; padding: 0;"></ul>設定した計画はクリックで撤回可能です。
     </div>
+    <div id="warshipDockDisplay" class="warship-dock-display"></div>
 </div>
 <div id="log" style="margin-top:1em;">
   <div id="logStatusLine1"></div>
