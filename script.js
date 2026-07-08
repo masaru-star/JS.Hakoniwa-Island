@@ -26,6 +26,7 @@ const KING_MONSTER_CODE = 'KING_MONSTER';
   let actionQueue = [];
   let islandName = "MyIsland";
   let warships = []; // 軍艦の配列を追加
+  let dockedWarships = []; // 船渠に収納中の軍艦
 
   let islandSigningKeyPair = null; // P-256署名鍵ペア(JWK形式)
 
@@ -107,6 +108,30 @@ async function hasValidWarshipNameSignature(ship) {
         console.warn('軍艦署名の検証に失敗しました。', e);
         return false;
     }
+}
+async function ensureAndVerifyOwnWarship(ship) {
+    if (!ship) return false;
+    ensureWarshipFields(ship);
+    await ensureIslandSigningKeyPair({ silent: true });
+    if (!ship.nameSignature || !ship.signaturePublicKey) {
+        if (ship.homePort === islandName) {
+            await signWarshipName(ship);
+            logAction(`軍艦「${ship.name}」に自島のP-256署名を付与しました。`);
+        } else {
+            return false;
+        }
+    }
+    const ownPublicKey = islandSigningKeyPair && islandSigningKeyPair.publicKey;
+    if (!ownPublicKey || JSON.stringify(ship.signaturePublicKey) !== JSON.stringify(ownPublicKey)) return false;
+    return hasValidWarshipNameSignature(ship);
+}
+async function canOperateOwnWarship(ship, operationLabel) {
+    const verified = await ensureAndVerifyOwnWarship(ship);
+    if (!verified) {
+        logAction(`${operationLabel}はP-256署名検証に失敗したため実行できません。この軍艦は敵艦として扱われます。`);
+        return false;
+    }
+    return true;
 }
 function updatePublicKeyDisplay() {
     const el = document.getElementById('islandPublicKeyDisplay');
@@ -221,6 +246,43 @@ function getWarshipKey(ship) {
 function ensureWarshipFields(ship) {
     if (ship.nickname === undefined) ship.nickname = '';
     if (!ship.medalsEarned || typeof ship.medalsEarned !== 'object') ship.medalsEarned = {};
+    if (ship.isDocked === undefined) ship.isDocked = false;
+}
+function hasAnyPort() {
+    return map.some(row => row.some(tile => tile.facility === 'port'));
+}
+function isWarshipDocked(ship) {
+    return !!(ship && ship.isDocked);
+}
+function cloneWarshipForDock(ship) {
+    const clone = JSON.parse(JSON.stringify(ship));
+    clone.isDocked = true;
+    clone.isDispatched = false;
+    return clone;
+}
+function getWarshipNameHtml(ship) {
+    const className = getWarshipCapClass(ship);
+    const name = getWarshipDisplayName(ship);
+    return className ? `<span class="${className}">${name}</span>` : name;
+}
+function renderDockedWarshipCards() {
+    const container = document.getElementById('warshipDockDisplay');
+    if (!container) return;
+    if (!dockedWarships.length) {
+        container.innerHTML = '<h4>船渠</h4><p class="dock-empty">収納中の軍艦はありません。</p>';
+        return;
+    }
+    const cards = dockedWarships.map((ship, index) => {
+        ensureWarshipFields(ship);
+        return `<div class="warship-card">
+            <div class="warship-card-title">No.${index + 1} ${getWarshipNameHtml(ship)}</div>
+            <div class="warship-card-port">母港: ${ship.homePort}</div>
+            <div class="warship-card-stats">耐久 ${ship.currentDurability}/${ship.maxDurability}｜燃料 ${ship.currentFuel}/${ship.maxFuel}｜弾薬 ${ship.currentAmmo}/${ship.maxAmmo}</div>
+            <div class="warship-card-stats">主砲 ${ship.mainGun}｜魚雷 ${ship.torpedo}｜対空 ${ship.antiAir}｜偵察 ${ship.reconnaissance}｜精度 ${ship.accuracyImprovement}</div>
+            <div class="warship-card-signature">P-256署名: ${ship.nameSignature ? '保存済み' : '未付与'}</div>
+        </div>`;
+    }).join('');
+    container.innerHTML = `<h4>船渠 (${dockedWarships.length}/5)</h4><div class="warship-card-list">${cards}</div>`;
 }
 function getWarshipDisplayName(ship) {
     ensureWarshipFields(ship);
@@ -249,7 +311,7 @@ function maybeLogResidentWhisper(originMsg) {
 }
 function initWarshipTurnStats() {
     warshipTurnStats = {};
-    warships.forEach((ship) => {
+    warships.filter(ship => !isWarshipDocked(ship)).forEach((ship) => {
         ensureWarshipFields(ship);
         warshipTurnStats[getWarshipKey(ship)] = { maxHitStreak: 0, currentHitStreak: 0, damageTaken: 0, sunkWarships: 0 };
     });
@@ -366,7 +428,7 @@ function getActionName(action, x, y, extraData) {
         goToOtherIsland: '他の島に行く', returnToMyIsland: '自島に戻る', buildWarship: '軍艦建造',
         refuelWarship: '燃料補給', resupplyWarshipAmmo: '弾薬補給', repairWarship: '軍艦修理',
         enhanceWarship: '軍艦増強', decommissionWarship: '軍艦除籍', dispatchWarship: '軍艦派遣',
-        requestWarshipReturn: '軍艦帰還要請', setWarshipNickname: '二つ名指定', showWarshipDetails: '詳細情報提示', convertAchievementToExp: '実績pt変換', remodelWarshipWeapon: '武器換装', buildMonument: '石碑建設', upgradeMonument: '石碑強化',
+        requestWarshipReturn: '軍艦帰還要請', moveWarshipToDock: '船渠へ移動', returnWarshipFromDock: '海域へ復帰', setWarshipNickname: '二つ名指定', showWarshipDetails: '詳細情報提示', convertAchievementToExp: '実績pt変換', remodelWarshipWeapon: '武器換装', buildMonument: '石碑建設', upgradeMonument: '石碑強化',
         sellMonument: '石碑売却', initializeIsland: '島の初期化', delayAction: '遅延行動' 
     };
     name = actionNames[action] || action;
@@ -384,7 +446,7 @@ function getActionName(action, x, y, extraData) {
         name += ` (${extraData.amount} 耐久回復)`;
     } else if (action === 'buildWarship' && extraData && extraData.name) {
         name += ` (${extraData.name})`;
-    } else if ((action === 'dispatchWarship' || action === 'requestWarshipReturn') && extraData && extraData.name) {
+    } else if ((action === 'dispatchWarship' || action === 'requestWarshipReturn' || action === 'moveWarshipToDock' || action === 'returnWarshipFromDock') && extraData && extraData.name) {
         name += ` (${extraData.name})`;
     } else if (action === 'setWarshipNickname' && extraData && extraData.nickname) {
         name += ` (${extraData.nickname})`;
@@ -1004,6 +1066,7 @@ window.updateConfirmButton = function () {
   applyAutomaticInputValues(action);
   applySessionSettings();
   renderMap();
+  renderDockedWarshipCards();
 }
 function renderMap() {
   const table = document.getElementById('map');
@@ -1033,7 +1096,7 @@ function renderMap() {
           if (tile.facility === 'oilRig') cell.classList.add('enhancedOilRig');
       }
       // 軍艦の表示
-      const warshipAtTile = warships.find(ship => ship.x === x && ship.y === y);
+      const warshipAtTile = warships.find(ship => ship.x === x && ship.y === y && !isWarshipDocked(ship));
       if (warshipAtTile && !isViewingOtherIsland) { // 自分の島を見ているときのみ軍艦を表示
           if (warshipAtTile.currentDurability <= 0) { // 沈没している場合
               cell.classList.add('warship-wreckage');
@@ -1113,7 +1176,7 @@ function showTileInfo(x, y) {
     }
   }
 
-  const warshipAtTile = warships.find(ship => ship.x === x && ship.y === y);
+  const warshipAtTile = warships.find(ship => ship.x === x && ship.y === y && !isWarshipDocked(ship));
   if (warshipAtTile && !isViewingOtherIsland) {
       ensureWarshipFields(warshipAtTile);
       // 経験値表示を修正
@@ -1271,6 +1334,7 @@ function saveGame() {
         monsters: JSON.parse(JSON.stringify(monsters)), // 新しい配列を保存
         actionQueue: JSON.parse(JSON.stringify(actionQueue)),
         warships: JSON.parse(JSON.stringify(warships)), // 軍艦データを保存
+        dockedWarships: JSON.parse(JSON.stringify(dockedWarships)),
         islandSigningKeyPair: JSON.parse(JSON.stringify(islandSigningKeyPair))
     };
     const jsonString = JSON.stringify(gameState);
@@ -1322,6 +1386,7 @@ async function loadGame() {
 
         actionQueue = gameState.actionQueue || []; // ロード時にactionQueueがない場合に対応
         warships = gameState.warships || []; // 軍艦データをロード
+        dockedWarships = gameState.dockedWarships || [];
         islandSigningKeyPair = gameState.islandSigningKeyPair || null;
 
         // 過去のセーブデータにenhancedプロパティがない場合のために初期化
@@ -1351,6 +1416,11 @@ async function loadGame() {
                 ship.abnormality = null; 
             }
             ensureWarshipFields(ship);
+        });
+        dockedWarships.forEach(ship => {
+            ensureWarshipFields(ship);
+            ship.isDocked = true;
+            ship.isDispatched = false;
         });
 
         document.getElementById('islandNameInput').value = islandName; // UIにロードした名前を反映
@@ -1386,6 +1456,7 @@ function saveMyIslandState() {
         monsters: JSON.parse(JSON.stringify(monsters)),
         actionQueue: JSON.parse(JSON.stringify(actionQueue)),
         warships: JSON.parse(JSON.stringify(warships)),
+        dockedWarships: JSON.parse(JSON.stringify(dockedWarships)),
         economicCrisisTurns: economicCrisisTurns,
         frozenMoney: frozenMoney,
         volcanoTurns: volcanoTurns,
@@ -1459,6 +1530,7 @@ function loadMyIslandState() {
     monster = null; // 旧変数はクリア
     actionQueue = JSON.parse(JSON.stringify(myIslandState.actionQueue));
     warships = myIslandState.warships ? JSON.parse(JSON.stringify(myIslandState.warships)) : []; // 軍艦データをロード
+    dockedWarships = myIslandState.dockedWarships ? JSON.parse(JSON.stringify(myIslandState.dockedWarships)) : [];
     economicCrisisTurns = myIslandState.economicCrisisTurns || 0;
     frozenMoney = myIslandState.frozenMoney || 0;
     volcanoTurns = myIslandState.volcanoTurns || 0;
@@ -1475,6 +1547,11 @@ function loadMyIslandState() {
             ship.originalCost = 0;
         }
         ensureWarshipFields(ship);
+    });
+    dockedWarships.forEach(ship => {
+        ensureWarshipFields(ship);
+        ship.isDocked = true;
+        ship.isDispatched = false;
     });
 
     // 過去のセーブデータにenhancedプロパティがない場合のために初期化
@@ -1509,6 +1586,7 @@ async function resetGame() {
     monsters = [];
     actionQueue = [];
     warships = []; // 軍艦データをリセット
+    dockedWarships = [];
     islandSigningKeyPair = null;
     resetWarshipProgressStore();
     economicCrisisTurns = 0;
@@ -1555,7 +1633,7 @@ async function handleWarshipAttacks() {
     const currentMap = map;
     const activeAttackingWarships = [];
     for (const ship of warships) {
-        if (ship.currentDurability > 0 && ship.currentAmmo > 0 && !(await hasValidWarshipNameSignature(ship))) {
+        if (ship.currentDurability > 0 && !isWarshipDocked(ship) && ship.currentAmmo > 0 && !(await ensureAndVerifyOwnWarship(ship))) {
             activeAttackingWarships.push(ship);
         }
     }
@@ -1725,7 +1803,7 @@ if (warship.exp === "NaN") {
 }
 
 // confirmAction関数をグローバルスコープで定義
-window.confirmAction = function () {
+window.confirmAction = async function () {
     const actionSelect = document.getElementById('actionSelect');
     const warshipSubSelect = document.getElementById('warshipSubSelect');
     let action = document.getElementById('actionSelect').value;
@@ -1834,7 +1912,7 @@ const keepOptionSelected = document.getElementById('keepOptionSelected').checked
 
   if (!action) return;
   applyAutomaticInputValues(action);
-  const requiresTileSelection = ['buildFarm', 'buildFactory', 'buildPort', 'buildGun', 'buildDefenseFacility', 'buildWarship', 'refuelWarship', 'resupplyWarshipAmmo', 'repairWarship', 'setWarshipNickname', 'convertAchievementToExp', 'remodelWarshipWeapon', 'dispatchWarship', 'requestWarshipReturn', 'flatten', 'landfill', 'dig', 'cutForest', 'plantForest', 'enhanceFacility', 'selfDestructMilitaryFacility', 'bombard', 'spreadBombard', 'ppBombard', 'concentratedFire'];
+  const requiresTileSelection = ['buildFarm', 'buildFactory', 'buildPort', 'buildGun', 'buildDefenseFacility', 'buildWarship', 'refuelWarship', 'resupplyWarshipAmmo', 'repairWarship', 'setWarshipNickname', 'convertAchievementToExp', 'remodelWarshipWeapon', 'dispatchWarship', 'requestWarshipReturn', 'moveWarshipToDock', 'returnWarshipFromDock', 'flatten', 'landfill', 'dig', 'cutForest', 'plantForest', 'enhanceFacility', 'selfDestructMilitaryFacility', 'bombard', 'spreadBombard', 'ppBombard', 'concentratedFire'];
   if (requiresTileSelection.includes(action) && !targetTileSelected) {
     logAction(`アクションの対象タイルを選択してください`);
     return;
@@ -2189,6 +2267,7 @@ logAction(`島の初期化はキャンセルされました。`);
           logAction(`この軍艦はすでに派遣中です。`);
           return;
       }
+      if (!(await canOperateOwnWarship(warship, '軍艦派遣'))) return;
       const touristCode = document.getElementById('touristCodeInput').value;
       if (!touristCode) {
           logAction(`派遣先の観光者コードを入力してください。`);
@@ -2235,6 +2314,7 @@ logAction(`島の初期化はキャンセルされました。`);
           logAction(`この軍艦の母港は${warship.homePort}であり、この島ではありません。`);
           return;
       }
+      if (!(await canOperateOwnWarship(warship, '軍艦帰還要請'))) return;
       const returnRequestData = {
           type: "warshipReturnRequest", // 新しいタイプ
           homePort: warship.homePort,
@@ -2245,6 +2325,65 @@ logAction(`島の初期化はキャンセルされました。`);
 
       logAction(`軍艦「${warship.name}」の帰還を要請しました。他島への行動が「他島への行動」欄に出力されました。`);
       // ここでは軍艦の状態は変更しない（相手島からの確認を待つ）
+  } else if (action === 'moveWarshipToDock') {
+      if (!hasAnyPort()) {
+          logAction(`船渠へ移動するには自島に港が1個以上必要です。`);
+          return;
+      }
+      if (dockedWarships.length >= 5) {
+          logAction(`船渠は満杯です（最大5隻）。`);
+          return;
+      }
+      const warship = warships.find(ship => ship.x === selectedX && ship.y === selectedY && !isWarshipDocked(ship));
+      if (!warship) {
+          logAction(`(${selectedX},${selectedY}) に収納可能な軍艦が存在しません。`);
+          return;
+      }
+      if (warship.isDispatched || warship.currentDurability <= 0) {
+          logAction(`派遣中または撃沈済みの軍艦は船渠へ移動できません。`);
+          return;
+      }
+      if (!(await canOperateOwnWarship(warship, '船渠へ移動'))) return;
+      dockedWarships.push(cloneWarshipForDock(warship));
+      warships = warships.filter(ship => ship !== warship);
+      logAction(`軍艦「${warship.name}」を船渠へ移動しました（${dockedWarships.length}/5）。`);
+      renderDockedWarshipCards();
+      renderMap();
+      updateStatus();
+      saveMyIslandState();
+  } else if (action === 'returnWarshipFromDock') {
+      if (!hasAnyPort()) {
+          logAction(`海域へ復帰するには自島に港が1個以上必要です。`);
+          return;
+      }
+      if (!dockedWarships.length) {
+          logAction(`船渠に収納中の軍艦はありません。`);
+          return;
+      }
+      if (!targetTileSelected || tile.terrain !== 'sea' || tile.facility !== null || warships.some(ship => !isWarshipDocked(ship) && ship.x === selectedX && ship.y === selectedY)) {
+          logAction(`復帰先には、何も施設がない海タイルを選択してください。`);
+          return;
+      }
+      const list = dockedWarships.map((ship, index) => `${index + 1}: ${getWarshipDisplayName(ship)} (耐久 ${ship.currentDurability}/${ship.maxDurability}, 主砲 ${ship.mainGun}, 魚雷 ${ship.torpedo})`).join('\n');
+      const input = prompt(`海域へ復帰する軍艦番号を入力してください:\n${list}`);
+      const dockIndex = parseInt(input, 10) - 1;
+      if (Number.isNaN(dockIndex) || dockIndex < 0 || dockIndex >= dockedWarships.length) {
+          logAction(`海域へ復帰する軍艦番号が無効です。`);
+          return;
+      }
+      const warship = dockedWarships[dockIndex];
+      if (!(await canOperateOwnWarship(warship, '海域へ復帰'))) return;
+      dockedWarships.splice(dockIndex, 1);
+      warship.x = selectedX;
+      warship.y = selectedY;
+      warship.isDocked = false;
+      warship.isDispatched = false;
+      warships.push(warship);
+      logAction(`軍艦「${warship.name}」を (${selectedX},${selectedY}) の海域へ復帰させました。`);
+      renderDockedWarshipCards();
+      renderMap();
+      updateStatus();
+      saveMyIslandState();
   } else if (action === 'enhanceWarship') {
     if (!targetTileSelected) {
         logAction(`増強対象の軍艦が配置されているタイルを選択してください。`);
@@ -2327,6 +2466,7 @@ logAction(`島の初期化はキャンセルされました。`);
         return;
     }
       const warship = warships.find(ship => ship.x === selectedX && ship.y === selectedY);
+    if (!(await canOperateOwnWarship(warship, '軍艦除籍'))) return;
     const confirmation = confirm(`${ship.name} を除籍しますが、よろしいですか？`);
       if (warship.homePort !== islandName) {
           logAction(`この軍艦の母港は${warship.homePort}であり、この島ではありません。`);
@@ -2377,7 +2517,7 @@ window.nextTurn = async function () {
 turn++;
     initWarshipTurnStats();
     warships.forEach(warship => {
-        if (warship.currentDurability <= 0) return;
+        if (warship.currentDurability <= 0 || isWarshipDocked(warship)) return;
         if (warship.abnormality === 'commFailure' && !warship.isDispatched) {
             warship.abnormality = null;
             logAction(`軍艦 ${warship.name} は帰港したため、通信障害が自動復旧しました。`);
@@ -3284,7 +3424,7 @@ let hiyou = (durability * 10000000) + (mainGun * 12000000) + (torpedo * 10000000
   }
   // 軍艦の移動 (派遣中の軍艦は移動しない)
   for (const warship of warships) {
-      if (!warship.isDispatched && warship.currentFuel >= 1) { // 派遣中でない軍艦のみ移動
+      if (!warship.isDispatched && !isWarshipDocked(warship) && warship.currentFuel >= 1) { // 派遣中でない軍艦のみ移動
             if (warship.abnormality === 'flooding') {
                 logAction(`軍艦 ${warship.name} は浸水しているため、移動できません。`);
                 continue; // 次のアクションへ
@@ -4032,7 +4172,7 @@ map.forEach(row => {
     });
 });
 // 沈没していない軍艦（currentDurability > 0）の数をカウント
-const activeWarshipCount = warships.filter(ship => ship.currentDurability > 0).length;
+const activeWarshipCount = warships.filter(ship => ship.currentDurability > 0 && !isWarshipDocked(ship)).length;
 const facilityMaintenance = (gunCount * 600) + (enhancedGunCount * 600) + (defenseFacilityCount * 2000) + (portCount * 2500);
 const warshipMaintenance = activeWarshipCount * 20000;
 let maintenanceCost = facilityMaintenance + warshipMaintenance;
@@ -4304,6 +4444,7 @@ window.saveGame = async function() {
         actionQueue: myIslandState.actionQueue,
         monsters: myIslandState.monsters || [],
         warships: myIslandState.warships,
+        dockedWarships: myIslandState.dockedWarships || [],
         islandSigningKeyPair: myIslandState.islandSigningKeyPair,
         economicCrisisTurns: myIslandState.economicCrisisTurns,
         frozenMoney: myIslandState.frozenMoney,
@@ -4350,6 +4491,7 @@ window.loadGame = async function() {
         monster = null;
         actionQueue = gameState.actionQueue || []; // ロード時にactionQueueがない場合に対応
         warships = gameState.warships || []; // 軍艦データをロード
+        dockedWarships = gameState.dockedWarships || [];
         islandSigningKeyPair = gameState.islandSigningKeyPair || null;
         economicCrisisTurns = gameState.economicCrisisTurns || 0;
         frozenMoney = gameState.frozenMoney || 0;
@@ -4404,6 +4546,7 @@ function createHakoniwaSerializableState() {
         monsters: JSON.parse(JSON.stringify(monsters || [])),
         actionQueue: JSON.parse(JSON.stringify(actionQueue || [])),
         warships: JSON.parse(JSON.stringify(warships || [])),
+        dockedWarships: JSON.parse(JSON.stringify(dockedWarships || [])),
         economicCrisisTurns, frozenMoney, volcanoTurns,
         islandSigningKeyPair: JSON.parse(JSON.stringify(islandSigningKeyPair)),
         warshipProgress: JSON.parse(JSON.stringify(getWarshipProgressStore()))
@@ -4427,6 +4570,7 @@ function applyHakoniwaSerializableState(gameState, options = {}) {
     monster = null;
     actionQueue = JSON.parse(JSON.stringify(gameState.actionQueue || []));
     warships = JSON.parse(JSON.stringify(gameState.warships || []));
+    dockedWarships = JSON.parse(JSON.stringify(gameState.dockedWarships || []));
     economicCrisisTurns = Number(gameState.economicCrisisTurns || 0);
     frozenMoney = Number(gameState.frozenMoney || 0);
     volcanoTurns = Number(gameState.volcanoTurns || 0);
@@ -4443,6 +4587,11 @@ function applyHakoniwaSerializableState(gameState, options = {}) {
         if (ship.originalCost === undefined) ship.originalCost = 0;
         if (ship.abnormality === undefined) ship.abnormality = null;
         ensureWarshipFields(ship);
+    });
+    dockedWarships.forEach(ship => {
+        ensureWarshipFields(ship);
+        ship.isDocked = true;
+        ship.isDispatched = false;
     });
     ensureIslandSigningKeyPair({ silent: true });
     document.getElementById('islandNameInput').value = islandName;
