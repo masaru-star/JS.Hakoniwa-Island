@@ -218,17 +218,18 @@ SOFTWARE. -->
 <button onclick="confirmAction()" id="confirmBtn" disabled>決定</button>
 <button onclick="clearTileSelection()" id="clearTileSelectionBtn" style="display: none;">タイル選択の解除</button>
 <span id="tileInfo"></span>
-<div id="gameContainer" style="display: flex; gap: 5px;">
     <table id="map"></table>
-</div><br>
+<br>
 <details>
 <summary>自島の計画情報</summary>
+  <div id="gameContainer" style="display: flex; gap: 5px;">
   <div id="actionQueueDisplay" style="font-size: 0.7em;margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">
     <h4>計画キュー</h4><ul id="actionQueueList" style="list-style-type: none; padding: 0;"></ul>設定した計画はクリックで撤回可能です。
   </div>
   <div id="warshipDockDisplay" class="warship-dock-display"></div>
     <div id="logStatusLine1"></div>
     <div id="logStatusLine2"></div>
+  </div>
   </div>
 </details>
 <div id="log" style="margin-top:1em;">
