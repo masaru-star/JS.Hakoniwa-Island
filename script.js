@@ -3580,7 +3580,6 @@ if (remainingOilRigCount > 0 || totalOilRigIncome > 0) {
   checkAndCompleteMission('07', 2, 1000, 0, () => population >= 50000, '総人口が5万人に達する');
   foodChange -= Math.floor(population / 200) * 5;
   food += foodChange;
-  money += moneyChange;
 // 火山の噴火 持続処理 (追加)
     if (volcanoTurns > 0) {
         volcanoTurns--;
@@ -4200,6 +4199,7 @@ if (actualMaintenanceCost > 0) {
   renderActionQueue()
   const populationChange = population - prevPopulation; // 人口の増減を計算
   logAction(`資金収支: ${moneyChange+totalOilRigIncome - actualMaintenanceCost}G, 食料: ${foodChange >= 0 ? '+' : ''}${foodChange}, 人口変化: ${populationChange >= 0 ? '+' : ''}${populationChange}`);
+  money += moneyChange;
   renderMap();
 }
 /**
