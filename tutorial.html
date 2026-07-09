@@ -105,19 +105,14 @@
             </div>
         </div>
     </header>
-
-    <!-- 画面のどこでもタップして進むオーバーレイ -->
     <div id="tap-anywhere-overlay" class="fixed inset-0 z-30 cursor-pointer hidden pointer-events-auto" onclick="handleScreenTap(event)">
         <div class="absolute bottom-[92px] left-1/2 transform -translate-x-1/2 bg-blue-600/90 text-white px-5 py-1.5 rounded-full shadow-md flex items-center gap-1.5 text-xs font-bold tracking-wider pointer-events-none tap-pulse-text transition-all duration-300">
             <span>🖱️ 画面タップで解説を進める</span>
             <span id="tap-arrow" class="text-[10px]">▶</span>
         </div>
     </div>
-
-    <!-- メインコンテンツ -->
     <main class="max-w-7xl mx-auto w-full p-3 lg:p-4 flex-grow overflow-y-auto flex flex-col justify-start pb-[100px]">
         
-        <!-- ================= 1. チュートリアル一覧 選択画面 ================= -->
         <div id="menu-view" class="w-full space-y-4 py-2">
             <div class="text-center max-w-xl mx-auto space-y-1">
                 <h2 class="text-xl md:text-2xl font-black text-slate-900">島の開発と国家運営をマスターしよう！</h2>
@@ -126,7 +121,7 @@
                 </p>
             </div>
 
-            <!-- 進捗サマリー -->
+
             <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-xl text-blue-600">📊</div>
@@ -146,13 +141,13 @@
                 </div>
             </div>
 
-            <!-- 項目一覧カードグリッド (JavaScriptから動的生成) -->
+
             <div id="menu-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
                 <!-- 動的にチュートリアル一覧を表示します -->
             </div>
         </div>
 
-        <!-- ================= 2. チュートリアル実行画面 ================= -->
+
         <div id="tutorial-view" class="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 items-start hidden py-1">
             
             <!-- 左側：16x16 マップ -->
@@ -340,6 +335,7 @@
                         message: "開発には多額の「資金(G)」が必要です。平地に【農場】🌾や【工場】🏭を建設することで、ターンごとに安定した資金と食料を生み出すことができます。",
                         demos: [
                             { row: 4, col: 6, type: 'farm', delay: 400 },
+                            { row: 7, col: 7, type: 'farm', delay: 400 },
                             { row: 4, col: 8, type: 'factory', delay: 1100 }
                         ]
                     },
@@ -456,12 +452,12 @@
                 slides: [
                     {
                         task: "【ミッション07】暗号技術による所有証明",
-                        message: "高度な技術として、Web Crypto APIを用いた「P-256署名鍵ペア」を生成し、自軍の軍艦に署名を付与し、所有者の偽装を防ぐことができます。",
+                        message: "高度な技術として、Web Crypto APIを用いた「P-256署名鍵ペア」を生成し、自軍の軍艦に署名を付与し、所有者の偽装を防いでいます。",
                         demos: []
                     },
                     {
                         task: "【ミッション07】他島への派遣と船渠",
-                        message: "観光者コードを使って他島へ軍艦を【派遣】🛳️し、哨戒任務を行わせることも可能です。また、傷ついた艦は【船渠(ドック)】に収納して保管できます。",
+                        message: "観光者コードを使って他島へ軍艦を【派遣】🛳️し、哨戒任務を行わせることも可能です。また、使用しない艦は【船渠(ドック)】に収納して保管できます。",
                         demos: [
                             { row: 7, col: 0, type: 'warship-dispatched', delay: 500 }
                         ]
