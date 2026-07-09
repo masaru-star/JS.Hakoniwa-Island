@@ -1,30 +1,29 @@
 <!DOCTYPE html>
-<!-- 未完成だよ！ -->
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>箱庭諸島風ゲーム チュートリアル</title>
+    <title>箱庭諸島風ゲーム 開発チュートリアル</title>
     <!-- Tailwind CSS for modern layout -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ご指定のタイルスタイル */
-        .sea { background-color: #66b3ff; }
-        .port { background-color: #1f78b4; }
-        .oilRig { background: linear-gradient(#66b3ff, #004b8d); }
-        .plain { background-color: #dfffcc; }
-        .waste { background-color: #bbbbbb; }
-        .forest { background-color: #228B22; }
-        .mountain { background: linear-gradient(#705335, #4b3621); }
-        .farm { background-color: #b5e07a; }
-        .house { background-color: #fff3c4; }
-        .factory { background-color: #ccccff; }
-        .gun { background-color: #666666; }
-        .defenseFacility { background-color: #ff77aa; }
-        .Monument { background-color: #d4c17d; }
-        .warship { background: linear-gradient(#66b3ff, #4682B4); }
-        .warship-dispatched { background-color: #002f5f; color: #fff; }
-        .warship-wreckage { background-color: #333; color: #ccc; }
+        /* タイルスタイル (ライトモード向けに明るく微調整) */
+        .sea { background-color: #7ec0ff; }
+        .port { background-color: #2b80bf; color: #fff; }
+        .oilRig { background: linear-gradient(#7ec0ff, #0056a3); color: #fff; }
+        .plain { background-color: #e6ffcc; }
+        .waste { background-color: #cfcfcf; }
+        .forest { background-color: #2ea82e; color: #fff; }
+        .mountain { background: linear-gradient(#876541, #5c432a); color: #fff; }
+        .farm { background-color: #c4f08a; }
+        .house { background-color: #ffe89e; }
+        .factory { background-color: #d1d1ff; }
+        .gun { background-color: #555555; color: #fff; }
+        .defenseFacility { background-color: #ff99bb; }
+        .Monument { background-color: #e3cf8a; }
+        .warship { background: linear-gradient(#7ec0ff, #5092c4); color: #fff; }
+        .warship-dispatched { background-color: #0c437a; color: #fff; }
+        .warship-wreckage { background-color: #444; color: #ccc; }
 
         /* グリッドコンテナとセルのホバー設定 */
         .grid-container {
@@ -34,25 +33,24 @@
         }
         .map-cell {
             aspect-ratio: 1 / 1;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
         }
         .map-cell:hover {
-            filter: brightness(1.2);
-            transform: scale(1.08);
+            filter: brightness(1.1);
+            transform: scale(1.05);
             z-index: 20;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
         }
 
         /* 建築時などのピカッと光り弾けるアニメーション */
         @keyframes tile-pop {
             0% { transform: scale(1); filter: brightness(1); }
-            40% { transform: scale(1.25); filter: brightness(1.8) saturate(1.3); }
+            45% { transform: scale(1.25); filter: brightness(1.6) saturate(1.3); box-shadow: 0 0 10px #fbbf24; }
             100% { transform: scale(1); filter: brightness(1); }
         }
         .animate-build {
-            animation: tile-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: tile-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             z-index: 30;
         }
 
@@ -62,130 +60,202 @@
         }
         .typing-cursor::after {
             content: '';
-            border-right: 2px solid #3b82f6;
+            border-right: 3px solid #3b82f6;
             animation: blink 0.7s step-end infinite;
             margin-left: 2px;
         }
+
+        /* どこでもタップエリアの波紋アニメーション */
+        @keyframes tap-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        .tap-pulse-text {
+            animation: tap-pulse 1.5s infinite;
+        }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans selection:bg-blue-600 selection:text-white">
+<body class="bg-slate-50 text-slate-800 h-screen flex flex-col justify-between font-sans overflow-hidden selection:bg-blue-200 selection:text-blue-900">
 
-    <!-- ヘッダー -->
-    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+    <!-- ヘッダー (コンパクト化) -->
+    <header class="bg-white border-b border-slate-200 py-2.5 px-4 shadow-sm shrink-0">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="backToMenu()">
                 <span class="text-2xl">🏝️</span>
-                <h1 class="text-xl font-bold tracking-wider">箱庭諸島 開発チュートリアル</h1>
+                <div>
+                    <h1 class="text-base font-bold text-slate-900 tracking-wider leading-none">箱庭諸島 開発チュートリアル</h1>
+                    <p class="text-[9px] text-slate-400 font-medium mt-0.5">Hakoniwa Island Interactive Guide</p>
+                </div>
             </div>
-            <div class="text-sm bg-blue-900/50 border border-blue-700 px-3 py-1 rounded-full text-blue-300 font-semibold flex items-center gap-1.5 animate-pulse">
-                <span class="w-2 h-2 rounded-full bg-blue-400"></span>
-                Tutorial Mode
+            <div class="flex items-center gap-2">
+                <span id="global-status-badge" class="text-[10px] bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full text-blue-600 font-bold flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                    <span id="status-text">メニュー画面</span>
+                </span>
             </div>
         </div>
     </header>
 
-    <!-- メインコンテンツ -->
-    <main class="max-w-7xl mx-auto w-full p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow items-start">
+    <!-- 画面のどこでもタップして進むオーバーレイ（チュートリアルプレイ中のみ有効・操作ボタン以外の領域） -->
+    <div id="tap-anywhere-overlay" class="fixed inset-0 z-30 cursor-pointer hidden pointer-events-auto" onclick="handleScreenTap(event)">
+        <!-- 固定フッターのすぐ上にタップ促進インジケーターを表示 -->
+        <div class="absolute bottom-[92px] left-1/2 transform -translate-x-1/2 bg-blue-600/90 text-white px-5 py-1.5 rounded-full shadow-md flex items-center gap-1.5 text-xs font-bold tracking-wider pointer-events-none tap-pulse-text transition-all duration-300">
+            <span>🖱️ 画面タップで解説を進める</span>
+            <span id="tap-arrow" class="text-[10px]">▶</span>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ (スクロール対応・高さを制御) -->
+    <main class="max-w-7xl mx-auto w-full p-3 lg:p-4 flex-grow overflow-y-auto flex flex-col justify-start pb-[100px]">
         
-        <!-- 左側：16x16 マップ (グリッド) -->
-        <div class="lg:col-span-7 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-xl flex flex-col items-center">
-            <div class="w-full flex justify-between items-center mb-3">
-                <div class="flex items-center gap-2">
-                    <span class="text-xs bg-slate-750 px-2 py-1 rounded text-slate-400 font-mono">GRID: 16×16</span>
-                    <span id="active-mode-badge" class="text-xs bg-emerald-900/60 border border-emerald-700 text-emerald-300 px-2 py-1 rounded font-semibold">🔍 観測モード</span>
-                </div>
-                <span id="hovered-tile-info" class="text-sm font-semibold text-blue-400">セルを選択、またはホバーしてください</span>
+        <!-- ================= 1. チュートリアル一覧 選択画面 ================= -->
+        <div id="menu-view" class="w-full space-y-4 py-2">
+            <div class="text-center max-w-xl mx-auto space-y-1">
+                <h2 class="text-xl md:text-2xl font-black text-slate-900">島の開発方法をマスターしよう！</h2>
+                <p class="text-slate-500 text-xs">
+                    箱庭諸島の司令官として、土地を整え、街を潤し、島民を守るための基本カリキュラムです。好きな項目をタップして開始してください。
+                </p>
             </div>
-            
-            <div id="game-map" class="grid-container w-full border-2 border-slate-700 rounded overflow-hidden shadow-2xl">
-                <!-- JSで16x16=256個のセルを動的生成します -->
+
+            <!-- 進捗サマリー (コンパクト化) -->
+            <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm max-w-3xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-xl text-blue-600">📊</div>
+                    <div>
+                        <div class="text-xs font-bold text-slate-700">全体トレーニング進捗</div>
+                        <div class="text-[10px] text-slate-400">各テーマのトレーニングを進めて開発を学習しましょう</div>
+                    </div>
+                </div>
+                <div class="w-full sm:w-48">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-500 mb-0.5">
+                        <span>進捗率</span>
+                        <span id="menu-progress-percent">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div id="menu-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 項目一覧カードグリッド (JavaScriptから動的生成します) -->
+            <div id="menu-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 max-w-3xl mx-auto">
+                <!-- 動的にチュートリアル一覧を表示します -->
             </div>
         </div>
 
-        <!-- 右側：チュートリアル管理・コマンド -->
-        <div class="lg:col-span-5 flex flex-col gap-6 h-full">
+
+        <!-- ================= 2. チュートリアル実行画面 ================= -->
+        <div id="tutorial-view" class="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 items-start hidden py-1">
             
-            <!-- チュートリアルナビゲーター -->
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl flex-grow">
-                <h2 class="text-lg font-bold mb-3 text-blue-400 flex items-center gap-2">
-                    <span>🧭</span> チュートリアル進行
-                </h2>
-                
-                <!-- 進捗バー -->
-                <div class="w-full bg-slate-750 rounded-full h-2 mb-4 overflow-hidden">
-                    <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 20%"></div>
+            <!-- 左側：16x16 マップ -->
+            <div class="lg:col-span-6 bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center max-w-[440px] mx-auto w-full">
+                <div class="w-full flex justify-between items-center mb-2">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono font-bold">GRID 16×16</span>
+                        <span id="active-mode-badge" class="text-[9px] bg-emerald-50 border border-emerald-200 text-emerald-600 px-2 py-0.5 rounded font-bold">🔍 観測モード</span>
+                    </div>
+                    <span id="hovered-tile-info" class="text-[11px] font-semibold text-blue-600 truncate max-w-[200px]">地形にポインターを合わせて情報を取得</span>
                 </div>
-
-                <div class="space-y-4">
-                    <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-750 min-h-[140px]">
-                        <div class="text-xs text-blue-500 font-bold uppercase tracking-wider mb-1">現在の課題</div>
-                        <div id="step-title" class="font-bold text-base mb-2">島の様子を観察しよう</div>
-                        <p id="step-task" class="text-sm text-slate-300 leading-relaxed">
-                            島には様々な地形があります。まずはマップ上の色々なタイルをクリックして、どのような地形があるか情報を確認してみましょう。
-                        </p>
-                    </div>
-
-                    <!-- 操作ボタン -->
-                    <div class="flex gap-3">
-                        <button id="btn-prev" onclick="changeStep(-1)" class="flex-1 bg-slate-750 hover:bg-slate-700 active:scale-95 transition text-white font-medium py-2.5 px-4 rounded-lg border border-slate-650 disabled:opacity-40 disabled:pointer-events-none disabled:transform-none">
-                            戻る
-                        </button>
-                        <button id="btn-next" onclick="changeStep(1)" class="flex-1 bg-blue-650 hover:bg-blue-500 active:scale-95 transition text-white font-medium py-2.5 px-4 rounded-lg shadow-lg shadow-blue-950/50 flex items-center justify-center gap-2">
-                            <span>次へ進む</span> <span>➔</span>
-                        </button>
-                    </div>
+                
+                <!-- マップグリッド -->
+                <div id="game-map" class="grid-container w-full border border-slate-200 rounded-lg overflow-hidden shadow-sm bg-blue-100">
+                    <!-- JSで動的生成します -->
                 </div>
             </div>
-            <!-- 地形凡例 -->
-            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-xl">
-                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">地形凡例（タイル一覧）</h3>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded sea inline-block border border-black/10 flex items-center justify-center"></span>海</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded port inline-block border border-black/10 flex items-center justify-center text-[10px]">⚓</span>港</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded oilRig inline-block border border-black/10 flex items-center justify-center text-[10px]">🛢️</span>海底油田</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded plain inline-block border border-black/10 flex items-center justify-center"></span>平地</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded waste inline-block border border-black/10 flex items-center justify-center"></span>荒れ地</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded forest inline-block border border-black/10 flex items-center justify-center text-[10px]">🌲</span>森</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded mountain inline-block border border-black/10 flex items-center justify-center text-[10px]">⛰️</span>山</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded farm inline-block border border-black/10 flex items-center justify-center text-[10px]">🌾</span>農耕地</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded house inline-block border border-black/10 flex items-center justify-center text-[10px]">🏠</span>住宅</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded factory inline-block border border-black/10 flex items-center justify-center text-[10px]">🏭</span>工場</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded gun inline-block border border-black/10 flex items-center justify-center text-[10px]">🔫</span>ミサイル基地</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded defenseFacility inline-block border border-black/10 flex items-center justify-center text-[10px]">🛡️</span>防衛施設</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded Monument inline-block border border-black/10 flex items-center justify-center text-[10px]">🗿</span>記念碑</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded warship inline-block border border-black/10 flex items-center justify-center text-[10px]">🚢</span>艦船</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded warship-dispatched inline-block border border-black/10 flex items-center justify-center text-[10px]">🛳️</span>出撃中艦船</div>
-                    <div class="flex items-center gap-2"><span class="w-5 h-5 rounded warship-wreckage inline-block border border-black/10 flex items-center justify-center text-[10px]">🛟</span>難破船跡</div>
+
+            <!-- 右側：チュートリアル管理・凡例 -->
+            <div class="lg:col-span-6 flex flex-col gap-4">
+                
+                <!-- チュートリアルナビゲーター -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative z-40">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-xs font-bold text-slate-700 flex items-center gap-1">
+                            <span>🧭</span> 学習進捗
+                        </h2>
+                        <button onclick="backToMenu()" class="text-[10px] font-bold text-slate-400 hover:text-red-500 hover:bg-slate-50 px-2 py-1 rounded transition">
+                            ✕ メニュー
+                        </button>
+                    </div>
+                    
+                    <!-- 進捗バー -->
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 mb-3 overflow-hidden">
+                        <div id="progress-bar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-300" style="width: 25%"></div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 min-h-[90px]">
+                            <div class="flex justify-between items-center mb-1">
+                                <div class="text-[9px] text-blue-600 font-bold uppercase tracking-wider">現在の課題</div>
+                                <div id="substep-badge" class="text-[9px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.2 rounded-full">スライド 1 / 3</div>
+                            </div>
+                            <div id="step-title" class="font-bold text-slate-900 text-sm mb-1">島の様子を観察しよう</div>
+                            <p id="step-task" class="text-[11px] text-slate-500 leading-relaxed">
+                                島の地形の性質を理解し、今後の開発に向けた基礎知識を学びましょう。
+                            </p>
+                        </div>
+
+                        <!-- 操作ボタン (コンパクト化) -->
+                        <div class="flex gap-2">
+                            <button id="btn-prev" onclick="changeStep(-1, event)" class="flex-1 bg-slate-100 hover:bg-slate-200 active:scale-95 transition text-slate-700 font-bold py-2 px-3 rounded-lg border border-slate-200 disabled:opacity-40 disabled:pointer-events-none text-[11px]">
+                                ◀ 戻る
+                            </button>
+                            <button id="btn-next" onclick="changeStep(1, event)" class="flex-1 bg-blue-600 hover:bg-blue-500 active:scale-95 transition text-white font-bold py-2 px-3 rounded-lg shadow shadow-blue-100 flex items-center justify-center gap-1 text-[11px]">
+                                <span id="btn-next-text">次へ進む</span> <span id="btn-next-arrow">➔</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 地形凡例 (コンパクト化) -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">地形凡例（全16種類）</h3>
+                    <div class="grid grid-cols-3 gap-1.5 text-[10px]">
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded sea inline-block border border-black/10 flex items-center justify-center shrink-0"></span>海</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded port inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">⚓</span>港</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded oilRig inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🛢️</span>油田</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded plain inline-block border border-black/10 flex items-center justify-center shrink-0"></span>平地</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded waste inline-block border border-black/10 flex items-center justify-center shrink-0"></span>荒れ地</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded forest inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🌲</span>森</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded mountain inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">⛰️</span>山</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded farm inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🌾</span>農場</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded house inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🏠</span>住宅</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded factory inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🏭</span>工場</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded gun inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🔫</span>砲台</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded defenseFacility inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🛡️</span>防衛</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded Monument inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🗿</span>記念碑</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded warship inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🚢</span>艦船</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded warship-dispatched inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🛳️</span>出撃</div>
+                        <div class="flex items-center gap-1"><span class="w-4 h-4 rounded warship-wreckage inline-block border border-black/10 flex items-center justify-center text-[8px] shrink-0">🛟</span>残骸</div>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- 下部：解説メッセージ用スペース -->
-    <footer class="bg-slate-950 border-t border-slate-800 p-4 md:p-6 w-full shadow-[0_-10px_20px_rgba(0,0,0,0.3)]">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-4 items-center">
-            <!-- 進行アシスタント（ナビゲーターキャラ風） -->
-            <div class="flex items-center gap-3 self-start md:self-center">
-                <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-xl shadow-inner border-2 border-blue-400 shrink-0">
+    <!-- 下部：解説メッセージ用スペース (画面最下部に完全に固定) -->
+    <footer id="footer-helper" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-3 px-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-50">
+        <div class="max-w-7xl mx-auto flex gap-3 items-center">
+            <!-- アシスタントキャラクター -->
+            <div class="flex items-center gap-2 shrink-0">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl shadow border-2 border-blue-400 shrink-0">
                     🤖
                 </div>
-                <div>
-                    <h4 class="font-bold text-sm text-blue-400">開発助手 A.I.</h4>
-                    <p class="text-[10px] text-slate-500 font-mono">STATUS: ACTIVE</p>
+                <div class="hidden sm:block">
+                    <h4 class="font-bold text-xs text-slate-800">開発助手 A.I.</h4>
+                    <p class="text-[9px] text-blue-600 font-mono font-bold">STATUS: ACTIVE</p>
                 </div>
             </div>
             
             <!-- メッセージ表示エリア -->
-            <div class="flex-grow w-full bg-slate-900 border border-slate-800 p-4 rounded-xl min-h-[80px] flex items-center relative overflow-hidden">
-                <div class="absolute top-2 right-3 text-[10px] font-mono text-slate-600 select-none">MESSAGE LOG</div>
+            <div id="msg-box-container" class="flex-grow bg-slate-50 border border-slate-200 p-3 rounded-xl min-h-[56px] flex items-center relative overflow-hidden transition-all duration-350">
+                <div class="absolute top-1 right-2 text-[8px] font-mono font-bold text-slate-400 select-none">MESSAGE LOG</div>
                 <!-- この中にアニメーション関数でテキストが送り込まれます -->
-                <p id="explain-box" class="text-sm md:text-base leading-relaxed text-slate-200 font-medium tracking-wide typing-cursor select-none"></p>
+                <p id="explain-box" class="text-xs md:text-sm leading-relaxed text-slate-700 font-medium tracking-wide typing-cursor select-none pr-4"></p>
             </div>
         </div>
     </footer>
 
     <script>
-      /* 
         // --- 1. タイル種類と定義 ---
         const TILE_TYPES = {
             sea: { name: '海', desc: '島の周囲を囲む海です。船の移動経路や海底油田の建設対象になります。' },
@@ -194,19 +264,19 @@
             plain: { name: '平地', desc: '何もない平原。あらゆる陸上建造物の基礎となる最も重要な土地です。' },
             waste: { name: '荒れ地', desc: '荒廃した土地。そのままでは建設ができません。まずは整地を行いましょう。' },
             forest: { name: '森', desc: '豊かな自然。伐採して資金にするか、災害からの防風林になります。' },
-            mountain: { name: '山', desc: '険しい山岳。しばらくの間は開発することは難しいでしょう。' },
+            mountain: { name: '山', desc: '険しい山岳。そのままでは建物は建てられませんが、自然の防御壁となります。' },
             farm: { name: '農場', desc: '食料を生産する場所。島民が生活を維持するために不可欠なエリアです。' },
-            house: { name: '住宅', desc: '島民が暮らすエリア。多いほどより高い収入が期待できますが…？' },
-            factory: { name: '工場', desc: '産業の中心。人口に応じて資金を提供します。' },
-            gun: { name: '砲台', desc: '国防、または他島への攻撃用。' },
-            defenseFacility: { name: '防衛施設', desc: 'それぞれのタイルは単体では無防備、これで周囲のタイルを守ります。' },
-            Monument: { name: '記念碑', desc: '島の発展を象徴する巨大建造物。軍艦に良い影響を与えるとか？。' },
-            warship: { name: '軍艦', desc: '港の近くに配備できる護衛・哨戒用の艦です。' },
-            'warship-dispatched': { name: '出撃中軍艦', desc: '遠洋の哨戒や他エリアへの進行任務に就いている軍艦。' },
-            'warship-wreckage': { name: '軍艦の残骸', desc: '戦闘によって沈没した船の残骸。放置すると航行の邪魔になります。' }
+            house: { name: '住宅', desc: '島民が暮らすエリア。多いほどより高い税収が期待できます。' },
+            factory: { name: '工場', desc: '産業の中心。島民が働くことで大きな資金を提供します。' },
+            gun: { name: '砲台', desc: '国防、または他島への攻撃用ミサイル基地。' },
+            defenseFacility: { name: '防衛施設', desc: '周囲のタイルへの攻撃を防ぐ強力な盾です。' },
+            Monument: { name: '記念碑', desc: '島の発展を象徴する巨大なモニュメント。' },
+            warship: { name: '軍艦', desc: '港の近くに配備できる護衛・哨戒用の艦船です。' },
+            'warship-dispatched': { name: '出撃中軍艦', desc: '遠洋の哨戒や任務に就いている軍艦。' },
+            'warship-wreckage': { name: '軍艦の残骸', desc: '戦闘などで沈没した船の残骸。撤去して海を綺麗にできます。' }
         };
 
-        // 16x16の箱庭アイランド初期マップ設計（サンプル配列）
+        // 16x16の箱庭アイランド初期マップ設計
         const INITIAL_MAP = [
             ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
             ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
@@ -226,12 +296,7 @@
             ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea']
         ];
 
-        // 動的に変更可能な現在のマップデータを保持
-        let currentMapState = [];
-        let currentStep = 0;
-        let typingTimeout = null;
-        let activeCommand = 'inspect'; // 選択中の開拓コマンド ('inspect' = 観測モード)
-
+        // 絵文字マップ
         const EMOJI_MAP = {
             'port': '⚓',
             'oilRig': '🛢️',
@@ -248,38 +313,257 @@
             'warship-wreckage': '🛟'
         };
 
-        // --- 2. チュートリアルシナリオのステップ定義 ---
-        const TUTORIAL_STEPS = [
+        // --- 2. チュートリアル設定データ配列 (一元管理) ---
+        // 各スライドに紐づくデモアニメーションデータも配列化し、編集・追加を容易にしています。
+        const TUTORIAL_CHAPTERS = [
             {
-                title: "ようこそ、箱庭諸島へ！",
-                task: "まずは島内の土地を確認しましょう。マップ上の気になる土地をいくつかクリックしてみてください。",
-                message: "司令官、着任おめでとうございます！ここはあなたの管轄となる「16×16」の小さな箱庭です。現在の人口はごく僅か。これからこの地を大都市へと発展させましょう！"
+                id: 0,
+                title: "1. 島の様子を観察しよう",
+                emoji: "🔍",
+                summary: "島に存在する多様な地形の特徴や性質を学びます。山や荒れ地、記念碑など開発の基本となる最初のステップです。",
+                slides: [
+                    {
+                        task: "【観察編：基本理念】周囲の環境やタイルの基本的な種類を学びます。",
+                        message: "司令官、ようこそ！まずはこの「16×16」の環境を把握することが大切です。島には多くの種類の地形があり、それぞれ役割が大きく異なります。",
+                        demos: [] // デモなし
+                    },
+                    {
+                        task: "【観察編：開発候補地】平地や森、山、荒れ地について学びます。",
+                        message: "開発の主軸となるのは【平地】⬜です。ここには何でも建てることができます。【荒れ地】⚙️は整地することで平地にできますが、【山】⛰️は基本的には開発不可能ですが自然の盾になります。",
+                        demos: []
+                    },
+                    {
+                        task: "【観察編：その他】特殊な建造物や海、港の機能です。",
+                        message: "島には他にも【港】⚓や【記念碑】🗿といったランドマークが存在します。カーソルをマップ上の各種タイルにホバーさせて、どのようなタイルがあるか名前を確認してみてください！",
+                        demos: []
+                    }
+                ]
             },
             {
-                title: "資金と産業の基盤を作ろう",
-                task: "【開発デモ稼働！】「平地」を「農耕地」や「工場」にしてみましょう。また「海」には「海底油田」が有効です。",
-                message: "発展には予算が必要です。平地を開発して【農耕地】🌾で食料を蓄え、【工場】🏭や【海底油田】🛢️を建設して毎ターンの資金供給源を確保するのが第一歩です。デモとしていくつか新設しました！"
+                id: 1,
+                title: "2. 資金と産業の基盤作り",
+                emoji: "🌾",
+                summary: "開発の生命線である予算！「農耕地」や「工場」や「海底油田」による毎ターンの安定的かつ強力な資金供給源の作り方を学びます。",
+                slides: [
+                    {
+                        task: "【産業編：資金確保】島全体の開発を拡大するための資金計画を学びます。",
+                        message: "島の開発には、毎ターンの莫大な「資金」が必要不可欠です。平地のまま置いておくのではなく、積極的に開拓を行い生産施設に切り替えていきましょう。",
+                        demos: []
+                    },
+                    {
+                        task: "【産業編：建設実演①】平地を「農耕地」や「工場」へと開拓します。",
+                        message: "平地に【農耕地】🌾や【工場】🏭を建設すると、島民たちの働く場所となり安定した収益を生み出します。さっそく平地の一部をこれらの産業地にアップデートしてみましょう！",
+                        demos: [
+                            { row: 4, col: 10, type: 'farm', delay: 400 },
+                            { row: 6, col: 9, type: 'factory', delay: 1100 }
+                        ]
+                    },
+                    {
+                        task: "【産業編：建設実演②】島の周囲の「海」を開拓し、海底油田を建設します。",
+                        message: "そして島を囲む【海】にも開発の余地があります！海上に【海底油田】🛢️を整備することで、毎ターン高額な予算追加を叩き出す超重要拠点になります。実演デモをご覧ください！",
+                        demos: [
+                            { row: 13, col: 11, type: 'oilRig', delay: 400 }
+                        ]
+                    }
+                ]
             },
             {
-                title: "島民の受け入れと人口増加",
-                task: "【開発デモ稼働！】「平地」に「住宅」を建ててみましょう。人が増えると「税収」が発生します。",
-                message: "働く人間がいなければ島は回りません。【住宅】🏠を建てると島民が移住してきます。彼らから徴収する「所得税」もまた、重要な開発原資になります。住宅区画が拡張されました！"
+                id: 2,
+                title: "3. 人口増加と住宅建設",
+                emoji: "🏠",
+                summary: "島を支える人々！平地に「住宅」を建てて新たな島民を呼び込み、安定した税収をもたらす仕組みを理解します。",
+                slides: [
+                    {
+                        task: "【人口編：島民の重要性】新しい働き手、納税者を島に迎える計画です。",
+                        message: "産業地があっても、働く【島民（人口）】が少なければ十分な成果を出すことができません。島が発展すると所得税による安定財政も作れます。",
+                        demos: []
+                    },
+                    {
+                        task: "【人口編：住宅地の建設】平地に複数の「住宅」をまとめて配置します。",
+                        message: "平地の一角を【住宅地】🏠に開拓しましょう。住宅が立ち並ぶと島民たちが自動的に移住してきて人口が増加します。移住した市民たちの住処をこのように確保してあげましょう！",
+                        demos: [
+                            { row: 5, col: 8, type: 'house', delay: 400 },
+                            { row: 5, col: 10, type: 'house', delay: 1100 }
+                        ]
+                    }
+                ]
             },
             {
-                title: "国防と防衛の準備",
-                task: "【開発デモ稼働！】「ミサイル基地」や「防衛施設」を配備する計画を練りましょう。",
-                message: "平和を守るため、ミサイル攻撃や突如襲い来る災害（怪獣や台風）から島を守る必要があります。司令部横に【ミサイル基地】🔫と、都市部に【防衛施設】🛡️が配備されました！"
-            },
-            {
-                title: "チュートリアル完了！",
-                task: "基本はマスターです。右側の「開発テストツール」を使って、自由に島を切り拓いてみましょう！",
-                message: "素晴らしい！すべてのカリキュラムが完了しました。右下の「開発テストツール」で農地を開拓したり、住宅を建てたりして自由に箱庭開発をシミュレーションしてみましょう！"
+                id: 3,
+                title: "4. 国防と災害への備え",
+                emoji: "🛡️",
+                summary: "突発的な災害や外敵への対策！周囲を強力に防御する「防衛施設」や敵を討つ「ミサイル基地」の正しい配置を学習します。",
+                slides: [
+                    {
+                        task: "【防衛編：脅威への警戒】災害や敵の急襲から、大切な都市を守る防衛計画です。",
+                        message: "平和な島生活にも突如、台風や災害（怪獣）、また敵国からの急襲といった脅威が訪れます。丸腰の都市部は一撃で【荒れ地】へと化してしまいます。",
+                        demos: []
+                    },
+                    {
+                        task: "【防衛編：ミサイル砲台】攻撃・迎撃能力を持つミサイル基地を構築します。",
+                        message: "そこで、島を守る要として【ミサイル基地(砲台)】🔫を配備しましょう！これにより敵の脅威に対抗できるようになり、都市全体の防衛能力が劇的に高まります。",
+                        demos: [
+                            { row: 10, col: 6, type: 'gun', delay: 400 }
+                        ]
+                    },
+                    {
+                        task: "【防衛編：盾 of 防衛】広範囲の建物を保護する防衛施設を設置します。",
+                        message: "さらに、住宅街のまわりには【防衛施設】🛡️を配備しましょう。これは周辺の建物への被害を無効化する最強のプロテクターです。これで島を守る万全の体制が整いました！",
+                        demos: [
+                            { row: 8, col: 10, type: 'defenseFacility', delay: 400 }
+                        ]
+                    }
+                ]
             }
         ];
 
-        // --- 3. アニメーション付き解説文字送り関数 (Typewriter Effect) ---
-        function typeMessage(text, speed = 30) {
+        // 状態管理
+        let currentMapState = [];
+        let currentChapterIdx = 0; // 現在のチャプター (0〜3)
+        let currentSlideIdx = 0;   // チャプター内の現在のスライド
+        let isSingleMode = false;  // メニューから個別選択されたプレイかどうか
+        let typingTimeout = null;
+        let currentFullText = "";
+        let currentStepFinished = false; // 現在のスライドの文字送りが終わっているか
+        let completedSteps = [false, false, false, false]; // 各チャプターの完了記録
+
+        // 挨拶メッセージ
+        const WELCOME_MESSAGE = "司令官、ようこそ！開発チュートリアルが用意されています。上のカード一覧から学びたいテーマを選択して、トレーニングを開始しましょう！";
+
+        // --- 3. メニュー画面の動的構築 ---
+        function renderMenuCards() {
+            const grid = document.getElementById('menu-cards-grid');
+            grid.innerHTML = '';
+
+            TUTORIAL_CHAPTERS.forEach((chapter, index) => {
+                const card = document.createElement('div');
+                card.className = "group bg-white hover:bg-blue-50/30 border border-slate-200 hover:border-blue-300 rounded-xl p-4 shadow-sm hover:shadow transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-3 relative overflow-hidden";
+                card.onclick = () => startTutorialFromMenu(index);
+
+                card.innerHTML = `
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -z-10 group-hover:bg-blue-100/50 transition-colors"></div>
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-start">
+                            <span class="text-2xl">${chapter.emoji}</span>
+                            <span id="badge-comp-${index}" class="text-[9px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">未着手</span>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 group-hover:text-blue-700 transition-colors">${chapter.title}</h3>
+                        <p class="text-slate-500 text-[11px] leading-relaxed">${chapter.summary}</p>
+                    </div>
+                    <div class="text-[10px] font-bold text-blue-600 flex items-center gap-0.5 group-hover:translate-x-1 transition-transform">
+                        トレーニングを開始する ➔
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // 一気見（フルコース）ボタンを最後に追加
+            const fullCourseCard = document.createElement('div');
+            fullCourseCard.className = "lg:col-span-2 group bg-gradient-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border border-blue-700 rounded-xl p-4 shadow-sm hover:shadow transition-all duration-300 cursor-pointer flex flex-col justify-between text-white space-y-3";
+            fullCourseCard.onclick = () => startTutorialFromMenu(0, true);
+            fullCourseCard.innerHTML = `
+                <div class="space-y-1">
+                    <div class="flex justify-between items-start">
+                        <span class="text-2xl">🔥</span>
+                        <span class="text-[9px] font-bold bg-white/20 text-white px-1.5 py-0.5 rounded">フルコース</span>
+                    </div>
+                    <h3 class="text-sm font-bold">全ステップ（チャプター1〜4）を連続プレイ</h3>
+                    <p class="text-blue-100 text-[11px] leading-relaxed">
+                        個別に戻ることなく、すべての地形と開発理論、実演デモを連続してノンストップで学習・マスターするモードです。
+                    </p>
+                </div>
+                <div class="text-[10px] font-bold text-white flex items-center gap-0.5 group-hover:translate-x-1 transition-transform">
+                    フルコースを開始する ➔
+                </div>
+            `;
+            grid.appendChild(fullCourseCard);
+        }
+
+        // メニューの進捗状況バッジおよびバーの更新
+        function updateMenuProgress() {
+            const completedCount = completedSteps.filter(Boolean).length;
+            const percent = Math.round((completedCount / TUTORIAL_CHAPTERS.length) * 100);
+            document.getElementById('menu-progress-percent').innerText = `${percent}%`;
+            document.getElementById('menu-progress-bar').style.width = `${percent}%`;
+
+            TUTORIAL_CHAPTERS.forEach((chapter, index) => {
+                const badge = document.getElementById(`badge-comp-${index}`);
+                if (badge) {
+                    if (completedSteps[index]) {
+                        badge.innerText = "完了 ✓";
+                        badge.className = "text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded";
+                    } else {
+                        badge.innerText = "未着手";
+                        badge.className = "text-[9px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded";
+                    }
+                }
+            });
+        }
+
+        // チュートリアルの開始
+        function startTutorialFromMenu(chapterIdx, isAll = false) {
+            currentChapterIdx = chapterIdx;
+            currentSlideIdx = 0;
+            isSingleMode = !isAll;
+
+            // UI切り替え
+            document.getElementById('menu-view').classList.add('hidden');
+            document.getElementById('tutorial-view').classList.remove('hidden');
+            document.getElementById('tap-anywhere-overlay').classList.remove('hidden');
+            document.getElementById('msg-box-container').classList.add('ring-2', 'ring-blue-400', 'bg-blue-50/80');
+
+            document.getElementById('status-text').innerText = "トレーニング中";
+            document.getElementById('global-status-badge').className = "text-[10px] bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full text-amber-600 font-bold flex items-center gap-1 animate-pulse";
+
+            // マップ状態をこのチャプターに必要な事前状態まで巻き上げてロード
+            setupMapStateForChapter(chapterIdx);
+            updateStepUI();
+        }
+
+        // メニューへ戻る
+        function backToMenu() {
+            document.getElementById('menu-view').classList.remove('hidden');
+            document.getElementById('tutorial-view').classList.add('hidden');
+            document.getElementById('tap-anywhere-overlay').classList.add('hidden');
+            document.getElementById('msg-box-container').classList.remove('ring-2', 'ring-blue-400', 'bg-blue-50/80');
+
+            document.getElementById('status-text').innerText = "メニュー画面";
+            document.getElementById('global-status-badge').className = "text-[10px] bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full text-blue-600 font-bold flex items-center gap-1";
+
+            updateMenuProgress();
+            typeMessage(WELCOME_MESSAGE, 20);
+        }
+
+        // チャプターに応じた初期マップを設定
+        function setupMapStateForChapter(chapterIdx) {
+            initMapData(true); // 基本島ロード
+            if (chapterIdx >= 1) {
+                // チャプター2(産業)以降は既に農場や工場、油田がある状態
+                currentMapState[4][10] = 'farm';
+                currentMapState[6][9] = 'factory';
+                currentMapState[13][11] = 'oilRig';
+            }
+            if (chapterIdx >= 2) {
+                // チャプター3(住宅)以降は住宅も建っている状態
+                currentMapState[5][8] = 'house';
+                currentMapState[5][10] = 'house';
+            }
+            if (chapterIdx >= 3) {
+                // チャプター4(国防)はすべて構築された状態
+                currentMapState[10][6] = 'gun';
+                currentMapState[8][10] = 'defenseFacility';
+            }
+            generateMap();
+        }
+
+        // タイピング演出 (Typewriter)
+        function typeMessage(text, speed = 15) {
             const explainBox = document.getElementById('explain-box');
+            currentFullText = text;
+            currentStepFinished = false;
+
+            // タップ促しテキストのアローを変更
+            document.getElementById('tap-arrow').innerText = "▶";
             
             if (typingTimeout) {
                 clearTimeout(typingTimeout);
@@ -292,53 +576,71 @@
                 if (index < text.length) {
                     explainBox.innerText += text.charAt(index);
                     index++;
-                    const randomDelay = speed + (Math.random() * 15 - 7);
-                    typingTimeout = setTimeout(nextChar, Math.max(10, randomDelay));
+                    const randomDelay = speed + (Math.random() * 6 - 3);
+                    typingTimeout = setTimeout(nextChar, Math.max(5, randomDelay));
                 } else {
                     typingTimeout = null;
+                    currentStepFinished = true; // 出力完了
+                    document.getElementById('tap-arrow').innerText = "✔";
                 }
             }
             nextChar();
         }
 
-        // --- 4. 所定のタイルを小さなアニメーション付きで変更する関数 ---
+        // 画面全体のどこでもタップしたときの進行
+        function handleScreenTap(event) {
+            // 操作ボタンなどを叩いた場合は重複を避けるためスルー
+            if (event.target.closest('button') || event.target.closest('.map-cell')) {
+                return;
+            }
+
+            if (!currentStepFinished) {
+                // タイピング中の場合、一瞬で全文を表示
+                if (typingTimeout) {
+                    clearTimeout(typingTimeout);
+                    typingTimeout = null;
+                }
+                document.getElementById('explain-box').innerText = currentFullText;
+                currentStepFinished = true;
+                document.getElementById('tap-arrow').innerText = "✔";
+            } else {
+                // タイピングが完了している場合、次のスライドへ進む
+                changeStep(1);
+            }
+        }
+
+        // タイル建築アニメーション
         function updateTileWithAnim(r, c, newType) {
             const cell = document.querySelector(`.map-cell[data-row="${r}"][data-col="${c}"]`);
             if (!cell) return;
 
-            // 1. マップデータ配列(現在の状態)を更新
+            // マップデータ配列(現在の状態)を更新
             currentMapState[r][c] = newType;
 
-            // 2. アニメーション演出クラスと枠線の適用
-            cell.classList.remove('animate-build'); // 重複除去用のリセット
-            void cell.offsetWidth; // リフローを起こしてアニメーションを再トリガー
-            cell.classList.add('animate-build', 'ring-4', 'ring-amber-400');
+            // アニメーション演出クラスと枠線の適用
+            cell.classList.remove('animate-build');
+            void cell.offsetWidth; // 再トリガー
+            cell.classList.add('animate-build', 'ring-2', 'ring-amber-400');
 
-            // 3. アニメーションの頂点あたりで見た目を切り替える (約 150ms 後)
+            // 150ms後にタイルクラスと中身を変更
             setTimeout(() => {
-                // 古いクラスをすべて削除
                 Object.keys(TILE_TYPES).forEach(key => {
                     cell.classList.remove(key);
                 });
-                
-                // 新しいクラスを割り当て、データ属性を更新
                 cell.classList.add(newType);
                 cell.dataset.type = newType;
-                
-                // 絵文字テキストを割り当て
                 cell.textContent = EMOJI_MAP[newType] || '';
             }, 150);
 
-            // 4. アニメーション終了後に演出枠線を除外
+            // 500ms後にハイライト枠線を除去
             setTimeout(() => {
-                cell.classList.remove('ring-4', 'ring-amber-400');
-            }, 600);
+                cell.classList.remove('ring-2', 'ring-amber-400');
+            }, 500);
         }
 
-        // --- 5. マップの生成と描画 ---
+        // マップの動的描画
         function initMapData(resetToDefault = true) {
             if (resetToDefault || currentMapState.length === 0) {
-                // INITIAL_MAP をディープコピーして現在の状態とする
                 currentMapState = JSON.parse(JSON.stringify(INITIAL_MAP));
             }
         }
@@ -352,49 +654,25 @@
                     const tileType = currentMapState[r][c];
                     const cell = document.createElement('div');
                     
-                    cell.className = `map-cell ${tileType} border border-slate-900/10 flex items-center justify-center text-xs sm:text-sm select-none`;
+                    cell.className = `map-cell ${tileType} border border-slate-900/10 flex items-center justify-center text-[10px] sm:text-xs select-none font-bold`;
                     cell.dataset.row = r;
                     cell.dataset.col = c;
                     cell.dataset.type = tileType;
 
-                    // 初期絵文字挿入
+                    // 初期絵文字の挿入
                     cell.textContent = EMOJI_MAP[tileType] || '';
 
                     // ホバーイベント
                     cell.addEventListener('mouseenter', () => {
                         const currentType = cell.dataset.type;
-                        const info = TILE_TYPES[currentType] || { name: '未知', desc: '詳細不明のエリア。' };
+                        const info = TILE_TYPES[currentType] || { name: '未知', desc: '詳細不明 of エリア。' };
                         document.getElementById('hovered-tile-info').innerHTML = 
-                            `座標: (${c}, ${r}) | <span class="text-white font-bold underline">${info.name}</span>`;
+                            `(${c}, ${r}) | <span class="text-blue-700 font-bold underline">${info.name}</span>`;
                     });
 
-                    // クリックイベント (開発コマンドモードと観測モードの分岐)
-                    cell.addEventListener('click', () => {
-                        const currentType = cell.dataset.type;
-                        
-                        if (activeCommand === 'inspect') {
-                            // 通常の観測モード
-                            const info = TILE_TYPES[currentType] || { name: '未知', desc: '詳細不明のエリア。' };
-                            const customMsg = `【${info.name}】座標 (${c}, ${r}): ${info.desc}`;
-                            typeMessage(customMsg, 15);
-                        } else {
-                            // 開発テスト（コマンド配置）モード
-                            // 海岸や海への配置制限など簡単なルールを持たせると雰囲気が出ます
-                            if (activeCommand === 'oilRig' && currentType !== 'sea') {
-                                typeMessage(`[システム警告] 海底油田 🛢️ は「海」のタイルにしか建設できません。`, 10);
-                                return;
-                            }
-                            if (activeCommand !== 'oilRig' && currentType === 'sea') {
-                                typeMessage(`[システム警告] 陸上施設は「海」のタイルには建設できません。埋め立てるか陸地を選んでください。`, 10);
-                                return;
-                            }
-
-                            // アニメーション付きでタイルを更新！
-                            updateTileWithAnim(r, c, activeCommand);
-                            
-                            const info = TILE_TYPES[activeCommand];
-                            typeMessage(`[開発命令成功] 座標 (${c}, ${r}) を「${info.name}」へ開拓・設営しました！`, 15);
-                        }
+                    // クリックイベントは無効化 (学習に集中)
+                    cell.addEventListener('click', (e) => {
+                        e.stopPropagation();
                     });
 
                     mapContainer.appendChild(cell);
@@ -402,128 +680,117 @@
             }
         }
 
-        // --- 6. 開発テストツール コマンドの切り替え ---
-        function setBuildCommand(command) {
-            activeCommand = command;
-            
-            // UIボタンのアクティブクラス切り替え
-            const buttons = document.querySelectorAll('.cmd-btn');
-            buttons.forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'border-blue-400', 'text-white');
-                btn.classList.add('bg-slate-750', 'hover:bg-slate-700', 'text-slate-300');
-            });
+        // ステップ・スライドの進行管理
+        function changeStep(direction, event) {
+            if (event) event.stopPropagation();
 
-            const activeBtn = document.getElementById(`cmd-${command}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('bg-slate-750', 'hover:bg-slate-700', 'text-slate-300');
-                activeBtn.classList.add('bg-blue-600', 'border-blue-400', 'text-white');
-            }
+            const chapter = TUTORIAL_CHAPTERS[currentChapterIdx];
+            const targetSlideIdx = currentSlideIdx + direction;
 
-            // バッジの更新
-            const badge = document.getElementById('active-mode-badge');
-            if (command === 'inspect') {
-                badge.innerText = "🔍 観測モード";
-                badge.className = "text-xs bg-emerald-900/60 border border-emerald-700 text-emerald-300 px-2 py-1 rounded font-semibold";
-            } else {
-                const info = TILE_TYPES[command];
-                badge.innerText = `🛠️ 設営: ${info.name}`;
-                badge.className = "text-xs bg-amber-900/60 border border-amber-700 text-amber-300 px-2 py-1 rounded font-semibold animate-bounce";
-            }
-        }
-
-        // --- 7. ステップ進行管理とアニメーションデモ実行 ---
-        function changeStep(direction) {
-            const targetStep = currentStep + direction;
-            if (targetStep >= 0 && targetStep < TUTORIAL_STEPS.length) {
-                currentStep = targetStep;
+            if (targetSlideIdx >= 0 && targetSlideIdx < chapter.slides.length) {
+                currentSlideIdx = targetSlideIdx;
                 updateStepUI(direction);
+            } else if (targetSlideIdx < 0) {
+                if (currentChapterIdx > 0) {
+                    currentChapterIdx--;
+                    currentSlideIdx = TUTORIAL_CHAPTERS[currentChapterIdx].slides.length - 1;
+                    setupMapStateForChapter(currentChapterIdx);
+                    updateStepUI(direction);
+                } else {
+                    backToMenu();
+                }
+            } else if (targetSlideIdx >= chapter.slides.length) {
+                completedSteps[currentChapterIdx] = true;
+
+                if (isSingleMode) {
+                    backToMenu();
+                } else {
+                    const nextChapterIdx = currentChapterIdx + 1;
+                    if (nextChapterIdx < TUTORIAL_CHAPTERS.length) {
+                        currentChapterIdx = nextChapterIdx;
+                        currentSlideIdx = 0;
+                        setupMapStateForChapter(currentChapterIdx);
+                        updateStepUI(direction);
+                    } else {
+                        backToMenu();
+                    }
+                }
             }
         }
 
+        // UI情報の更新
         function updateStepUI(direction = 0) {
-            const step = TUTORIAL_STEPS[currentStep];
+            const chapter = TUTORIAL_CHAPTERS[currentChapterIdx];
+            const slide = chapter.slides[currentSlideIdx];
             
-            // UIテキスト更新
-            document.getElementById('step-title').innerText = step.title;
-            document.getElementById('step-task').innerText = step.task;
+            document.getElementById('step-title').innerText = chapter.title;
+            document.getElementById('step-task').innerText = slide.task;
             
-            // 進捗バー更新
-            const progressPercent = ((currentStep + 1) / TUTORIAL_STEPS.length) * 100;
+            document.getElementById('substep-badge').innerText = `スライド ${currentSlideIdx + 1} / ${chapter.slides.length}`;
+            
+            // 全スライド中の位置から進捗割合を算出
+            let totalSlides = 0;
+            let currentGlobalSlideIndex = 0;
+            for (let i = 0; i < TUTORIAL_CHAPTERS.length; i++) {
+                if (i < currentChapterIdx) {
+                    currentGlobalSlideIndex += TUTORIAL_CHAPTERS[i].slides.length;
+                }
+                totalSlides += TUTORIAL_CHAPTERS[i].slides.length;
+            }
+            currentGlobalSlideIndex += currentSlideIdx + 1;
+            const progressPercent = (currentGlobalSlideIndex / totalSlides) * 100;
             document.getElementById('progress-bar').style.width = `${progressPercent}%`;
 
-            // ボタン活性化/非活性化
-            document.getElementById('btn-prev').disabled = (currentStep === 0);
-            document.getElementById('btn-next').innerHTML = (currentStep === TUTORIAL_STEPS.length - 1) ? "<span>最初からリセット</span> <span>🔄</span>" : "<span>次へ進む</span> <span>➔</span>";
+            document.getElementById('btn-prev').disabled = (currentChapterIdx === 0 && currentSlideIdx === 0);
 
-            // 最後のステップで「次へ（最初からリセット）」を押したときの挙動
-            if (currentStep === TUTORIAL_STEPS.length - 1) {
-                document.getElementById('btn-next').onclick = () => {
-                    currentStep = 0;
-                    initMapData(true); // 完全初期リセット
-                    generateMap();
-                    updateStepUI();
-                    setBuildCommand('inspect');
-                };
+            const nextText = document.getElementById('btn-next-text');
+            const nextArrow = document.getElementById('btn-next-arrow');
+            
+            const isLastSlideOfChapter = (currentSlideIdx === chapter.slides.length - 1);
+
+            if (isLastSlideOfChapter) {
+                if (isSingleMode) {
+                    nextText.innerText = "メニューへ戻る";
+                    nextArrow.innerText = "✕";
+                } else {
+                    if (currentChapterIdx === TUTORIAL_CHAPTERS.length - 1) {
+                        nextText.innerText = "学習を修了する";
+                        nextArrow.innerText = "✓";
+                    } else {
+                        nextText.innerText = "次のテーマへ";
+                        nextArrow.innerText = "➔";
+                    }
+                }
             } else {
-                document.getElementById('btn-next').onclick = () => changeStep(1);
+                nextText.innerText = "次へ進む";
+                nextArrow.innerText = "➔";
             }
 
-            // 解説エリアに文字送りアニメーション実行
-            typeMessage(step.message, 25);
-
-            // --- ステップごとの自動アニメーションデモ効果の実行 ---
-            triggerStepDemo(currentStep, direction);
+            typeMessage(slide.message, 15);
+            triggerStepDemo(chapter, currentSlideIdx, direction);
         }
 
-        // ステップ遷移時に、自動で該当タイルがピカピカ変化して見せるデモ
-        function triggerStepDemo(stepIdx, direction) {
-            // 「戻る」で遷移した場合は、そこまでのステップに合うようにマップ状態を初期から再構成する
-            if (direction < 0) {
-                initMapData(true); // 初期化
-                // 各ステップに応じた確定分を裏で適用
-                if (stepIdx >= 1) {
-                    currentMapState[4][10] = 'farm';
-                    currentMapState[6][9] = 'factory';
-                    currentMapState[13][11] = 'oilRig';
-                }
-                if (stepIdx >= 2) {
-                    currentMapState[5][8] = 'house';
-                    currentMapState[5][10] = 'house';
-                }
-                if (stepIdx >= 3) {
-                    currentMapState[10][6] = 'gun';
-                    currentMapState[8][10] = 'defenseFacility';
-                }
-                generateMap();
-                return;
-            }
+        // チャプター内のスライドデータ配列から、演出を動的かつ簡潔に読み込んで実行
+        function triggerStepDemo(chapter, slideIdx, direction) {
+            if (direction < 0) return; // 戻る場合は何もしない
 
-            // 「進む」場合の華やかなアニメーションデモ
-            if (stepIdx === 1) {
-                // 平地 -> 農地、工場、油田へ
-                setTimeout(() => updateTileWithAnim(4, 10, 'farm'), 400);
-                setTimeout(() => updateTileWithAnim(6, 9, 'factory'), 1000);
-                setTimeout(() => updateTileWithAnim(13, 11, 'oilRig'), 1600);
-            } 
-            else if (stepIdx === 2) {
-                // 平地 -> 住宅へ
-                setTimeout(() => updateTileWithAnim(5, 8, 'house'), 500);
-                setTimeout(() => updateTileWithAnim(5, 10, 'house'), 1100);
-            }
-            else if (stepIdx === 3) {
-                // 平地 -> 防衛施設、ミサイル基地へ
-                setTimeout(() => updateTileWithAnim(10, 6, 'gun'), 500);
-                setTimeout(() => updateTileWithAnim(8, 10, 'defenseFacility'), 1200);
+            const slide = chapter.slides[slideIdx];
+            if (slide && slide.demos && slide.demos.length > 0) {
+                slide.demos.forEach(demo => {
+                    setTimeout(() => {
+                        updateTileWithAnim(demo.row, demo.col, demo.type);
+                    }, demo.delay);
+                });
             }
         }
 
         // ページ読み込み完了時の初期化
         window.onload = function() {
             initMapData(true);
-            generateMap();
-            updateStepUI();
+            renderMenuCards(); // メニューカードを動的に生成
+            updateMenuProgress();
+            typeMessage(WELCOME_MESSAGE, 15);
         };
-      */
     </script>
 </body>
 </html>
