@@ -179,29 +179,29 @@ function updatePublicKeyDisplay() {
       precise: {
           label: '精密射撃の名手',
           tiers: [
-              { level: 1, id: '01_1_precise', icon: 'svg/01_1_precise.svg', condition: (s) => s.maxHitStreak >= 3 },
-              { level: 2, id: '01_2_precise', icon: 'svg/01_2_precise.svg', condition: (s) => s.maxHitStreak >= 6 },
-              { level: 3, id: '01_3_precise', icon: 'svg/01_3_precise.svg', condition: (s) => s.maxHitStreak >= 12 }
+              { level: 1, id: '01_1_precise', icon: 'src/svg/01_1_precise.svg', condition: (s) => s.maxHitStreak >= 3 },
+              { level: 2, id: '01_2_precise', icon: 'src/svg/01_2_precise.svg', condition: (s) => s.maxHitStreak >= 6 },
+              { level: 3, id: '01_3_precise', icon: 'src/svg/01_3_precise.svg', condition: (s) => s.maxHitStreak >= 12 }
           ]
       },
       shield: {
           label: '不落の盾',
           tiers: [
-              { level: 1, id: '02_1_shield', icon: 'svg/02_1_shield.svg', condition: (s) => s.damageTaken > 5 },
-              { level: 2, id: '02_2_shield', icon: 'svg/02_2_shield.svg', condition: (s) => s.damageTaken > 10 },
-              { level: 3, id: '02_3_shield', icon: 'svg/02_3_shield.svg', condition: (s) => s.damageTaken > 30 }
+              { level: 1, id: '02_1_shield', icon: 'src/svg/02_1_shield.svg', condition: (s) => s.damageTaken > 5 },
+              { level: 2, id: '02_2_shield', icon: 'src/svg/02_2_shield.svg', condition: (s) => s.damageTaken > 10 },
+              { level: 3, id: '02_3_shield', icon: 'src/svg/02_3_shield.svg', condition: (s) => s.damageTaken > 30 }
           ]
       },
       shot: {
           label: '殲滅王',
           tiers: [
-              { level: 1, id: '03_1_shot', icon: 'svg/03_1_shot.svg', condition: (s) => s.sunkWarships >= 1 }
+              { level: 1, id: '03_1_shot', icon: 'src/svg/03_1_shot.svg', condition: (s) => s.sunkWarships >= 1 }
           ]
       },
       avoidance: {
           label: '奇跡の生還者',
           tiers: [
-              { level: 1, id: '04_1_avoidance', icon: 'svg/04_1_avoidance.svg', condition: (s) => s.hp1HoldTurns >= 2 }
+              { level: 1, id: '04_1_avoidance', icon: 'src/svg/04_1_avoidance.svg', condition: (s) => s.hp1HoldTurns >= 2 }
           ]
       }
   };
