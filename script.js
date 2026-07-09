@@ -4154,7 +4154,7 @@ if (turn >= 1000 && Math.random() < 0.001) { // 0.1% = 0.001
           }
       }
   }
-
+money += moneyChange;
 let gunCount = 0;
 let enhancedGunCount = 0;
 let defenseFacilityCount = 0;
@@ -4199,7 +4199,6 @@ if (actualMaintenanceCost > 0) {
   renderActionQueue()
   const populationChange = population - prevPopulation; // 人口の増減を計算
   logAction(`資金収支: ${moneyChange+totalOilRigIncome - actualMaintenanceCost}G, 食料: ${foodChange >= 0 ? '+' : ''}${foodChange}, 人口変化: ${populationChange >= 0 ? '+' : ''}${populationChange}`);
-  money += moneyChange;
   renderMap();
 }
 /**
