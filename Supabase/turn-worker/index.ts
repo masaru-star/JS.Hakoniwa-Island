@@ -10,6 +10,7 @@ const ACTIONS_PER_TURN = 2;
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS', // 追加
 };
 
 type IslandRow = { serial: number; island_name: string; state: any; last_action_turn: number };
@@ -176,7 +177,12 @@ function produce(state: any) {
 }
 
 serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { 
+      status: 200, 
+      headers: corsHeaders 
+    });
+  }
   try {
     const body = await req.json().catch(() => ({}));
     const inactiveTurnLimit = Number(body.inactiveTurnLimit || 50);
