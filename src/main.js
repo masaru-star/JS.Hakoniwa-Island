@@ -152,12 +152,59 @@ function updatePublicKeyDisplay() {
       settingShowFundingTrackingControls: false,
       settingShowEconomicCrisisRate: false,
       settingEnablePlanTracking: false,
+      settingConfirmOnSelectedTileClick: false,
       settingEnhanceWarshipToExpLimit: false,
       settingAutoBombardCountToGuns: false,
       settingAutoExportFoodMax: false,
       settingAutoSupplyMax: false
   };
   let sessionSettings = { ...SESSION_SETTING_DEFAULTS };
+
+const MANUAL_SAVE_PREFIX = 'MySave:';
+function bytesToBase64(bytes) {
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
+}
+function base64ToBytes(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+}
+async function gzipText(text) {
+    if (typeof CompressionStream !== 'function') {
+        throw new Error('CompressionStream is not available in this browser.');
+    }
+    const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function gunzipText(bytes) {
+    if (typeof DecompressionStream !== 'function') {
+        throw new Error('DecompressionStream is not available in this browser.');
+    }
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+    return await new Response(stream).text();
+}
+async function encodeManualSaveText(jsonString) {
+    return MANUAL_SAVE_PREFIX + bytesToBase64(await gzipText(jsonString));
+}
+async function decodeManualSaveText(saveText) {
+    const encodedData = saveText.trim();
+    if (encodedData.startsWith(MANUAL_SAVE_PREFIX)) {
+        const payload = encodedData.slice(MANUAL_SAVE_PREFIX.length);
+        return await gunzipText(base64ToBytes(payload));
+    }
+    if (encodedData.includes(',')) {
+        const charCodes = encodedData.split(',').map(Number);
+        return String.fromCharCode(...charCodes);
+    }
+    return decodeURIComponent(atob(encodedData));
+}
+
 
   // 軍艦の色変化条件
   const WARSHIP_CAPS = {
@@ -1203,6 +1250,7 @@ info += ` / 軍艦: ${warshipNameDisplay} (母港: ${warshipAtTile.homePort}, EX
   document.getElementById('tileInfo').innerHTML = info;
 }
 function selectTile(x, y) {
+  const clickedSelectedTile = selectedX === x && selectedY === y;
   selectedX = x;
   selectedY = y;
   const actionSelect = document.getElementById('actionSelect');
@@ -1210,6 +1258,10 @@ function selectTile(x, y) {
   let action = actionSelect ? actionSelect.value : '';
   if (action === 'warshipTool' && warshipSubSelect) action = warshipSubSelect.value;
   applyAutomaticInputValues(action);
+  if (clickedSelectedTile && action && isSessionSettingEnabled('settingConfirmOnSelectedTileClick') && typeof window.confirmAction === 'function') {
+      window.confirmAction();
+      return;
+  }
   renderMap();
 }
 window.clearTileSelection = function() {
@@ -1338,9 +1390,13 @@ function saveGame() {
         islandSigningKeyPair: JSON.parse(JSON.stringify(islandSigningKeyPair))
     };
     const jsonString = JSON.stringify(gameState);
-    // 新しいエンコード方式 (btoaとencodeURIComponentを組み合わせる)
-    document.getElementById('saveLoadData').value = btoa(encodeURIComponent(jsonString));
-    logAction("ゲームがセーブされました。データをテキストエリアからコピーしてください。");
+    encodeManualSaveText(jsonString).then(encodedData => {
+        document.getElementById('saveLoadData').value = encodedData;
+        logAction("ゲームがMySave形式（gzip圧縮テキスト）で出力されました。データをテキストエリアからコピーしてください。");
+    }).catch(error => {
+        console.error(error);
+        logAction("セーブデータの圧縮に失敗しました。");
+    });
 }
 
 async function loadGame() {
@@ -1350,8 +1406,7 @@ async function loadGame() {
         return;
     }
     try {
-        // 新しいデコード方式
-        const jsonString = decodeURIComponent(atob(encodedData));
+        const jsonString = await decodeManualSaveText(encodedData);
         const gameState = JSON.parse(jsonString);
 
         map = gameState.map;
@@ -4450,12 +4505,10 @@ window.saveGame = async function() {
         volcanoTurns: myIslandState.volcanoTurns
     };
     const jsonString = JSON.stringify(gameState);
-
-    // 文字列をUnicodeコードポイントの配列に変換し、カンマ区切りで結合
-    const encodedData = Array.from(jsonString).map(char => char.charCodeAt(0)).join(',');
+    const encodedData = await encodeManualSaveText(jsonString);
 
     document.getElementById('saveLoadData').value = encodedData;
-    logAction("ゲームがセーブデータとして出力されました。テキストエリアからコピーしてください。");
+    logAction("ゲームがMySave形式（gzip圧縮テキスト）で出力されました。テキストエリアからコピーしてください。");
     updateStatus(); // 島の名前の変更をUIに反映
 }
 
@@ -4468,9 +4521,7 @@ window.loadGame = async function() {
     }
 
     try {
-        // カンマ区切りの文字列をUnicodeコードポイントの配列に戻し、文字列に変換
-        const charCodes = encodedData.split(',').map(Number);
-        const jsonString = String.fromCharCode(...charCodes);
+        const jsonString = await decodeManualSaveText(encodedData);
 
         const gameState = JSON.parse(jsonString);
         map = gameState.map;
