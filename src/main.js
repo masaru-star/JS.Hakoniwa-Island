@@ -22,6 +22,7 @@ const KING_MONSTER_CODE = 'KING_MONSTER';
       '01': false, '02': false, '03': false, '04': false, '05': false, '06': false, '07': false, '08': false
   };
   let map = [];
+  let monsters = [];
   let selectedX = null, selectedY = null;
   let actionQueue = [];
   let islandName = "MyIsland";
