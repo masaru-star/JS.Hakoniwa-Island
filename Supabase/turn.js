@@ -49,7 +49,7 @@ export function createTurnScheduler({ supabase, core, onTick, onTurnComplete }) 
     running = true;
     lastProcessedSlot = slot;
     try {
-      const { error } = await supabase.functions.invoke('hakoniwa-turn-worker', {
+      const { error } = await supabase.functions.invoke('dynamic-handler', {
         body: { inactiveTurnLimit: 50 }
       });
       if (error) throw error;
