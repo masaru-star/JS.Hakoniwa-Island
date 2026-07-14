@@ -1,4 +1,4 @@
-export const TURN_INTERVAL_MS = 5 * 60 * 1000;
+export const TURN_INTERVAL_MS = 1 * 60 * 1000;
 
 export function createTurnScheduler({ supabase, core, onTick, onTurnComplete }) {
   let timerId = null;
