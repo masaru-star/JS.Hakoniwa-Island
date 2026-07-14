@@ -165,10 +165,10 @@ function runAction(state: any, task: any, outgoing: any[]) {
 }
 
 function produce(state: any) {
-  let foodChange = 0, moneyChange = 0;
+  let foodChange = 0, moneyChange = 0, divisor = 0;
   for (const row of state.map || []) for (const tile of row) {
     if (tile.facility === 'farm' && tile.terrain === 'plain') foodChange += tile.enhanced ? 300 : 100;
-    if (tile.facility === 'factory' && tile.terrain === 'plain') moneyChange += tile.enhanced ? 300 : 100;
+    if (tile.facility === 'factory' && tile.terrain === 'plain') divisor = tile.enhanced ? (4 / 1.5) : 4; moneyChange += Math.floor(state.population / divisor);
     if (tile.facility === 'oilRig' && tile.terrain === 'sea') moneyChange += tile.enhanced ? 30000 : 10000;
     if (tile.facility === 'house' && tile.terrain === 'plain') { const growth = Math.min(100, Math.max(0, 1000 - n(tile.pop))); tile.pop = n(tile.pop) + growth; state.population = n(state.population) + growth; }
   }
