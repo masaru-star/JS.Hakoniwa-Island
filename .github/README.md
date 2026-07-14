@@ -1,11 +1,10 @@
 # M式箱庭ゲーム Ver.5.0-Beta.1
 
 [こちらから遊べます](https://masaru-star.github.io/JS.Hakoniwa-Island/)<br>
+初心者向けにチュートリアルを作成しました。詳細な説明書はGistsで作成中です。
 
-アンケートの要望に基づき、新規参加者向けのチュートリアル機能の策定を開始しました。<br>
-Based on requests from the survey, we have begun developing a tutorial feature for new participants.
-
-> **important!:** Ver.4.7以前のデータは、島管理方式が根本的に変更されるため、旧バージョンのデータとの互換性を維持できなくなります。9月中旬頃に失効する予定なのでダウンロードをしてプレイしている方は早めに`Ver.5.0-Beta.1`など新データへの移行をお願いします。
+> **important!:** Ver.4.7以前のデータは、島管理方式が根本的に変更されるため、旧バージョンのデータとの互換性を維持できなくなります。9月中旬頃に失効する予定なのでダウンロードをしてプレイしている方は早めに`Ver.5.0`など新データへの移行をお願いします。
+> Ver.5.0リリース直後にセーブコード出力のアルゴリズムを変更しました。現時点では互換性失効と同時に失効させる方針です。
 
 ![Good First Issue](https://img.shields.io/badge/good%20first--issue-welcome-blueviolet) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) ![Help Wanted](https://img.shields.io/badge/translation-welcome-brightgreen)
 
