@@ -153,7 +153,6 @@ SOFTWARE. -->
   <option value="buildMonument" data-myisland="true">石碑建設 (500000000G)</option>
   <option value="upgradeMonument" data-myisland="true">石碑強化 (500000000G)</option>
   <option value="sellMonument" data-myisland="true">石碑売却 (無料)</option>
-  <option value="initializeIsland" data-myisland="true">島の初期化</option>
 </select><select id="warshipSubSelect" onchange="updateConfirmButton()" style="width: 140px; display: none;">
   <option value="">軍艦ツールを選択</option>
   <option value="refuelWarship" data-myisland="true">燃料補給</option>
@@ -168,13 +167,7 @@ SOFTWARE. -->
   <option value="requestWarshipReturn" data-myisland="true">軍艦帰還要請</option>
   <option value="moveWarshipToDock" data-myisland="true">船渠へ移動</option>
   <option value="returnWarshipFromDock" data-myisland="true">海域へ復帰</option>
-</select><!-- <select id="AutocommandSubSelect" onchange="updateConfirmButton()" style="width: 140px; display: none;">
-  <option value="">自動送信ツールを選択</option>
-  <option value="autoflatten" data-myisland="true">整地自動送信</option>
-  <option value="autofarm" data-myisland="true">農場整備自動送信</option>
-  <option value="autofactory" data-myisland="true">工場建設自動送信</option>
-  <option value="autolandfill" data-myisland="true">埋め立て自動送信</option>
-</select> -->
+</select>
 <input type="number" id="exportAmount" placeholder="輸出数" min="1" style="width: 60px; display: none;">
 <input type="number" id="bombardCount" placeholder="攻撃数" min="1" style="width: 60px; display: none;">
 <input type="number" id="refuelAmount" placeholder="補給数" min="1" style="width: 60px; display: none;">
@@ -244,7 +237,7 @@ SOFTWARE. -->
 <script type="module">
   // main.html で編集するSupabase接続情報は以下の2変数だけです。
   const SUPABASE_URL = "https://crnadiscmpzetjwxxdal.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_vfvF6h_jsuwE2j120FNlTg__CwltZhs";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNybmFkaXNjbXB6ZXRqd3h4ZGFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDA2MDIsImV4cCI6MjA5NTU3NjYwMn0.5Llk-rEvLj2buDYAh3PxZEyVZ8paxv3jtoHfyYtL1Kk";
   import { startSupabaseHakoniwa } from "./Supabase/main.js";
   startSupabaseHakoniwa({ supabaseUrl: SUPABASE_URL, supabaseAnonKey: SUPABASE_ANON_KEY });
 </script>
