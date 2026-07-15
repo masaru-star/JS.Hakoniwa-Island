@@ -1087,7 +1087,6 @@ window.updateConfirmButton = function () {
       document.getElementById('touristCodeInput').style.display = 'inline-block';
   } else if (action === 'buildWarship') {
       document.getElementById('warshipBuildInputs').style.display = 'block';
-      // デフォルト値を設定
       document.getElementById('warshipName').value = "無銘艦";
       document.getElementById('warshipDurability').value = 2;
       document.getElementById('warshipMainGun').value = 1;
@@ -1133,26 +1132,22 @@ function renderMap() {
       // 他の島を見ているときは砲台と防衛施設を森に偽装
       const displayFacility = (isViewingOtherIsland && (tile.facility === 'gun' || tile.facility === 'defenseFacility' || tile.facility === 'Monument')) ? 'forest' : tile.facility;
       const displayTerrain = (isViewingOtherIsland && (tile.facility === 'gun' || tile.facility === 'defenseFacility' || tile.facility === 'Monument')) ? 'forest' : tile.terrain;
-
-      cell.className = displayTerrain; // 地形クラス
-      if (displayFacility) cell.classList.add(displayFacility); // 施設クラス
-
-      // 強化施設のクラスを追加
+      cell.className = displayTerrain;
+      if (displayFacility) cell.classList.add(displayFacility);
       if (tile.enhanced) {
           if (tile.facility === 'farm') cell.classList.add('enhancedFarm');
           if (tile.facility === 'factory') cell.classList.add('enhancedFactory');
           if (tile.facility === 'oilRig') cell.classList.add('enhancedOilRig');
       }
-      // 軍艦の表示
       const warshipAtTile = warships.find(ship => ship.x === x && ship.y === y && !isWarshipDocked(ship));
-      if (warshipAtTile && !isViewingOtherIsland) { // 自分の島を見ているときのみ軍艦を表示
-          if (warshipAtTile.currentDurability <= 0) { // 沈没している場合
+      if (warshipAtTile && !isViewingOtherIsland) { 
+          if (warshipAtTile.currentDurability <= 0) { 
               cell.classList.add('warship-wreckage');
               cell.textContent = 'x'; // 残骸アイコン
           } else {
               cell.classList.add('warship');
               if (warshipAtTile.isDispatched) {
-                  cell.classList.add('warship-dispatched'); // 派遣中のスタイル
+                  cell.classList.add('warship-dispatched'); 
                   cell.textContent = '⛶'; // 派遣中アイコン
               } else {
                   cell.textContent = '🚢';
@@ -1169,8 +1164,6 @@ function renderMap() {
                              displayFacility === 'oilRig' ? '🛢️' :'';
                              displayTerrain === 'mountain' ? '⛰️' : '';
       }
-
-      // 強化施設のアイコンはそのまま
       if (tile.enhanced) {
           if (tile.facility === 'farm') cell.textContent = '🌾';
           if (tile.facility === 'factory') cell.textContent = '🏭';
@@ -1184,9 +1177,8 @@ function renderMap() {
       cell.onmouseover = () => showTileInfo(x, y);
       cell.onclick = () => selectTile(x, y);
       row.appendChild(cell);
-      // ★変更: monsters 配列をチェック
       const monsterAtTile = monsters.find(m => m.x === x && m.y === y);
-      if (monsterAtTile) {
+      if (monsterAtTile && !isViewingOtherIsland) {  // 自分の島を見ているときのみ表示
         cell.textContent = '👾';
       }
     }
@@ -1211,7 +1203,7 @@ function showTileInfo(x, y) {
 
     let facilityName = facilityNameMap[tile.facility] || tile.facility;
 
-    if (tile.enhanced) { // 強化施設の表示名
+    if (tile.enhanced) {
         if (tile.facility === 'farm') facilityName = '強化農場';
         if (tile.facility === 'factory') facilityName = '強化工場';
         if (tile.facility === 'oilRig') facilityName = '高効率海底油田';
@@ -1227,7 +1219,6 @@ function showTileInfo(x, y) {
   const warshipAtTile = warships.find(ship => ship.x === x && ship.y === y && !isWarshipDocked(ship));
   if (warshipAtTile && !isViewingOtherIsland) {
       ensureWarshipFields(warshipAtTile);
-      // 経験値表示を修正
       const expDisplay = warshipAtTile.exp === "NaN" ? "NaN" : warshipAtTile.exp;
       const warshipCapClass = getWarshipCapClass(warshipAtTile);
 const baseWarshipName = getWarshipDisplayName(warshipAtTile);
@@ -1275,8 +1266,6 @@ window.clearFundingFailureTracking = function() {
     trackedFundingFailure = null;
     updateLogStatusLines();
 }
-
-// logAction関数を修正して、メッセージに基づいて色を適用
 function logAction(msg, options = {}) {
   const log = document.getElementById('log');
   const statusLine2 = document.getElementById('logStatusLine2');
@@ -1323,11 +1312,8 @@ function generateTouristCode() {
         turn: turn
     };
     const jsonString = JSON.stringify(touristData);
-    // 新しいエンコード方式 (btoaとencodeURIComponentを組み合わせる)
     return btoa(encodeURIComponent(jsonString));
 }
-
-// 軍艦データをコードに変換する関数
 function encodeWarshipData(warship) {
     const data = {
         homePort: warship.homePort,
@@ -1356,11 +1342,9 @@ function encodeWarshipData(warship) {
     return btoa(encodeURIComponent(jsonString));
 }
 
-// コードから軍艦データをデコードする関数
 function decodeWarshipData(encodedData) {
     const jsonString = decodeURIComponent(atob(encodedData));
     const data = JSON.parse(jsonString);
-    // 互換性維持のための初期化
     if (data.isDispatched === undefined) data.isDispatched = false;
     if (data.maxFuel === undefined) data.maxFuel = 100;
     if (data.originalCost === undefined) data.originalCost = 0; // 追加
