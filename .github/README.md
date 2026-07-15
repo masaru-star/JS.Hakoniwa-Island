@@ -1,4 +1,4 @@
-# M式箱庭ゲーム Ver.5.0-Beta.1
+# MSR式箱庭ゲーム
 
 [こちらから遊べます](https://masaru-star.github.io/JS.Hakoniwa-Island/)<br>
 初心者向けにチュートリアルを作成しました。詳細な説明書はGistsで作成中です。
