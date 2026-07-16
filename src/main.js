@@ -490,7 +490,7 @@ function getActionName(action, x, y, extraData) {
         refuelWarship: '燃料補給', resupplyWarshipAmmo: '弾薬補給', repairWarship: '軍艦修理',
         enhanceWarship: '軍艦増強', decommissionWarship: '軍艦除籍', dispatchWarship: '軍艦派遣',
         requestWarshipReturn: '軍艦帰還要請', moveWarshipToDock: '船渠へ移動', returnWarshipFromDock: '海域へ復帰', setWarshipNickname: '二つ名指定', showWarshipDetails: '詳細情報提示', convertAchievementToExp: '実績pt変換', remodelWarshipWeapon: '武器換装', buildMonument: '石碑建設', upgradeMonument: '石碑強化',
-        sellMonument: '石碑売却', initializeIsland: '島の初期化', delayAction: '遅延行動' 
+        sellMonument: '石碑売却', initializeIsland: '島の初期化', delayAction: '遅延行動' , emergencyReturn: '緊急帰還',
     };
     name = actionNames[action] || action;
 
@@ -1966,7 +1966,7 @@ const keepOptionSelected = document.getElementById('keepOptionSelected').checked
 
   if (!action) return;
   applyAutomaticInputValues(action);
-  const requiresTileSelection = ['buildFarm', 'buildFactory', 'buildPort', 'buildGun', 'buildDefenseFacility', 'buildWarship', 'refuelWarship', 'resupplyWarshipAmmo', 'repairWarship', 'setWarshipNickname', 'convertAchievementToExp', 'remodelWarshipWeapon', 'dispatchWarship', 'requestWarshipReturn', 'moveWarshipToDock', 'returnWarshipFromDock', 'flatten', 'landfill', 'dig', 'cutForest', 'plantForest', 'enhanceFacility', 'selfDestructMilitaryFacility', 'bombard', 'spreadBombard', 'ppBombard', 'concentratedFire'];
+  const requiresTileSelection = ['buildFarm', 'buildFactory', 'buildPort', 'buildGun', 'buildDefenseFacility', 'buildWarship', 'refuelWarship', 'resupplyWarshipAmmo', 'repairWarship', 'setWarshipNickname', 'convertAchievementToExp', 'remodelWarshipWeapon', 'dispatchWarship', 'requestWarshipReturn', 'moveWarshipToDock', 'returnWarshipFromDock', 'flatten', 'landfill', 'dig', 'cutForest', 'plantForest', 'enhanceFacility', 'selfDestructMilitaryFacility','emergencyReturn', 'bombard', 'spreadBombard', 'ppBombard', 'concentratedFire'];
   if (requiresTileSelection.includes(action) && !targetTileSelected) {
     logAction(`アクションの対象タイルを選択してください`);
     return;
@@ -3003,7 +3003,35 @@ const newWarship = {
             }
         }
         previousExecutedAction = 'concentratedFire';
+    } else if (action === 'emergencyReturn') {
+    const warship = warships.find(ship => ship.x === selectedX && ship.y === selectedY);
+    if (!warship) {
+        logAction(`(${selectedX},${selectedY}) に軍艦が存在しません。`);
+        return;
     }
+    if (!warship.isDispatched) {
+        logAction(`派遣中の軍艦のみ緊急帰還が可能です。`);
+        return;
+    }
+    if (await hasValidWarshipNameSignature(warship)) {
+        logAction(`この軍艦の母港は${warship.homePort}であり、この島ではありません。`);
+        return;
+    }
+    const cost = 80000000; // 8000万G
+    if (money < cost) {
+        logAction(`緊急帰還に失敗しました（資金不足: ${cost}G 必要）`);
+        return;
+    }
+    if (!(await canOperateOwnWarship(warship, '緊急帰還'))) return;
+    
+    money -= cost;
+    warship.isDispatched = false;
+    warship.currentFuel = 0;
+    warship.currentAmmo = 0;
+    logAction(`軍艦「${warship.name}」の緊急帰還を実行しました（${cost}G消費）。`);
+    updateStatus();
+    saveMyIslandState();
+}
     else if (action === 'buildFarm') {
       if (tile && tile.terrain === 'plain' && money >= 100) {
         handleHouseOverwrite(tile);
