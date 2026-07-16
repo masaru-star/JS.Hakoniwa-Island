@@ -4678,6 +4678,7 @@ window.onload = function() {
         renderActionQueue();
     } else {
         loadMyIslandState(); // まず自分の島をロード/初期化
+        syncVerifiedWarshipHomePorts();
         ensureIslandSigningKeyPair({ silent: true });
     }
     updateConfirmButton(); // 初回UI更新
