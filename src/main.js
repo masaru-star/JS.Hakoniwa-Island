@@ -260,6 +260,13 @@ async function decodeManualSaveText(saveText) {
       }
   };
   let warshipTurnStats = {};
+async function syncVerifiedWarshipHomePorts() {
+    for (const ship of warships) {
+        if (await hasValidWarshipNameSignature(ship)) {
+            ship.homePort = islandName;
+        }
+    }
+}
 function factorial(n) {
     if (n < 0) return NaN;
     if (n === 0 || n === 1) return 1;
@@ -1388,6 +1395,7 @@ function saveGame() {
         console.error(error);
         logAction("セーブデータの圧縮に失敗しました。");
     });
+    syncVerifiedWarshipHomePorts();
 }
 
 async function loadGame() {
