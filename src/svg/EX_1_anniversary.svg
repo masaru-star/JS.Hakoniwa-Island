@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- ゴールドグラデーション -->
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE07D" />
+      <stop offset="30%" stop-color="#F5B041" />
+      <stop offset="70%" stop-color="#C0392B" stop-opacity="0.2" /> <!-- 陰影用 -->
+      <stop offset="70%" stop-color="#D4AC0D" />
+      <stop offset="100%" stop-color="#F9E79F" />
+    </linearGradient>
+
+    <linearGradient id="gold-bright" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#B7950B" />
+      <stop offset="50%" stop-color="#F4D03F" />
+      <stop offset="100%" stop-color="#FEF9E7" />
+    </linearGradient>
+
+    <!-- ネイビーグラデーション (海・軍艦イメージ) -->
+    <radialGradient id="navy-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1B4F72" />
+      <stop offset="70%" stop-color="#113047" />
+      <stop offset="100%" stop-color="#0B1D2B" />
+    </radialGradient>
+
+    <!-- リボン用グラデーション -->
+    <linearGradient id="ribbon-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7B241C" />
+      <stop offset="30%" stop-color="#E74C3C" />
+      <stop offset="50%" stop-color="#FDEDEC" />
+      <stop offset="70%" stop-color="#E74C3C" />
+      <stop offset="100%" stop-color="#7B241C" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <!-- 左リボン -->
+    <path d="M 180,240 L 130,420 L 180,390 L 230,420 Z" fill="url(#ribbon-grad)" />
+    <!-- 右リボン -->
+    <path d="M 320,240 L 270,420 L 320,390 L 370,420 Z" fill="url(#ribbon-grad)" />
+  </g>
+
+  <g filter="url(#shadow)">
+    <!-- 16星（または羅針盤の目盛り）の土台 -->
+    <path d="M 250,50 L 265,90 L 305,75 L 305,115 L 345,110 L 330,150 L 365,160 L 335,190 L 360,215 L 320,230 L 335,270 L 295,270 L 295,310 L 255,295 L 250,335 L 245,295 L 205,310 L 205,270 L 165,270 L 180,230 L 140,215 L 165,190 L 135,160 L 170,150 L 155,110 L 195,115 L 195,75 L 235,90 Z" fill="url(#gold)" />
+    <circle cx="250" cy="200" r="115" fill="none" stroke="url(#gold-bright)" stroke-width="8" />
+  </g>
+  <circle cx="250" cy="200" r="100" fill="url(#navy-grad)" stroke="url(#gold-bright)" stroke-width="3" filter="url(#shadow)" />
+  <g opacity="0.25">
+    <path d="M 155,230 Q 175,210 195,230 T 235,230 T 275,230 T 315,230 T 345,230" fill="none" stroke="#FFFFFF" stroke-width="3" />
+    <path d="M 150,210 Q 175,190 200,210 T 250,210 T 300,210 T 350,210" fill="none" stroke="#FFFFFF" stroke-width="3" />
+  </g>
+  <g fill="none" stroke="url(#gold-bright)" stroke-linecap="round" stroke-linejoin="round" filter="url(#shadow)">
+    <!-- シャックル（上のリング） -->
+    <circle cx="250" cy="130" r="10" stroke-width="5" />
+    <!-- ストック（横棒） -->
+    <line x1="220" y1="150" x2="280" y2="150" stroke-width="7" />
+    <circle cx="220" cy="150" r="4" fill="url(#gold-bright)" />
+    <circle cx="280" cy="150" r="4" fill="url(#gold-bright)" />
+    <!-- シャフト（縦棒） -->
+    <line x1="250" y1="140" x2="250" y2="250" stroke-width="9" />
+    <!-- クラウン・アーム（下の錨爪） -->
+    <path d="M 205,215 C 205,265 295,265 295,215" stroke-width="9" />
+    <!-- フルー（爪先） -->
+    <path d="M 195,210 L 205,220 L 215,210 Z" fill="url(#gold-bright)" stroke-width="1" />
+    <path d="M 285,210 L 295,220 L 305,210 Z" fill="url(#gold-bright)" stroke-width="1" />
+  </g>
+  <!-- 月桂樹（ローレル）の装飾 -->
+  <g fill="url(#gold)" opacity="0.8">
+    <!-- 左の葉 -->
+    <path d="M 175,200 C 160,170 170,140 190,120 C 180,140 180,170 175,200 Z" />
+    <path d="M 170,170 C 155,150 160,130 175,115 C 170,130 170,150 170,170 Z" />
+    <!-- 右の葉 -->
+    <path d="M 325,200 C 340,170 330,140 310,120 C 320,140 320,170 325,200 Z" />
+    <path d="M 330,170 C 345,150 340,130 325,115 C 330,130 330,150 330,170 Z" />
+  </g>
+  <g filter="url(#shadow)">
+    <!-- 影用（立体感） -->
+    <path d="M 225,230 L 225,175 L 210,185 L 210,170 L 230,155 L 243,155 L 243,230 Z" fill="#7B241C" transform="translate(2, 2)" />
+    <!-- メイン（1） -->
+    <path d="M 225,230 L 225,175 L 210,185 L 210,170 L 230,155 L 243,155 L 243,230 Z" fill="url(#gold-bright)" />
+    
+    <!-- 「st」部分（影） -->
+    <text x="248" y="192" font-family="'Impact', 'Arial Black', sans-serif" font-size="26" font-weight="bold" fill="#7B241C" transform="translate(2, 2)">st</text>
+    <!-- 「st」部分（メイン） -->
+    <text x="248" y="192" font-family="'Impact', 'Arial Black', sans-serif" font-size="26" font-weight="bold" fill="url(#gold-bright)">st</text>
+  </g>
+  <!-- パス定義 -->
+  <path id="textPath" d="M 160,260 A 105,105 0 0,0 340,260" fill="none" />
+  <text fill="url(#gold-bright)" font-family="'Arial', sans-serif" font-size="14" font-weight="bold" letter-spacing="3px">
+    <textPath href="#textPath" startOffset="50%" text-anchor="middle">
+      ANNIVERSARY
+    </textPath>
+  </text>
+  <g fill="url(#gold-bright)" filter="url(#shadow)">
+    <!-- 中央上部の星 -->
+    <polygon points="250,68 253,75 261,75 255,80 257,87 250,83 243,87 245,80 239,75 247,75" />
+  </g>
+</svg>
