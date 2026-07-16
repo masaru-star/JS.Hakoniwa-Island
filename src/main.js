@@ -28,9 +28,15 @@ const KING_MONSTER_CODE = 'KING_MONSTER';
   let islandName = "MyIsland";
   let warships = []; // 軍艦の配列を追加
   let dockedWarships = []; // 船渠に収納中の軍艦
-
   let islandSigningKeyPair = null; // P-256署名鍵ペア(JWK形式)
-
+  console.log(
+    `%cSTOP!!!!`, 
+    "color: red; font-size: 40px; font-weight: bold; -webkit-text-stroke: 1px black; font-family: sans-serif;"
+  );
+  console.log(
+    `%cこれは開発者向けのブラウザ機能です。もし誰かからここに何かをコピー＆ペーストするように言われたら、絶対にやめてください！島情報が盗まれるなど、その他多くの不利益を被る可能性があります。内容を理解していないコードは入力しないでください。`, 
+    "font-size: 16px; font-family: sans-serif; line-height: 1.5;"
+  );
 function arrayBufferToBase64(buffer) {
     return btoa(String.fromCharCode(...new Uint8Array(buffer)));
 }
