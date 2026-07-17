@@ -2260,7 +2260,7 @@ logAction(`島の初期化はキャンセルされました。`);
         logAction(`選択したタイルに軍艦がいません。`);
         return;
     }
-    if (ship.homePort !== islandName) {
+    if (await !hasValidWarshipNameSignature(ship)) {
         logAction(`母港が自島の軍艦のみ二つ名指定できます。`);
         return;
     }
@@ -2364,7 +2364,7 @@ logAction(`島の初期化はキャンセルされました。`);
           logAction(`この軍艦は派遣されていません。`);
           return;
       }
-      if (warship.homePort !== islandName) {
+      if (await !hasValidWarshipNameSignature(warship)) {
           logAction(`この軍艦の母港は${warship.homePort}であり、この島ではありません。`);
           return;
       }
@@ -2522,7 +2522,7 @@ logAction(`島の初期化はキャンセルされました。`);
       const warship = warships.find(ship => ship.x === selectedX && ship.y === selectedY);
     if (!(await canOperateOwnWarship(warship, '軍艦除籍'))) return;
     const confirmation = confirm(`${ship.name} を除籍しますが、よろしいですか？`);
-      if (warship.homePort !== islandName) {
+      if (await !hasValidWarshipNameSignature(warship)) {
           logAction(`この軍艦の母港は${warship.homePort}であり、この島ではありません。`);
           return;
 }if (confirmation) {
@@ -3013,7 +3013,7 @@ const newWarship = {
         logAction(`派遣中の軍艦のみ緊急帰還が可能です。`);
         return;
     }
-    if (await hasValidWarshipNameSignature(warship)) {
+    if (await !hasValidWarshipNameSignature(warship)) {
         logAction(`この軍艦の母港は${warship.homePort}であり、この島ではありません。`);
         return;
     }
@@ -3594,7 +3594,7 @@ if (turn > 0 && turn % 50 === 0) {
             // 1. 母港が現在の島名と同じ
             // 2. expが"NaN"でない（特殊艦の除外）
             // 3. 沈没していない
-            if (ship.homePort === islandName && ship.exp !== "NaN" && ship.currentDurability > 0) {
+            if (await hasValidWarshipNameSignature(ship) && ship.exp !== "NaN" && ship.currentDurability > 0) {
                 ship.exp += expIncrease;
                 increasedCount++;
             }
