@@ -560,6 +560,7 @@ function getRequiredMoneyForTask(task) {
     if (action === 'buildWarship') return Number(task?.warshipData?.originalCost || 0);
     if (action === 'resupplyWarshipAmmo') return 1000 * (task.amount || 1);
     if (action === 'repairWarship') return 100000 * (task.amount || 1);
+    if (action === 'emergencyReturn') return 80000000;
     return 0;
 }
 function isSessionSettingEnabled(settingId) {
