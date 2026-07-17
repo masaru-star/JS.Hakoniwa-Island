@@ -261,6 +261,29 @@ window.addEventListener('click', (e) => {
       text.style.display = 'none';
     }
   });
+  // HTMLの読み込みが完了したタイミングで実行
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. URLからパラメータを取得（例: https://example.com/?touristCode=12345 の場合）
+    const urlParams = new URLSearchParams(window.location.search);
+    // 'touristCode' の部分を取得したいパラメータ名に合わせて変更してください
+    const codeFromUrl = urlParams.get('touristCode'); 
+    // URLにパラメータが存在する場合のみ実行
+    if (codeFromUrl) {
+      // 2. プルダウンを "goToOtherIsland" に変更
+      const actionSelect = document.getElementById("actionSelect");
+      if (actionSelect) {
+        actionSelect.value = "goToOtherIsland";
+        // もしプルダウン変更時に別のJavaScript処理を連動させている場合は、
+        // 以下のコメントアウトを外してchangeイベントを強制的に発火させます
+        // actionSelect.dispatchEvent(new Event('change'));
+      }
+      // 3. テキストボックスにURLから取得した値をセット
+      const touristCodeInput = document.getElementById("touristCodeInput");
+      if (touristCodeInput) {
+        touristCodeInput.value = codeFromUrl;
+      }
+    }
+  });
 </script>
 </body>
 </html>
