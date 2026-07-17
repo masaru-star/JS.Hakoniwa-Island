@@ -1,0 +1,24 @@
+name: Sync Reminder
+on:
+  schedule:
+    - cron: '0 0 5,20 * *' # 毎月5日と20日のAM9:00(日本時間)に実行
+
+# Issueを作成するための書き込み権限を明示的に付与
+permissions:
+  issues: write
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Reminder Issue
+        uses: imjohnbo/issue-bot@v3
+        with:
+          assignees: "masaru-star"
+          title: "⏰ Codebergへの手動同期リマインダー"
+          body: |
+            前回の同期から数週間が経過しました。
+            Actionsタブから手動同期ワークフローを実行してください。
+            作業が完了したらこのIssueをクローズします。
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # アクションの実行に必要なトークン
