@@ -2348,8 +2348,6 @@ logAction(`島の初期化はキャンセルされました。`);
                 jsonString = decodeURIComponent(atob(touristCode));
                 const otherIslandData = JSON.parse(jsonString);
             }
-          const jsonString = decodeURIComponent(atob(touristCode));
-          const otherIslandData = JSON.parse(jsonString);
           targetIslandName = otherIslandData.islandName;
       } catch (e) {
           logAction(`無効な観光者コードです。`);
