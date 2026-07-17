@@ -1,0 +1,38 @@
+name: Rollback to Specific Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_ref:
+        description: '差し戻したい先のコミットハッシュまたはタグ'
+        required: true
+        type: string
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Create Rollback Commit (Safe Revert)
+        run: |
+          TARGET="${{ github.event.inputs.target_ref }}"
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          echo "現在のブランチ: $CURRENT_BRANCH"
+          echo "目標のバージョン: $TARGET"
+          git checkout $TARGET -- .
+          if git diff --staged --quiet && git diff --quiet; then
+            echo "指定されたバージョンは現在の状態と同じです。差し戻しの必要はありません。"
+          else
+            git commit -am "chore: rollback to $TARGET [skip ci]"
+            git push origin $CURRENT_BRANCH
+            echo "指定されたバージョンへの差し戻しコミットをプッシュしました。"
+          fi
