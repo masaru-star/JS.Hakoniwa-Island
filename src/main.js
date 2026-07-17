@@ -489,8 +489,8 @@ function getActionName(action, x, y, extraData) {
         goToOtherIsland: '他の島に行く', returnToMyIsland: '自島に戻る', buildWarship: '軍艦建造',
         refuelWarship: '燃料補給', resupplyWarshipAmmo: '弾薬補給', repairWarship: '軍艦修理',
         enhanceWarship: '軍艦増強', decommissionWarship: '軍艦除籍', dispatchWarship: '軍艦派遣',
-        requestWarshipReturn: '軍艦帰還要請', moveWarshipToDock: '船渠へ移動', returnWarshipFromDock: '海域へ復帰', setWarshipNickname: '二つ名指定', showWarshipDetails: '詳細情報提示', convertAchievementToExp: '実績pt変換', remodelWarshipWeapon: '武器換装', buildMonument: '石碑建設', upgradeMonument: '石碑強化',
-        sellMonument: '石碑売却', initializeIsland: '島の初期化', delayAction: '遅延行動' , emergencyReturn: '緊急帰還',
+        requestWarshipReturn: '軍艦帰還要請', moveWarshipToDock: '船渠へ移動', emergencyReturn: '緊急帰還', returnWarshipFromDock: '海域へ復帰', setWarshipNickname: '二つ名指定', showWarshipDetails: '詳細情報提示', convertAchievementToExp: '実績pt変換', remodelWarshipWeapon: '武器換装', buildMonument: '石碑建設', upgradeMonument: '石碑強化',
+        sellMonument: '石碑売却', initializeIsland: '島の初期化', delayAction: '遅延行動' ,
     };
     name = actionNames[action] || action;
 
@@ -2798,11 +2798,12 @@ turn++;
               const existingWarship = warships.find(ship =>
                   ship.homePort === returnedWarshipData.homePort &&
                   ship.name === returnedWarshipData.name &&
-                  ship.isDispatched === true // 母港で派遣中とマークされているもの
+                  ship.isDispatched === true
               );
 
               if (existingWarship) {
                   // 最新の軍艦情報に書き換える
+                  existingWarship.medalsEarned = returnedWarshipData.medalsEarned;
                   existingWarship.exp = returnedWarshipData.exp;
                   existingWarship.currentFuel = returnedWarshipData.currentFuel;
                   existingWarship.maxFuel = returnedWarshipData.maxFuel; // maxFuelも更新
@@ -2816,8 +2817,7 @@ turn++;
                   existingWarship.accuracyImprovement = returnedWarshipData.accuracyImprovement;
                   existingWarship.nameSignature = returnedWarshipData.nameSignature || existingWarship.nameSignature || '';
                   existingWarship.signaturePublicKey = returnedWarshipData.signaturePublicKey || existingWarship.signaturePublicKey || null;
-
-                  existingWarship.isDispatched = false; // 派遣状態を解除
+                  existingWarship.isDispatched = false;
 
                   logAction(`軍艦「${existingWarship.name}」が母港「${originalHomePort}」に帰還しました！情報が更新され、派遣状態が解除されました。`);
               } else {
@@ -3023,7 +3023,6 @@ const newWarship = {
         return;
     }
     if (!(await canOperateOwnWarship(warship, '緊急帰還'))) return;
-    
     money -= cost;
     warship.isDispatched = false;
     warship.currentFuel = 0;
