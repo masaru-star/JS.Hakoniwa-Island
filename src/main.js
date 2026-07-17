@@ -1325,12 +1325,9 @@ async function generateTouristCode() {
         turn: turn
     };
     const jsonString = JSON.stringify(touristData);
-    // gzip圧縮版
+    // gzip圧縮 + IslandCODEv2プレフィックス
     const gzipBytes = await gzipText(jsonString);
-    const compressedCode = "IslandCODE:" + bytesToBase64(gzipBytes);
-    // 従来版もサポート
-    const legacyCode = btoa(encodeURIComponent(jsonString));
-    return { compressed: compressedCode };
+    return "IslandCODEv2:" + bytesToBase64(gzipBytes);
 }
 function encodeWarshipData(warship) {
     const data = {
@@ -1349,7 +1346,7 @@ function encodeWarshipData(warship) {
         reconnaissance: warship.reconnaissance,
         accuracyImprovement: warship.accuracyImprovement,
         isDispatched: warship.isDispatched,
-        originalCost: warship.originalCost || 0, // 追加
+        originalCost: warship.originalCost || 0, 
         abnormality: warship.abnormality || 0,
         nickname: warship.nickname || '',
         medalsEarned: warship.medalsEarned || {},
@@ -1959,7 +1956,8 @@ const keepOptionSelected = document.getElementById('keepOptionSelected').checked
           return;
       } else if (action === 'returnToMyIsland') {
           loadMyIslandState(); // 自分の島に戻る
-          document.getElementById('actionForOtherIslandOutput').value = generateTouristCode(); // 自分の観光者コードを出力
+          const touristCode = await generateTouristCode(); // 新形式のみ
+          document.getElementById('actionForOtherIslandOutput').value = touristCode;
           return;
       } else {
           logAction(`他の島では砲撃系コマンドか「自島に戻る」のみ実行可能です。`);
@@ -2046,9 +2044,9 @@ const keepOptionSelected = document.getElementById('keepOptionSelected').checked
     if (touristCode) {
         try {
             let jsonString;
-            if (touristCode.startsWith('IslandCODE:')) {
+            if (touristCode.startsWith('IslandCODEv2:')) {
                 // 新形式（gzip圧縮）
-                const payload = touristCode.slice('IslandCODE:'.length);
+                const payload = touristCode.slice('IslandCODEv2:'.length);
                 jsonString = await gunzipText(base64ToBytes(payload));
             } else {
                 // 従来形式（Base64）
