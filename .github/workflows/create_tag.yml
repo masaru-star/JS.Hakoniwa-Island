@@ -1,0 +1,27 @@
+name: Create Datetime Tag
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # タグをプッシュするための書き込み権限
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Generate Tag Name
+        id: tag_gen
+        run: |
+          # タイムゾーンを日本時間 (JST) に設定
+          TAG_NAME=$(TZ="Asia/Tokyo" date +'%Y%m%d%H')
+          echo "Generated tag: $TAG_NAME"
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+      - name: Create and Push Tag
+        run: |
+          TAG_NAME="${{ steps.tag_gen.outputs.tag_name }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "$TAG_NAME"
+          git push origin "$TAG_NAME"
