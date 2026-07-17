@@ -2074,8 +2074,8 @@ const keepOptionSelected = document.getElementById('keepOptionSelected').checked
           logAction(`観光者コードを入力してください。`);
       }
   } else if (action === 'returnToMyIsland') {
-      loadMyIslandState(); // 自分の島に戻る
-      document.getElementById('actionForOtherIslandOutput').value = generateTouristCode(); // 自分の観光者コードを出力
+      loadMyIslandState();
+      document.getElementById('actionForOtherIslandOutput').value = await generateTouristCode();
   } else if (action === 'initializeIsland') { // 新しいコマンドの処理
 if (confirm('本当にこの操作を行いますか？')) {
       resetGame();
