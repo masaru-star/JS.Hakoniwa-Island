@@ -2340,6 +2340,14 @@ logAction(`島の初期化はキャンセルされました。`);
       }
       let targetIslandName;
       try {
+            let jsonString;
+            if (touristCode.startsWith('IslandCODEv2:')) {
+                const payload = touristCode.slice('IslandCODEv2:'.length);
+                jsonString = await gunzipText(base64ToBytes(payload));
+            } else {
+                jsonString = decodeURIComponent(atob(touristCode));
+                const otherIslandData = JSON.parse(jsonString);
+            }
           const jsonString = decodeURIComponent(atob(touristCode));
           const otherIslandData = JSON.parse(jsonString);
           targetIslandName = otherIslandData.islandName;
