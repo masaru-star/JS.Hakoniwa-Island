@@ -1,4 +1,3 @@
-        /* タイルスタイル (ライトモード向けに明るく微調整) */
         .sea { background-color: #7ec0ff; }
         .port { background-color: #2b80bf; color: #fff; }
         .oilRig { background: linear-gradient(#7ec0ff, #0056a3); color: #fff; }
