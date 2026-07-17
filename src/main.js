@@ -1309,12 +1309,11 @@ function logAction(msg, options = {}) {
 }
 
 // 観光者コードを生成する関数
-function generateTouristCode() {
+async function generateTouristCode() {
     const simplifiedMap = map.map(row => row.map(tile => {
         let touristTerrain = tile.terrain;
         let touristFacility = tile.facility;
-
-            if (touristFacility === 'gun' || touristFacility === 'defenseFacility' || touristFacility === 'Monument') {
+        if (touristFacility === 'gun' || touristFacility === 'defenseFacility' || touristFacility === 'Monument') {
             touristTerrain = 'forest';
             touristFacility = null;
         }
@@ -1326,7 +1325,12 @@ function generateTouristCode() {
         turn: turn
     };
     const jsonString = JSON.stringify(touristData);
-    return btoa(encodeURIComponent(jsonString));
+    // gzip圧縮版
+    const gzipBytes = await gzipText(jsonString);
+    const compressedCode = "IslandCODE:" + bytesToBase64(gzipBytes);
+    // 従来版もサポート
+    const legacyCode = btoa(encodeURIComponent(jsonString));
+    return { compressed: compressedCode };
 }
 function encodeWarshipData(warship) {
     const data = {
@@ -2038,11 +2042,19 @@ const keepOptionSelected = document.getElementById('keepOptionSelected').checked
       logAction(`(${selectedX},${selectedY}) に軍事施設がありません`);
     }
   } else if (action === 'goToOtherIsland') {
-      const touristCode = document.getElementById('touristCodeInput').value;
-      if (touristCode) {
-          try {
-              const jsonString = decodeURIComponent(atob(touristCode));
-              const otherIslandData = JSON.parse(jsonString);
+    const touristCode = document.getElementById('touristCodeInput').value;
+    if (touristCode) {
+        try {
+            let jsonString;
+            if (touristCode.startsWith('IslandCODE:')) {
+                // 新形式（gzip圧縮）
+                const payload = touristCode.slice('IslandCODE:'.length);
+                jsonString = await gunzipText(base64ToBytes(payload));
+            } else {
+                // 従来形式（Base64）
+                jsonString = decodeURIComponent(atob(touristCode));
+            }
+            const otherIslandData = JSON.parse(jsonString);
 
               saveMyIslandState(); // 自分の島の状態を保存
               map = otherIslandData.map;
