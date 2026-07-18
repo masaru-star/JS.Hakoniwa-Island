@@ -249,7 +249,7 @@ async function canOperateOwnWarship(ship, operationLabel) {
   const verified = await ensureAndVerifyOwnWarship(ship);
   if (!verified) {
     logAction(
-      `${operationLabel}はP-256署名検証に失敗したため実行できません。この軍艦は敵艦として扱われます。`,
+      `${operationLabel}は島主が異なるため実行できません。この軍艦は敵艦として扱われます。`,
     );
     return false;
   }
@@ -265,9 +265,9 @@ function updatePublicKeyDisplay() {
 }
 let economicCrisisTurns = 0; // 経済危機の残りターン数
 let frozenMoney = 0; // 経済危機による凍結資金
-let volcanoTurns = 0; // 火山の噴火 残りターン数
-let trackedFundingFailure = null; // 資金不足で失敗した計画の追跡情報
-let currentExecutingTask = null; // 実行中計画（失敗追跡用）
+let volcanoTurns = 0; 
+let trackedFundingFailure = null; 
+let currentExecutingTask = null; 
 
 const SESSION_SETTING_DEFAULTS = {
   settingShowClearTileSelection: false,
@@ -417,6 +417,17 @@ const MEDAL_DEFS = {
       },
     ],
   },
+  avoidance: {
+    label: "1周年記念",
+    tiers: [
+      {
+        level: 1,
+        id: "EX_1_anniversary",
+        icon: "src/svg/EX_1_anniversary.svg",
+        condition: () => false,
+      },
+    ],
+  },
 };
 let warshipTurnStats = {};
 async function syncVerifiedWarshipHomePorts() {
@@ -502,7 +513,7 @@ function renderDockedWarshipCards() {
             <div class="warship-card-port">母港: ${ship.homePort}</div>
             <div class="warship-card-stats">耐久 ${ship.currentDurability}/${ship.maxDurability}｜燃料 ${ship.currentFuel}/${ship.maxFuel}｜弾薬 ${ship.currentAmmo}/${ship.maxAmmo}</div>
             <div class="warship-card-stats">主砲 ${ship.mainGun}｜魚雷 ${ship.torpedo}｜対空 ${ship.antiAir}｜偵察 ${ship.reconnaissance}｜精度 ${ship.accuracyImprovement}</div>
-            <div class="warship-card-signature">P-256署名: ${ship.nameSignature ? "保存済み" : "未付与"}</div>
+            <div class="warship-card-signature">所有者確認: ${ship.nameSignature ? "実行済み" : "未付与"}</div>
         </div>`;
     })
     .join("");
@@ -685,9 +696,9 @@ function checkAbnormalityOnHit(target) {
     newAbnormality = "flooding";
   }
 
-  // 1. 通信障害の判定 (命中した際、1%の確率)
+  // 1. 通信障害の判定 (命中した際、3%の確率)
   // 自島にいる場合は発生しない (isDispatchedがtrueの時のみ発生)
-  if (newAbnormality === null && target.isDispatched && Math.random() < 0.01) {
+  if (newAbnormality === null && target.isDispatched && Math.random() < 0.03) {
     newAbnormality = "commFailure";
   }
 
@@ -842,11 +853,9 @@ function getRequiredMoneyForTask(task) {
   if (action === "spreadBombard") return 500 * (task.count || 1);
   if (action === "ppBombard") return 10000000 * (task.count || 1);
   if (action === "randomBombard") return 500000 * (task.count || 1);
-  if (action === "buildMonument" || action === "upgradeMonument")
-    return 500000000;
+  if (action === "buildMonument" || action === "upgradeMonument") return 500000000;
   if (action === "setWarshipNickname") return 100000;
-  if (action === "buildWarship")
-    return Number(task?.warshipData?.originalCost || 0);
+  if (action === "buildWarship") return Number(task?.warshipData?.originalCost || 0);
   if (action === "resupplyWarshipAmmo") return 1000 * (task.amount || 1);
   if (action === "repairWarship") return 100000 * (task.amount || 1);
   if (action === "emergencyReturn") return 80000000;
@@ -1000,9 +1009,9 @@ function updateLogStatusLines() {
     : "none";
   const crisisInfo = getEconomicCrisisRiskInfo();
   if (crisisInfo.crisisActive) {
-    line1.textContent = `経済危機進行中: 発生確率 100% (残り ${economicCrisisTurns}ターン)`;
+    line1.textContent = `経済危機進行中: 残り ${economicCrisisTurns}ターン`;
   } else if (crisisInfo.probability <= 0) {
-    line1.textContent = `経済危機発生確率: 0% / 可能性が出るまであと ${crisisInfo.shortage}G 以上`;
+    line1.textContent = `経済危機発生確率: 0% / 可能性が出るまであと ${formatJapaneseNumber(crisisInfo.shortage)}G 以上`;
   } else {
     line1.textContent = `現在の経済危機発生確率: ${crisisInfo.probability.toFixed(1)}%`;
   }
@@ -1019,7 +1028,7 @@ function updateLogStatusLines() {
     targetMoney > 0 ? Math.min(100, (currentMoney / targetMoney) * 100) : 100;
   const achieved = currentMoney >= targetMoney;
   if (achieved) {
-    line2.textContent = `資金不足トラッキング: 「${planLabel}」は達成済みです (目標 ${targetMoney}G / 現在 ${currentMoney}G / 達成率 ${progress.toFixed(1)}%)`;
+    line2.textContent = `資金不足トラッキング: 「${planLabel}」は達成済みです (目標 ${targetMoney}G / 現在 ${currentMoney}G / 達成率 100%)`;
     line2.className = "log-status-info";
   } else {
     line2.textContent = `資金不足トラッキング: 「${planLabel}」 目標 ${targetMoney}G / 現在 ${currentMoney}G / 達成率 ${progress.toFixed(1)}%`;
