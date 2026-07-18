@@ -5058,7 +5058,7 @@ window.nextTurn = async function () {
       }
     }
   }
-  // 新規イベント：火山の噴火
+  // 火山の噴火
   if (
     volcanoTurns === 0 &&
     hasMountain &&
@@ -5125,9 +5125,7 @@ window.nextTurn = async function () {
   if (Math.random() < 0.018) {
     const x = Math.floor(Math.random() * SIZE);
     const y = Math.floor(Math.random() * SIZE);
-
     const protectingFacility = getProtectingDefenseFacility(x, y); // 変更点
-
     const tile = map[y][x];
     const label = tile.facility
       ? tile.facility === "farm"
@@ -5161,7 +5159,6 @@ window.nextTurn = async function () {
       logAction(
         `(${x},${y}) に隕石が落下しましたが、防衛施設が防御に成功しました。`,
       );
-      logAction(`防衛施設は職務を全うしました。`);
     } else {
       if (tile.facility === "house") {
         population -= tile.pop;
@@ -5441,7 +5438,7 @@ window.nextTurn = async function () {
       }
     } else if (monsterType.ability === "createSea") {
       // アクアガロス (毎ターン)
-      // 陸地タイルを探す (自分自身と他の怪獣、山、石碑を除く)
+      // 陸地タイルを探す
       const landTiles = [];
       for (let y = 0; y < SIZE; y++) {
         for (let x = 0; x < SIZE; x++) {
@@ -5617,7 +5614,7 @@ window.nextTurn = async function () {
           }
         } else {
           logAction(
-            `${monsterType.name} は隣接する軍艦を探したが見つからなかった。`,
+            `${monsterType.name} は隣接する軍艦を探しましたが見つかりませんでした。`,
           );
         }
       } else if (kingAction === 6) {
@@ -5681,12 +5678,12 @@ window.nextTurn = async function () {
   let maintenanceCost = facilityMaintenance + warshipMaintenance;
   let maintenanceMultiplier = 1;
   if (economicCrisisTurns > 0) {
-    maintenanceMultiplier = 12; // 経済危機中は維持費12倍
+    maintenanceMultiplier = 12;
   }
   const actualMaintenanceCost = maintenanceCost * maintenanceMultiplier;
   if (actualMaintenanceCost > 0) {
     money -= actualMaintenanceCost;
-    let logMsg = `維持費 ${actualMaintenanceCost}G を資金から差し引きました。（砲台:${gunCount}（高効率:${enhancedGunCount}）、防衛施設:${defenseFacilityCount}、港:${portCount}、軍艦:${activeWarshipCount}）`;
+    let logMsg = `維持費 ${formatJapaneseNumber(actualMaintenanceCost)}G を資金から差し引きました。（砲台:${gunCount}（高効率:${enhancedGunCount}）、防衛施設:${defenseFacilityCount}、港:${portCount}、軍艦:${activeWarshipCount}）`;
     if (maintenanceMultiplier > 1) {
       logMsg += ` (経済危機により${maintenanceMultiplier}倍)`;
     }
@@ -5703,7 +5700,7 @@ window.nextTurn = async function () {
   renderActionQueue();
   const populationChange = population - prevPopulation; // 人口の増減を計算
   logAction(
-    `資金収支: ${moneyChange + totalOilRigIncome - actualMaintenanceCost}G, 食料: ${foodChange >= 0 ? "+" : ""}${foodChange}, 人口変化: ${populationChange >= 0 ? "+" : ""}${populationChange}`,
+    `資金収支: ${formatJapaneseNumber(moneyChange + totalOilRigIncome - actualMaintenanceCost)}G, 食料: ${foodChange >= 0 ? "+" : ""}${formatJapaneseNumber(foodChange)}, 人口変化: ${populationChange >= 0 ? "+" : ""}${formatJapaneseNumber(populationChange)}`,
   );
   renderMap();
 };
