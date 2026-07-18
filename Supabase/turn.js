@@ -1,4 +1,5 @@
 export const TURN_INTERVAL_MS = 120 * 60 * 1000;
+const edgeURL = 'dynamic-handler';
 
 export function createTurnScheduler({ supabase, core, onTick, onTurnComplete }) {
   let timerId = null;
@@ -49,7 +50,7 @@ export function createTurnScheduler({ supabase, core, onTick, onTurnComplete }) 
     running = true;
     lastProcessedSlot = slot;
     try {
-      const { error } = await supabase.functions.invoke('dynamic-handler', {
+      const { error } = await supabase.functions.invoke(edgeURL, {
         body: { inactiveTurnLimit: 50 }
       });
       if (error) throw error;
