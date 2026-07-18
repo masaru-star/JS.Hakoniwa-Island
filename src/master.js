@@ -1407,15 +1407,30 @@ function initMap() {
   renderActionQueue();
 }
 
+function formatJapaneseNumber(num) {
+  const units = ['', '万', '億', '兆', '京'];
+  let unitIndex = 0;
+  
+  while (num >= 10000 && unitIndex < units.length - 1) {
+    num /= 10000;
+    unitIndex++;
+  }
+  
+  if (unitIndex === 0) {
+    return num.toString();
+  }
+  
+  return num.toFixed(3) + units[unitIndex];
+}
 function updateStatus() {
-  const moneyElement = document.getElementById("money");
+  const moneyElement = document.getElementById(formatJapaneseNumber(money));
   if (economicCrisisTurns > 0) {
-    moneyElement.innerHTML = `${money} <span style="color: red;">(使用不可${frozenMoney})</span>`;
+    moneyElement.innerHTML = `${formatJapaneseNumber(money)} <span style="color: red;">(使用不可${formatJapaneseNumber(frozenMoney)})</span>`;
   } else {
     moneyElement.textContent = money;
   }
-  document.getElementById("food").textContent = food < 0 ? 0 : food;
-  document.getElementById("population").textContent =
+  document.getElementById(formatJapaneseNumber(food)).textContent = food < 0 ? 0 : food;
+  document.getElementById(formatJapaneseNumber(population)).textContent =
     population < 0 ? 0 : population;
   document.getElementById("turn").textContent = turn;
   document.getElementById("currentIslandName").textContent = islandName;
@@ -1741,7 +1756,7 @@ window.clearTileSelection = function () {
 };
 window.clearFundingFailureTracking = function () {
   trackedFundingFailure = null;
-  updateLogStatusLines();
+  LogStatusLines();
 };
 function logAction(msg, options = {}) {
   const log = document.getElementById("log");
