@@ -1423,14 +1423,14 @@ function formatJapaneseNumber(num) {
   return num.toFixed(3) + units[unitIndex];
 }
 function updateStatus() {
-  const moneyElement = document.getElementById(money);
+  const moneyElement = document.getElementById("money");
   if (economicCrisisTurns > 0) {
     moneyElement.innerHTML = `${formatJapaneseNumber(money)} <span style="color: red;">(使用不可${formatJapaneseNumber(frozenMoney)})</span>`;
   } else {
     moneyElement.textContent = formatJapaneseNumber(money);
   }
-  document.getElementById(food).textContent = food < 0 ? 0 : formatJapaneseNumber(food);
-  document.getElementById(population).textContent =
+  document.getElementById("food").textContent = food < 0 ? 0 : formatJapaneseNumber(food);
+  document.getElementById("population").textContent =
     population < 0 ? 0 : formatJapaneseNumber(population);
   document.getElementById("turn").textContent = turn;
   document.getElementById("currentIslandName").textContent = islandName;
