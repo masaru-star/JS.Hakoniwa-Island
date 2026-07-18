@@ -1342,7 +1342,7 @@ function spawnKingMonsterFromCode() {
     }
   }
   if (spawnCandidates.length === 0) {
-    logAction("キングガロスの出現候補となる住宅がありませんでした。");
+    logAction("キングガロスの出現候補となるタイルがありませんでした。");
     return;
   }
   const spawn =
@@ -1380,7 +1380,7 @@ function initMap() {
     }),
   );
   let placed = 0;
-  // 初期住宅を2つ配置
+  // 初期市街地を2つ配置
   // 平地を探し、すでに施設がない場所に配置する
   const possibleHouseLocations = [];
   for (let y = 4; y < SIZE - 4; y++) {
@@ -1671,7 +1671,7 @@ function showTileInfo(x, y) {
   if (tile.facility) {
     let facilityNameMap = {
       farm: "農場",
-      house: "住宅",
+      house: "市街地",
       factory: "工場",
       gun: "砲台",
       port: "港",
@@ -2438,9 +2438,9 @@ async function handleWarshipAttacks() {
           } else if (targetTile.facility === "house") {
             // House hit
             expGained += Math.floor(targetTile.pop / 2500);
-            targetType = "住宅";
+            targetType = "市街地";
             logAction(
-              `${warship.name} は住宅 (${targetTile.pop}人) を攻撃し、${expGained} EXPを獲得しました！`,
+              `${warship.name} は市街地 (${targetTile.pop}人) を攻撃し、${expGained} EXPを獲得しました！`,
             );
             population -= targetTile.pop;
             if (population < 0) population = 0;
@@ -3896,14 +3896,14 @@ window.nextTurn = async function () {
       logAction(`(${x},${y}) に軍艦「${newWarship.name}」を建造しました。`);
     }
 
-    // 住宅の上に建設する際の処理を共通化
+    // 市街地の上に建設する際の処理を共通化
     const handleHouseOverwrite = (targetTile) => {
       if (targetTile && targetTile.facility === "house") {
         population -= targetTile.pop;
         if (population < 0) population = 0;
         targetTile.facility = null;
         targetTile.pop = 0;
-        logAction(`(${x},${y}) の住宅が取り壊されました。`);
+        logAction(`(${x},${y}) の市街地が取り壊されました。`);
       }
     };
     if (action === "delayAction") {
@@ -4546,7 +4546,7 @@ window.nextTurn = async function () {
         if (tile.facility === "farm") facilityName = "農場";
         else if (tile.facility === "factory") facilityName = "工場";
         else if (tile.facility === "oilRig") facilityName = "海底油田";
-        else if (tile.facility === "gun") facilityName = "高効率砲台";
+        else if (tile.facility === "gun") facilityName = "砲台";
         logAction(`(${x},${y}) の${facilityName}が強化されました。`);
         checkAndCompleteMission(
           "04",
@@ -4914,7 +4914,7 @@ window.nextTurn = async function () {
               map[ny][nx].facility = "house";
               map[ny][nx].pop = 50;
               currentTurnPopulationGrowth += 50;
-              logAction(`(${nx},${ny}) に住宅が自動形成されました`);
+              logAction(`(${nx},${ny}) に市街地が自動形成されました`);
             }
           }
         }
@@ -5127,7 +5127,7 @@ window.nextTurn = async function () {
         ? "農場"
         : tile.facility === "factory"
           ? "工場"
-          : "住宅"
+          : "市街地"
       : tile.terrain;
     const targetWarship = warships.find((ship) => ship.x === x && ship.y === y);
     if (targetWarship) {
@@ -5184,7 +5184,7 @@ window.nextTurn = async function () {
             tile.facility = null;
             tile.pop = 0;
             tile.enhanced = false; // 強化状態もリセット
-            logAction(`(${x},${y})の住宅は廃墟となりました。`);
+            logAction(`(${x},${y})の市街地は廃墟となりました。`);
           }
         }
       }
@@ -5215,12 +5215,12 @@ window.nextTurn = async function () {
   }
   if (food < 0) food = 0;
 
-  // 1. 出現候補地 (住宅) をリストアップ
+  // 1. 出現候補地 (市街地) をリストアップ
   const spawnCandidates = [];
   for (let y = 0; y < SIZE; y++) {
     for (let x = 0; x < SIZE; x++) {
       const tile = map[y][x];
-      // 住宅であり、かつ他の怪獣がいない場所
+      // 市街地であり、かつ他の怪獣がいない場所
       if (
         tile.facility === "house" &&
         !monsters.find((m) => m.x === x && m.y === y)
@@ -5456,7 +5456,7 @@ window.nextTurn = async function () {
         const tile = map[y][x];
         const facilityNameMap = {
           farm: "農場",
-          house: "住宅",
+          house: "市街地",
           factory: "工場",
           gun: "砲台",
           port: "港",
@@ -5737,7 +5737,7 @@ function earthquakeEffect(excludedCoords = []) {
     if (tile.facility === "house") {
       population -= tile.pop;
       if (population < 0) population = 0;
-      logAction(`(${x},${y})の住宅が地震により破壊されました。`);
+      logAction(`(${x},${y})の市街地が地震により破壊されました。`);
     } else {
       logAction(
         `(${x},${y})の${tile.facility || tile.terrain}が地震により破壊され荒地になりました。`,
@@ -5825,7 +5825,7 @@ function earthquakeEffect(excludedCoords = []) {
             population -= tile.pop;
             if (population < 0) population = 0;
             logAction(
-              `津波により (${x},${y})の住宅が破壊され荒地になりました。`,
+              `津波により (${x},${y})の市街地が破壊され荒地になりました。`,
             );
           } else {
             logAction(
@@ -5842,7 +5842,7 @@ function earthquakeEffect(excludedCoords = []) {
           if (tile.facility === "house") {
             population -= tile.pop;
             if (population < 0) population = 0;
-            logAction(`津波により (${x},${y})の住宅が破壊され海になりました。`);
+            logAction(`津波により (${x},${y})の市街地が破壊され海になりました。`);
           } else {
             logAction(
               `津波により (${x},${y})の${tile.facility || tile.terrain}が海になりました。`,
