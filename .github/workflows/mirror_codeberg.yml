@@ -12,4 +12,4 @@ jobs:
       - name: Mirror to Codeberg
         uses: pixta-dev/repository-mirroring-action@v1
         with:
-          target_repo_url: https://${{ github.actor }}:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/masaru-star/M-Island.git
+          target_repo_url: https://${{ github.actor }}:${{ secrets.CODEBERG_TOKEN }}@codeberg.org/masaru-star/JS.Hakoniwa-Island.git
