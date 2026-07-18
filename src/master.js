@@ -1427,7 +1427,7 @@ function updateStatus() {
   if (economicCrisisTurns > 0) {
     moneyElement.innerHTML = `${formatJapaneseNumber(money)} <span style="color: red;">(使用不可${formatJapaneseNumber(frozenMoney)})</span>`;
   } else {
-    moneyElement.textContent = money;
+    moneyElement.textContent = formatJapaneseNumber(money);
   }
   document.getElementById(formatJapaneseNumber(food)).textContent = food < 0 ? 0 : food;
   document.getElementById(formatJapaneseNumber(population)).textContent =
