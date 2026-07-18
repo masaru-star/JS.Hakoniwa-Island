@@ -1419,17 +1419,15 @@ function initMap() {
 function formatJapaneseNumber(num) {
   const units = ['', '万', '億', '兆', '京'];
   let unitIndex = 0;
-  
   while (num >= 10000 && unitIndex < units.length - 1) {
     num /= 10000;
     unitIndex++;
   }
-  
   if (unitIndex === 0) {
     return num.toString();
   }
-  
-  return num.toFixed(3) + units[unitIndex];
+  const formattedNum = Number(num.toFixed(3));
+  return formattedNum + units[unitIndex];
 }
 function updateStatus() {
   const moneyElement = document.getElementById("money");
