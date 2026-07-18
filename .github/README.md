@@ -3,8 +3,11 @@
 [こちらから遊べます](https://masaru-star.github.io/JS.Hakoniwa-Island/)<br>
 初心者向けにチュートリアルを作成しました。詳細な説明書はGistsで作成中です。
 
-> **important!:** Ver.4.7以前のデータは、島管理方式が根本的に変更されるため、旧バージョンのデータとの互換性を維持できなくなります。9月中旬頃に失効する予定なのでダウンロードをしてプレイしている方は早めに`Ver.5.0`など新データへの移行をお願いします。
+> **important!:** Ver.4.7以前のデータは、島管理方式が根本的に変更されるため、旧バージョンのデータとの互換性を維持できなくなります。9月中旬頃に失効する予定なのでダウンロードをしてプレイしている方は早めに`Ver.5.0`など新データへの移行をお願いします。<br>
 > Ver.5.0リリース直後にセーブコード出力のアルゴリズムを変更しました。現時点では互換性失効と同時に失効させる方針です。
+
+> **Important!** Due to a fundamental change in the island management system, data from Ver. 4.7 and earlier will no longer be compatible with newer versions. As this old data is scheduled to become invalid around mid-September, please migrate to the new data (such as Ver. 5.0) as soon as possible if you are currently playing.<br>
+> The save code generation algorithm was modified immediately after the release of Ver. 5.0. Our current policy is to invalidate the old save codes at the same time compatibility ends.
 
 ![Good First Issue](https://img.shields.io/badge/good%20first--issue-welcome-blueviolet) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) ![Help Wanted](https://img.shields.io/badge/translation-welcome-brightgreen)
 
