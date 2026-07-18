@@ -50,4 +50,4 @@ Interact with other islands, battle monsters that suddenly appear, and overcome 
 
 * **Original Inspired by**: 徳岡宏樹（箱庭諸島）
 * **Developer**: [masaru-star](https://github.com/masaru-star)
-* **Using Library**: [ethers.js](https://github.com/ethers-io/ethers.js)
+* **Using Library**: [ethers.js](https://github.com/ethers-io/ethers.js), [supabase.js](https://github.com/supabase/supabase-js)
