@@ -52,4 +52,4 @@ Interact with other islands, battle monsters that suddenly appear, and overcome 
 
 * **Original Inspired by**: 徳岡宏樹（箱庭諸島）
 * **Developer**: [masaru-star](https://github.com/masaru-star)
-* **Using Library**: [See here](../LICENSE_OtherSoftware.md)
+* **Using Library**: [See here](NOTICE.md)
