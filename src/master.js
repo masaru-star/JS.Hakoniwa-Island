@@ -1569,6 +1569,75 @@ window.updateConfirmButton = function () {
   renderMap();
   renderDockedWarshipCards();
 };
+// 各種アイコン・施設に対応する画像パスを返すヘルパー関数
+// ※ 必要に応じてパスや拡張子（.png, .svgなど）を調整してください
+function getImagePath(key) {
+  const imageMap = {
+    waste: "images/waste.png",
+    plain: "images/plain.png",
+    forest: "images/forest.png",
+    sea: "images/sea.png",
+    mountain: "images/mountain.png",
+    farm: "../images/farm.png",
+    house: "../images/house.png",
+    factory: "../images/factory.png",
+    gun: "../images/gun.png",
+    port: "../images/port.png",
+    Monument: "../images/monument.png",
+    defenseFacility: "../images/defense.png",
+    oilRig: "../images/oilrig.png",
+    enhancedFarm: "../images/enhanced_farm.png",
+    enhancedFactory: "../images/enhanced_factory.png",
+    enhancedOilRig: "../images/enhanced_oilrig.png",
+    warship: "../images/warship.png",
+    warshipDispatched: "../images/warship_dispatched.png",
+    warshipWreckage: "../images/wreckage.png",
+    monster: "../images/monster.png",
+    mountain: "../images/mountain.png"
+  };
+  return imageMap[key] || "";
+}
+
+// セルに画像を設定し、失敗したら絵文字にするヘルパー関数
+function setCellContentWithFallback(cell, imageKey, fallbackEmoji) {
+  cell.innerHTML = "";
+  const imagePath = getImagePath(imageKey);
+
+  if (imagePath) {
+    const img = document.createElement("img");
+    img.src = imagePath;
+    img.alt = fallbackEmoji;
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "contain";
+    img.onerror = () => {
+      cell.textContent = fallbackEmoji;
+    };
+    cell.appendChild(img);
+  } else {
+    cell.textContent = fallbackEmoji;
+  }
+}
+
+// セルに画像を設定するヘルパー関数（地形用：絵文字なし・失敗時は非表示）
+function setTerrainContent(cell, terrainKey) {
+  const imagePath = getImagePath(terrainKey);
+  if (imagePath) {
+    const img = document.createElement("img");
+    img.src = imagePath;
+    img.alt = terrainKey;
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "contain";
+    // 地形画像が万が一読み込めない場合は何も表示しない（空欄）
+    img.onerror = () => {
+      cell.innerHTML = "";
+    };
+    cell.appendChild(img);
+  } else {
+    cell.innerHTML = "";
+  }
+}
 function renderMap() {
   const table = document.getElementById("map");
   table.innerHTML = "";
@@ -1579,13 +1648,12 @@ function renderMap() {
   if (selectedAction === "ppBombard") previewRange = 0;
   if (selectedAction === "bombard") previewRange = 1;
   if (selectedAction === "spreadBombard") previewRange = 2;
+
   for (let y = 0; y < SIZE; y++) {
     const row = document.createElement("tr");
     for (let x = 0; x < SIZE; x++) {
       const cell = document.createElement("td");
       const tile = map[y][x];
-
-      // 他の島を見ているときは砲台と防衛施設を森に偽装
       const displayFacility =
         isViewingOtherIsland &&
         (tile.facility === "gun" ||
@@ -1607,49 +1675,44 @@ function renderMap() {
         if (tile.facility === "factory") cell.classList.add("enhancedFactory");
         if (tile.facility === "oilRig") cell.classList.add("enhancedOilRig");
       }
+      setTerrainContent(cell, displayTerrain);
       const warshipAtTile = warships.find(
         (ship) => ship.x === x && ship.y === y && !isWarshipDocked(ship),
       );
+      const monsterAtTile = monsters.find((m) => m.x === x && m.y === y);
       if (warshipAtTile && !isViewingOtherIsland) {
         if (warshipAtTile.currentDurability <= 0) {
           cell.classList.add("warship-wreckage");
-          cell.textContent = "x"; // 残骸アイコン
+          setCellContentWithFallback(cell, "warshipWreckage", "x");
         } else {
           cell.classList.add("warship");
           if (warshipAtTile.isDispatched) {
             cell.classList.add("warship-dispatched");
-            cell.textContent = "⛶"; // 派遣中アイコン
+            setCellContentWithFallback(cell, "warshipDispatched", "⛶");
           } else {
-            cell.textContent = "🚢";
+            setCellContentWithFallback(cell, "warship", "🚢");
           }
         }
-      } else {
-        cell.textContent =
-          displayFacility === "farm"
-            ? "🌾"
-            : displayFacility === "house"
-              ? "🏠"
-              : displayFacility === "factory"
-                ? "🏭"
-                : displayFacility === "gun"
-                  ? "🔫"
-                  : displayFacility === "port"
-                    ? "⚓"
-                    : displayFacility === "Monument"
-                      ? "🗿"
-                      : displayFacility === "defenseFacility"
-                        ? "🛡️"
-                        : displayFacility === "oilRig"
-                          ? "🛢️"
-                          : "";
-        displayTerrain === "mountain" ? "⛰️" : "";
+      } else if (monsterAtTile && !isViewingOtherIsland) {
+        setCellContentWithFallback(cell, "monster", "👾");
+      } else if (displayFacility) {
+        let facilityKey = displayFacility;
+        let fallbackEmoji = "";
+        if (displayFacility === "farm") fallbackEmoji = "🌾";
+        else if (displayFacility === "house") fallbackEmoji = "🏠";
+        else if (displayFacility === "factory") fallbackEmoji = "🏭";
+        else if (displayFacility === "gun") fallbackEmoji = "🔫";
+        else if (displayFacility === "port") fallbackEmoji = "⚓";
+        else if (displayFacility === "Monument") fallbackEmoji = "🗿";
+        else if (displayFacility === "defenseFacility") fallbackEmoji = "🛡️";
+        else if (displayFacility === "oilRig") fallbackEmoji = "🛢️";
+        if (tile.enhanced) {
+          if (tile.facility === "farm") { facilityKey = "farm"; fallbackEmoji = "🌾"; }
+          if (tile.facility === "factory") { facilityKey = "factory"; fallbackEmoji = "🏭"; }
+          if (tile.facility === "oilRig") { facilityKey = "oilRig"; fallbackEmoji = "🛢️"; }
+        }
+        setCellContentWithFallback(cell, facilityKey, fallbackEmoji);
       }
-      if (tile.enhanced) {
-        if (tile.facility === "farm") cell.textContent = "🌾";
-        if (tile.facility === "factory") cell.textContent = "🏭";
-        if (tile.facility === "oilRig") cell.textContent = "🛢️";
-      }
-
       if (
         previewRange >= 0 &&
         selectedX !== null &&
@@ -1663,15 +1726,11 @@ function renderMap() {
       cell.onmouseover = () => showTileInfo(x, y);
       cell.onclick = () => selectTile(x, y);
       row.appendChild(cell);
-      const monsterAtTile = monsters.find((m) => m.x === x && m.y === y);
-      if (monsterAtTile && !isViewingOtherIsland) {
-        // 自分の島を見ているときのみ表示
-        cell.textContent = "👾";
-      }
     }
     table.appendChild(row);
   }
 }
+
 function showTileInfo(x, y) {
   const tile = map[y][x];
   let info = ` (${x},${y}) 地形: ${tile.terrain}`;
