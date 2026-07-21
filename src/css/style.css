@@ -1,5 +1,6 @@
 body {
   font-family: sans-serif;
+  background-color: #cfe;
 }
 table {
   border-collapse: collapse;
@@ -132,7 +133,6 @@ td {
   color: red;
 }
 
-/* 背景のオーバーレイ */
 .overlay {
   display: none;
   position: fixed;
@@ -145,7 +145,6 @@ td {
   justify-content: center;
   align-items: center;
 }
-/* ポップアップの中身 */
 .modal-content {
   background-color: white;
   padding: 20px;
