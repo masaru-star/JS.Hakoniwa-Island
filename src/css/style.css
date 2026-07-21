@@ -1,5 +1,4 @@
 header {
-  position: fixed;
   top: 0; 
   left: 0; 
   width: 100%;
@@ -21,7 +20,7 @@ header nav ul {
 }
 
 body {
-  padding-top: 70px;
+  padding-top: 200px;
   font-family: sans-serif;
   background-color: #cfe;
 }
