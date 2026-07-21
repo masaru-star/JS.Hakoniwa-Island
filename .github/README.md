@@ -1,4 +1,5 @@
 # MSR式箱庭ゲーム
+![Good First Issue](https://img.shields.io/badge/good%20first--issue-welcome-blueviolet) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) ![Help Wanted](https://img.shields.io/badge/translation-welcome-brightgreen)
 
 [こちらから遊べます](https://masaru-star.github.io/JS.Hakoniwa-Island/)<br>
 初心者向けにチュートリアルを作成しました。詳細な説明書はGistsで作成中です。
@@ -8,8 +9,6 @@
 
 > **Important!** Due to a fundamental change in the island management system, data from Ver. 4.7 and earlier will no longer be compatible with newer versions. As this old data is scheduled to become invalid around mid-September, please migrate to the new data (such as Ver. 5.0) as soon as possible if you are currently playing.<br>
 > The save code generation algorithm was modified immediately after the release of Ver. 5.0. Our current policy is to invalidate the old save codes at the same time compatibility ends.
-
-![Good First Issue](https://img.shields.io/badge/good%20first--issue-welcome-blueviolet) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) ![Help Wanted](https://img.shields.io/badge/translation-welcome-brightgreen)
 
 ## Please cooperate with our survey
 [Click here for the survey](https://docs.google.com/forms/d/e/1FAIpQLSfQbRL926EcXjSShoP-p6uQYG5tqiP5CFijHzJE3qK3sY3wHA/viewform?usp=dialog)
@@ -53,4 +52,4 @@ Interact with other islands, battle monsters that suddenly appear, and overcome 
 
 * **Original Inspired by**: 徳岡宏樹（箱庭諸島）
 * **Developer**: [masaru-star](https://github.com/masaru-star)
-* **Using Library**: [ethers.js](https://github.com/ethers-io/ethers.js), [supabase.js](https://github.com/supabase/supabase-js)
+* **Using Library**: [See here](../LICENSE_OtherSoftware.md)
