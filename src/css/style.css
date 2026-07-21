@@ -33,24 +33,6 @@ td {
   text-align: center;
   cursor: pointer;
 }
-#map {
-  border-collapse: collapse;
-  border-spacing: 0;
-  padding: 0;
-  margin: 0;
-}
-#map td {
-  padding: 0;
-  margin: 0;
-  line-height: 0;
-  font-size: 0;
-}
-#map td img {
-  display: block;
-  width: 100%;
-  height: 130%;
-  object-fit: contain;
-}
 .selected {
   outline: 4px solid gray;
   outline-offset: -1px;
