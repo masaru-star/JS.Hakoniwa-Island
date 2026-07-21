@@ -1769,7 +1769,7 @@ function logAction(msg, options = {}) {
   const log = document.getElementById("log");
   const statusLine2 = document.getElementById("logStatusLine2");
   const entry = document.createElement("div");
-  entry.textContent = `[ターン${turn}] ${msg}`;
+  entry.textContent = msg;
   if (options.subtle) {
     entry.classList.add("log-whisper");
   } else if (
@@ -5702,6 +5702,7 @@ window.nextTurn = async function () {
   logAction(
     `資金収支: ${formatJapaneseNumber(moneyChange + totalOilRigIncome - actualMaintenanceCost)}G, 食料: ${foodChange >= 0 ? "+" : ""}${formatJapaneseNumber(foodChange)}, 人口変化: ${populationChange >= 0 ? "+" : ""}${formatJapaneseNumber(populationChange)}`,
   );
+  logAction(`＝＝＝＝＝ターン: ${turn}＝＝＝＝＝`)
   renderMap();
 };
 /**
