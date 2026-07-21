@@ -3461,6 +3461,7 @@ window.confirmAction = async function () {
 
 // nextTurn関数をグローバルスコープで定義
 window.nextTurn = async function () {
+  logAction(`＝＝＝＝＝ターン開始: ${turn}＝＝＝＝＝`);
   turn++;
   initWarshipTurnStats();
   warships.forEach((warship) => {
@@ -5702,7 +5703,7 @@ window.nextTurn = async function () {
   logAction(
     `資金収支: ${formatJapaneseNumber(moneyChange + totalOilRigIncome - actualMaintenanceCost)}G, 食料: ${foodChange >= 0 ? "+" : ""}${formatJapaneseNumber(foodChange)}, 人口変化: ${populationChange >= 0 ? "+" : ""}${formatJapaneseNumber(populationChange)}`,
   );
-  logAction(`＝＝＝＝＝ターン: ${turn}＝＝＝＝＝`)
+  logAction(`＝＝＝＝＝ターン終了: ${turn}＝＝＝＝＝`);
   renderMap();
 };
 /**
