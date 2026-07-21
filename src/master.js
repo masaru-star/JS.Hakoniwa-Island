@@ -1921,7 +1921,7 @@ function saveGame() {
     .then((encodedData) => {
       document.getElementById("saveLoadData").value = encodedData;
       logAction(
-        "ゲームがMySave形式（gzip圧縮テキスト）で出力されました。データをテキストエリアからコピーしてください。",
+        "ゲームがMySave形式で出力されました。データをテキストエリアからコピーしてください。",
       );
     })
     .catch((error) => {
