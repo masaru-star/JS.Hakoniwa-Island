@@ -3461,8 +3461,8 @@ window.confirmAction = async function () {
 
 // nextTurn関数をグローバルスコープで定義
 window.nextTurn = async function () {
-  logAction(`＝＝＝＝＝ターン開始: ${turn}＝＝＝＝＝`);
   turn++;
+  logAction(`＝＝＝＝＝ターン開始: ${turn}＝＝＝＝＝`);
   initWarshipTurnStats();
   warships.forEach((warship) => {
     if (warship.currentDurability <= 0 || isWarshipDocked(warship)) return;
