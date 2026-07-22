@@ -417,7 +417,7 @@ const MEDAL_DEFS = {
       },
     ],
   },
-  avoidance: {
+  anniversary: {
     label: "1周年記念",
     tiers: [
       {
