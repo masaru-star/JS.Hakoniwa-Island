@@ -37,13 +37,14 @@ SOFTWARE. -->
   <!-- グローバルナビゲーション -->
   <nav>
     <ul>
-      <li><a href="tutorial.html">🔰 チュートリアル</a></li>
-      <li><a href="online.html">🌐Supabase管理版(Beta)</a></li>
-      <li><a href="https://docs.google.com/document/d/1Yb0-8OoQdDv-yxiYmJnhqIsNogoam779jEsIqv0pP38/edit?usp=sharing">コミュニティページ</a></li>
+      <li><a target="_blank" rel="noopener noreferrer" href="tutorial.html">🔰 チュートリアル</a></li>
+      <li><a target="_blank" rel="noopener noreferrer" href="online.html">🌐Supabase管理版(Beta)</a></li>
+      <li><a target="_blank" rel="noopener noreferrer" href="https://docs.google.com/document/d/1Yb0-8OoQdDv-yxiYmJnhqIsNogoam779jEsIqv0pP38/edit?usp=sharing">コミュニティページ</a></li>
     </ul>
   </nav>
 </header>
-<div id="publicity" style="margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f966;">
+<div style="margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f966;">
+<label><input type="checkbox" id="PR"> 宣伝を表示する</label><p id="prText" style="display: none;"></p>
 </div>
 <div id="gameControls" style="margin-bottom: 1em;">
   <label for="islandNameInput">島の名前:</label>
@@ -260,29 +261,44 @@ SOFTWARE. -->
 <div id="logStatusLine2"></div>
 <div id="log" style="margin-top:1em;"></div>
 <script>
-  const openBtn = document.getElementById('openBtn');
-  const closeBtn = document.getElementById('closeBtn');
-  const modal = document.getElementById('modalOverlay');
-openBtn.addEventListener('click', () => {
-  modal.style.display = 'flex';
+fetch("https://raw.githubusercontent.com/masaru-star/masaru-star/refs/heads/main/others/publicity.html")
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("ファイルの読み込みに失敗しました");
+    }
+    return response.text();
+  })
+  .then((data) => {
+    // id="prText" の要素の中に取得したHTMLを代入する
+    document.getElementById("prText").innerHTML = data;
+  })
+  .catch((error) => {
+    console.error("エラー:", error);
+    document.getElementById("prText").textContent = "読み込みに失敗しました。";
+  });
+const openBtn = document.getElementById("openBtn");
+const closeBtn = document.getElementById("closeBtn");
+const modal = document.getElementById("modalOverlay");
+openBtn.addEventListener("click", () => {
+  modal.style.display = "flex";
 });
-closeBtn.addEventListener('click', () => {
-  modal.style.display = 'none';
+closeBtn.addEventListener("click", () => {
+  modal.style.display = "none";
 });
-window.addEventListener('click', (e) => {
+window.addEventListener("click", (e) => {
   if (e.target === modal) {
-    modal.style.display = 'none';
+    modal.style.display = "none";
   }
 });
-  const checkbox = document.getElementById('PR');
-  const text = document.getElementById('prText');
-  checkbox.addEventListener('change', function() {
-    if (this.checked) {
-      text.style.display = 'block';
-    } else {
-      text.style.display = 'none';
-    }
-  });
+const checkbox = document.getElementById("PR");
+const text = document.getElementById("prText");
+checkbox.addEventListener("change", function () {
+  if (this.checked) {
+    text.style.display = "block";
+  } else {
+    text.style.display = "none";
+  }
+});
 </script>
 </body>
 </html>
