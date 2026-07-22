@@ -3960,9 +3960,9 @@ window.nextTurn = async function () {
         hitChance = 0.22;
       }
       let protectingDefenseFacility = null;
+      const attackLimit = ship.mainGun + ship.torpedo;
       for (let n = 0; n < attackLimit; n++) {
       if (Math.random() < hitChance) {
-        const attackLimit = ship.mainGun + ship.torpedo;
         let executed = 0;
           if (ship.currentAmmo <= 0 || ship.currentFuel <= 0) {
             registerWarshipMiss(ship);
