@@ -3938,7 +3938,7 @@ window.nextTurn = async function () {
         );
         previousExecutedAction = "concentratedFire";
         continue;
-      }
+      }  
       logAction(`(${targetX},${targetY}) へ集中砲撃を開始します。`);
       const canParticipate = (ship) => {
         const dist = Math.max(
@@ -3952,9 +3952,18 @@ window.nextTurn = async function () {
       };
       for (const ship of availableWarships) {
         if (!canParticipate(ship)) continue;
+
+      let hitChance = 0.1; // Base 10%
+      if (ship.accuracyImprovement === 1) {
+        hitChance = 0.15;
+      } else if (ship.accuracyImprovement === 2) {
+        hitChance = 0.22;
+      }
+      let protectingDefenseFacility = null;
+      for (let n = 0; n < attackLimit; n++) {
+      if (Math.random() < hitChance) {
         const attackLimit = ship.mainGun + ship.torpedo;
         let executed = 0;
-        for (let n = 0; n < attackLimit; n++) {
           if (ship.currentAmmo <= 0 || ship.currentFuel <= 0) {
             registerWarshipMiss(ship);
             break;
@@ -3976,8 +3985,10 @@ window.nextTurn = async function () {
                 monsterHit,
                 `${monsterName} は集中砲撃により討伐されました！`,
               );
+              ship.exp += 1;
             } else {
               logAction(`${monsterName} に命中！ (残り体力: ${monsterHit.hp})`);
+              ship.exp += 1;
             }
             continue;
           }
@@ -4017,6 +4028,7 @@ window.nextTurn = async function () {
                 logAction(
                   `集中砲撃が軍艦「${targetWarship.name}」に命中！ (残り耐久: ${targetWarship.currentDurability})`,
                 );
+                ship.exp += 1;
               }
             } else {
               registerWarshipMiss(ship);
@@ -4035,7 +4047,8 @@ window.nextTurn = async function () {
               `集中砲撃により (${targetX},${targetY}) が破壊されました。`,
             );
           }
-        }
+        }}
+      
         if (executed > 0) {
           logAction(
             `軍艦「${ship.name}」が集中砲撃を ${executed} 回実行しました。`,
