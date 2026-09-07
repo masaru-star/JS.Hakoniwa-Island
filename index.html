@@ -149,7 +149,7 @@ SOFTWARE. -->
   <option value="">計画一覧</option>
   <option value="buildFarm" data-myisland="true">農場建設 (100G)</option>
   <option value="buildFactory" data-myisland="true">工場建設 (100G)</option>
-  <option value="buildMiningSite" data-myisland="true">採掘場整備</option>
+  <option value="buildMiningSite" data-myisland="true">採掘場整備 (100000G)</option>
   <option value="enhanceFacility" data-myisland="true">設備強化 (10000G)</option>
   <option value="buildPort" data-myisland="true">港建設 (3000G)</option>
   <option value="buildGun" data-myisland="true">砲台建設 (1200G)</option>
@@ -171,6 +171,8 @@ SOFTWARE. -->
   <option value="delayAction" data-myisland="true">遅延行動</option>
   <option value="buildWarship" data-myisland="true">軍艦建造</option>
   <option value="warshipTool" data-myisland="true">軍艦ツール</option>
+  <option value="fastPlanTool" data-myisland="true">高速計画実行</option>
+  <option value="bulkPlanTool" data-myisland="true">一括計画ツール</option>
   <option value="buildMonument" data-myisland="true">石碑建設 (500000000G)</option>
   <option value="upgradeMonument" data-myisland="true">石碑強化 (500000000G)</option>
   <option value="sellMonument" data-myisland="true">石碑売却 (無料)</option>
@@ -201,6 +203,21 @@ SOFTWARE. -->
   <option value="autofactory" data-myisland="true">工場建設自動送信</option>
   <option value="autolandfill" data-myisland="true">埋め立て自動送信</option>
 </select> -->
+<select id="fastPlanSubSelect" onchange="updateConfirmButton()" style="width: 180px; display: none;">
+  <option value="">高速計画を選択</option>
+  <option value="fastBuildFarm" data-myisland="true">高速農場建設 (10000G)</option>
+  <option value="fastBuildFactory" data-myisland="true">高速工場建設 (10000G)</option>
+  <option value="fastBuildGun" data-myisland="true">高速砲台建設 (120000G)</option>
+  <option value="fastBuildDefenseFacility" data-myisland="true">高速防衛施設建設 (500000G)</option>
+  <option value="fastFlattenAll" data-myisland="true">一括地ならし (荒地数 × 200G)</option>
+  <option value="fastFlatten" data-myisland="true">地ならし (200G)</option>
+  <option value="fastLandfill" data-myisland="true">高速埋め立て (60000G)</option>
+  <option value="fastPlantForest" data-myisland="true">高速植林 (20000G)</option>
+</select>
+<select id="bulkPlanSubSelect" onchange="updateConfirmButton()" style="width: 180px; display: none;">
+  <option value="">一括計画を選択</option>
+  <option value="bulkFlattenWaste" data-myisland="true">整地一括入力</option>
+</select>
 <input type="number" id="exportAmount" placeholder="輸出数" min="1" style="width: 60px; display: none;">
 <input type="number" id="bombardCount" placeholder="攻撃数" min="1" style="width: 60px; display: none;">
 <input type="number" id="refuelAmount" placeholder="補給数" min="1" style="width: 60px; display: none;">
