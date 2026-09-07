@@ -5325,8 +5325,8 @@ window.nextTurn = async function () {
       }
     }
   }
-  if (turn >= 1000 && Math.random() < 0.001) {
-    // 0.1% = 0.001
+  if (turn >= 1000 && Math.random() < 0.0003) {
+    // 0.1% (9月7日: 0.03%に変更)
     logAction(`巨大地震が発生しました！島全体に甚大な被害が予想されます！`);
     earthquakeEffect();
   }
