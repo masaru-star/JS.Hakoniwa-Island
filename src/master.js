@@ -1577,15 +1577,36 @@ function updateStatus() {
 window.updateConfirmButton = function () {
   const actionSelect = document.getElementById("actionSelect");
   const warshipSubSelect = document.getElementById("warshipSubSelect");
+  const fastPlanSubSelect = document.getElementById("fastPlanSubSelect");
+  const bulkPlanSubSelect = document.getElementById("bulkPlanSubSelect");
 
   let action = actionSelect.value;
   if (action === "warshipTool") {
     warshipSubSelect.style.display = "inline-block";
     action = warshipSubSelect.value;
+  } else if (action === "fastPlanTool" && fastPlanSubSelect) {
+    fastPlanSubSelect.style.display = "inline-block";
+    action = fastPlanSubSelect.value;
+  } else if (action === "bulkPlanTool" && bulkPlanSubSelect) {
+    bulkPlanSubSelect.style.display = "inline-block";
+    action = bulkPlanSubSelect.value;
   } else {
     warshipSubSelect.style.display = "none";
     warshipSubSelect.value = ""; // サブセレクトをリセット
+    if (fastPlanSubSelect) {
+      fastPlanSubSelect.style.display = "none";
+      fastPlanSubSelect.value = "";
+    }
+    if (bulkPlanSubSelect) {
+      bulkPlanSubSelect.style.display = "none";
+      bulkPlanSubSelect.value = "";
+    }
   }
+  if (actionSelect.value !== "warshipTool") warshipSubSelect.style.display = "none";
+  if (fastPlanSubSelect && actionSelect.value !== "fastPlanTool")
+    fastPlanSubSelect.style.display = "none";
+  if (bulkPlanSubSelect && actionSelect.value !== "bulkPlanTool")
+    bulkPlanSubSelect.style.display = "none";
   document.getElementById("confirmBtn").disabled = action === "";
   document.getElementById("exportAmount").style.display = "none";
   document.getElementById("bombardCount").style.display = "none";
@@ -2600,18 +2621,148 @@ async function handleWarshipAttacks() {
   });
 }
 
+function executeFastPlan(action) {
+  const requiresTile = action !== "fastFlattenAll";
+  if (requiresTile && (selectedX === null || selectedY === null)) {
+    logAction("アクションの対象タイルを選択してください");
+    return false;
+  }
+
+  const x = selectedX;
+  const y = selectedY;
+  const tile = requiresTile ? map[y][x] : null;
+  const overwriteHouse = (targetTile) => {
+    if (targetTile.facility === "house") {
+      population = Math.max(0, population - targetTile.pop);
+      targetTile.facility = null;
+      targetTile.pop = 0;
+      logAction(`(${x},${y}) の市街地が取り壊されました。`);
+    }
+  };
+  const build = (facility, cost, name) => {
+    if (!tile || tile.terrain !== "plain" || money < cost) {
+      logAction(`(${x},${y}) の${name}は失敗しました（条件不適合または資金不足）`);
+      return false;
+    }
+    overwriteHouse(tile);
+    tile.facility = facility;
+    tile.enhanced = false;
+    money -= cost;
+    logAction(`(${x},${y}) に${name}を建設しました（${cost}G消費）`);
+    return true;
+  };
+
+  switch (action) {
+    case "fastBuildFarm":
+      return build("farm", 10000, "農場");
+    case "fastBuildFactory":
+      return build("factory", 10000, "工場");
+    case "fastBuildGun":
+      return build("gun", 120000, "砲台");
+    case "fastBuildDefenseFacility":
+      return build("defenseFacility", 500000, "防衛施設");
+    case "fastFlatten":
+      if (!tile || (tile.terrain !== "waste" && !tile.facility) || money < 200) {
+        logAction(`(${x},${y}) の整地は失敗しました（条件不適合または資金不足）`);
+        return false;
+      }
+      overwriteHouse(tile);
+      tile.terrain = "plain";
+      tile.facility = null;
+      tile.pop = 0;
+      tile.enhanced = false;
+      money -= 200;
+      logAction(`(${x},${y}) を整地して平地にしました（200G消費）`);
+      return true;
+    case "fastFlattenAll": {
+      const wasteTiles = map.flat().filter((target) => target.terrain === "waste");
+      const cost = wasteTiles.length * 200;
+      if (money < cost) {
+        logAction(`一括地ならしは失敗しました（資金不足: ${cost}G 必要）`);
+        return false;
+      }
+      wasteTiles.forEach((target) => {
+        target.terrain = "plain";
+        target.facility = null;
+        target.pop = 0;
+        target.enhanced = false;
+      });
+      money -= cost;
+      logAction(`${wasteTiles.length} 個の荒地を一括地ならししました（${cost}G消費）`);
+      return true;
+    }
+    case "fastLandfill":
+      if (!tile || tile.terrain !== "sea" || money < 60000) {
+        logAction(`(${x},${y}) の埋め立ては失敗しました（海ではありませんまたは資金不足）`);
+        return false;
+      }
+      tile.terrain = "waste";
+      tile.enhanced = false;
+      money -= 60000;
+      logAction(`(${x},${y}) を埋め立てて荒地にしました（60000G消費）`);
+      return true;
+    case "fastPlantForest":
+      if (!tile || tile.terrain !== "plain" || tile.facility !== null || money < 20000) {
+        logAction(`(${x},${y}) の植林は失敗しました（条件不適合または資金不足）`);
+        return false;
+      }
+      tile.terrain = "forest";
+      tile.enhanced = false;
+      money -= 20000;
+      logAction(`(${x},${y}) に植林を行い、森にしました（20000G消費）`);
+      return true;
+    default:
+      return false;
+  }
+}
+
 // confirmAction関数をグローバルスコープで定義
 window.confirmAction = async function () {
   const actionSelect = document.getElementById("actionSelect");
   const warshipSubSelect = document.getElementById("warshipSubSelect");
+  const fastPlanSubSelect = document.getElementById("fastPlanSubSelect");
+  const bulkPlanSubSelect = document.getElementById("bulkPlanSubSelect");
   let action = document.getElementById("actionSelect").value;
   if (action === "warshipTool") {
     action = warshipSubSelect.value;
+  } else if (action === "fastPlanTool") {
+    action = fastPlanSubSelect.value;
+  } else if (action === "bulkPlanTool") {
+    action = bulkPlanSubSelect.value;
   }
   if (action === "") {
     if (actionSelect.value === "warshipTool") {
       logAction(`軍艦ツールからオプションを選択してください`);
+    } else if (actionSelect.value === "fastPlanTool") {
+      logAction(`高速計画実行からオプションを選択してください`);
+    } else if (actionSelect.value === "bulkPlanTool") {
+      logAction(`一括計画ツールからオプションを選択してください`);
     }
+    return;
+  }
+  if (action.startsWith("fast")) {
+    if (isViewingOtherIsland) {
+      logAction("他の島の表示中は高速計画を実行できません。");
+      return;
+    }
+    const executed = executeFastPlan(action);
+    if (executed) {
+      renderMap();
+      updateStatus();
+      saveMyIslandState();
+    }
+    if (!document.getElementById("keepOptionSelected").checked) {
+      actionSelect.value = "";
+    }
+    updateConfirmButton();
+    return;
+  }
+  if (action === "bulkFlattenWaste") {
+    addBulkPlans("flatten", "waste", null);
+    if (!document.getElementById("keepOptionSelected").checked) {
+      actionSelect.value = "";
+    }
+    updateConfirmButton();
     return;
   }
   const targetTileSelected = selectedX !== null && selectedY !== null;
@@ -4244,12 +4395,19 @@ window.nextTurn = async function () {
       updateStatus();
       saveMyIslandState();
     } else if (action === "buildMiningSite") {
-      if (tile && tile.terrain === "mountain" && tile.facility === null) {
+      const miningSiteCost = window.HAKONIWA_SUPABASE_MODE ? 0 : 100000;
+      if (
+        tile &&
+        tile.terrain === "mountain" &&
+        tile.facility === null &&
+        money >= miningSiteCost
+      ) {
         tile.facility = "miningSite";
         tile.enhanced = false;
-        logAction(`(${x},${y}) に採掘場を整備しました`);
+        money -= miningSiteCost;
+        logAction(`(${x},${y}) に採掘場を整備しました${miningSiteCost ? `（${miningSiteCost}G消費）` : ""}`);
       } else {
-        logAction(`(${x},${y}) の採掘場整備は失敗しました（山以外には整備できません）`);
+        logAction(`(${x},${y}) の採掘場整備は失敗しました（条件不適合または資金不足）`);
       }
     } else if (action === "buildFarm") {
       if (tile && tile.terrain === "plain" && money >= 100) {
