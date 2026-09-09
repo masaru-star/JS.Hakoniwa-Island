@@ -3,7 +3,6 @@ const HOUSE_NATURAL_POP_LIMIT = 10000;
 const HOUSE_INVITED_POP_LIMIT = 20000;
 const UNKNOWN_WARSHIP_HOME_PORT = "不明";
 const UNKNOWN_WARSHIP_NAME = "所属不明の軍艦";
-
 const MONSTER_TYPES = {
   1: {
     name: "怪獣シマオロシ",
@@ -126,6 +125,17 @@ console.log(
   `%cこれは開発者向けのブラウザ機能です。もし誰かからここに何かをコピー＆ペーストするように言われたら、絶対にやめてください！島情報が盗まれるなど、その他多くの不利益を被る可能性があります。内容を理解していないコードは入力しないでください。`,
   "font-size: 16px; font-family: sans-serif; line-height: 1.5;",
 );
+// 50ミリ秒待機するヘルパー関数
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function playSoundAndDelay(audioname) {
+  // 1. 音声の読み込みと再生
+  const audio = new Audio(audioname);
+  await audio.play().catch((error) => {
+    console.error("再生に失敗しました:", error);
+  });
+  await sleep(50);
+}
 function arrayBufferToBase64(buffer) {
   return btoa(String.fromCharCode(...new Uint8Array(buffer)));
 }
@@ -2637,6 +2647,7 @@ function executeFastPlan(action) {
       targetTile.facility = null;
       targetTile.pop = 0;
       logAction(`(${x},${y}) の市街地が取り壊されました。`);
+      playSoundAndDelay('build2.mp3');
     }
   };
   const build = (facility, cost, name) => {
@@ -2649,6 +2660,7 @@ function executeFastPlan(action) {
     tile.enhanced = false;
     money -= cost;
     logAction(`(${x},${y}) に${name}を建設しました（${cost}G消費）`);
+    playSoundAndDelay('build2.mp3');
     return true;
   };
 
@@ -3828,6 +3840,7 @@ window.nextTurn = async function () {
       warship.currentAmmo = 0;
       warship.abnormality = null;
       logAction(`軍艦 ${warship.name} は異常状態の進行により撃沈しました！`);
+      playSoundAndDelay('fire.mp3');
     }
   });
   const otherIslandActionCode = document.getElementById(
@@ -3904,6 +3917,7 @@ window.nextTurn = async function () {
                   logAction(
                     `砲撃は防衛施設により無効化されました (${tx},${ty})`,
                   );
+                  playSoundAndDelay('fire.mp3');
                   continue; // 次の攻撃へ
                 }
               }
@@ -3913,7 +3927,8 @@ window.nextTurn = async function () {
                 // 追加
                 logAction(
                   `他島からの砲撃は山に着弾しましたが、被害はありませんでした(${tx},${ty})`,
-                ); // 追加
+                );
+                playSoundAndDelay('fire.mp3');
                 continue; // 追加
               }
               if (target.terrain === "sea") {
@@ -3931,6 +3946,7 @@ window.nextTurn = async function () {
                       logAction(
                         `派遣中の軍艦「${targetWarship.name}」への砲撃は無効でした。`,
                       );
+                      playSoundAndDelay('fire.mp3');
                       continue;
                     }
                     targetWarship.currentDurability -= 1; // 耐久値1減少
@@ -3947,13 +3963,16 @@ window.nextTurn = async function () {
                       logAction(
                         `他島からの砲撃により軍艦「${targetWarship.name}」が撃沈されました！`,
                       );
+                      playSoundAndDelay('fire.mp3');
                     } else {
                       logAction(
                         `他島からの砲撃が軍艦「${targetWarship.name}」に着弾しました！ (残り耐久: ${targetWarship.currentDurability})`,
                       );
+                      playSoundAndDelay('fire.mp3');
                     }
                   } else {
                     logAction(`他島からの砲撃は海に着弾しました (${tx},${ty})`);
+                    playSoundAndDelay('fire.mp3');
                   }
                 }
               } else {
