@@ -3,7 +3,6 @@ const HOUSE_NATURAL_POP_LIMIT = 10000;
 const HOUSE_INVITED_POP_LIMIT = 20000;
 const UNKNOWN_WARSHIP_HOME_PORT = "不明";
 const UNKNOWN_WARSHIP_NAME = "所属不明の軍艦";
-
 const MONSTER_TYPES = {
   1: {
     name: "怪獣シマオロシ",
@@ -6578,6 +6577,7 @@ window.HakoniwaCore = {
 
 // 初期化時に自分の島の状態をロード（または初期化）する
 window.onload = function () {
+  document.getElementById("islandNameInput").value = islandName;
   initializeSessionSettings();
   if (window.HAKONIWA_SUPABASE_MODE) {
     initMap();
