@@ -3,6 +3,28 @@ const HOUSE_NATURAL_POP_LIMIT = 10000;
 const HOUSE_INVITED_POP_LIMIT = 20000;
 const UNKNOWN_WARSHIP_HOME_PORT = "不明";
 const UNKNOWN_WARSHIP_NAME = "所属不明の軍艦";
+const CONSTANT = {
+  amount: {
+    buildFarm: 100,
+    buildFactory: 100,
+    buildMiningsite: 100000,
+    enhanceFacility: 10000,
+    buildPort: 3000,
+    buildGun: 1200,
+    buildDefencefacility: 5000,
+    flatten: 20,
+    landfill: 600,
+    dig: 300,
+    cutforest: 0,
+    bombard: 120,
+    spreadBombard: 500,
+    ppBombard: 100000000,
+    randomBombard: 10000000,
+  }
+  chance: {
+
+  }
+}
 const MONSTER_TYPES = {
   1: {
     name: "怪獣シマオロシ",
@@ -273,9 +295,9 @@ function updatePublicKeyDisplay() {
 }
 let economicCrisisTurns = 0; // 経済危機の残りターン数
 let frozenMoney = 0; // 経済危機による凍結資金
-let volcanoTurns = 0; 
-let trackedFundingFailure = null; 
-let currentExecutingTask = null; 
+let volcanoTurns = 0;
+let trackedFundingFailure = null;
+let currentExecutingTask = null;
 
 const SESSION_SETTING_DEFAULTS = {
   settingShowClearTileSelection: false,
@@ -1700,16 +1722,16 @@ function renderMap() {
       // 他の島を見ているときは砲台と防衛施設を森に偽装
       const displayFacility =
         isViewingOtherIsland &&
-        (tile.facility === "gun" ||
-          tile.facility === "defenseFacility" ||
-          tile.facility === "Monument")
+          (tile.facility === "gun" ||
+            tile.facility === "defenseFacility" ||
+            tile.facility === "Monument")
           ? "forest"
           : tile.facility;
       const displayTerrain =
         isViewingOtherIsland &&
-        (tile.facility === "gun" ||
-          tile.facility === "defenseFacility" ||
-          tile.facility === "Monument")
+          (tile.facility === "gun" ||
+            tile.facility === "defenseFacility" ||
+            tile.facility === "Monument")
           ? "forest"
           : tile.terrain;
       cell.className = displayTerrain;
@@ -4080,24 +4102,16 @@ window.nextTurn = async function () {
             existingWarship.exp = returnedWarshipData.exp;
             existingWarship.currentFuel = returnedWarshipData.currentFuel;
             existingWarship.maxFuel = returnedWarshipData.maxFuel; // maxFuelも更新
-            existingWarship.currentDurability =
-              returnedWarshipData.currentDurability;
+            existingWarship.currentDurability = returnedWarshipData.currentDurability;
             existingWarship.mainGun = returnedWarshipData.mainGun;
             existingWarship.torpedo = returnedWarshipData.torpedo;
             existingWarship.antiAir = returnedWarshipData.antiAir;
             existingWarship.maxAmmo = returnedWarshipData.maxAmmo;
             existingWarship.currentAmmo = returnedWarshipData.currentAmmo;
             existingWarship.reconnaissance = returnedWarshipData.reconnaissance;
-            existingWarship.accuracyImprovement =
-              returnedWarshipData.accuracyImprovement;
-            existingWarship.nameSignature =
-              returnedWarshipData.nameSignature ||
-              existingWarship.nameSignature ||
-              "";
-            existingWarship.signaturePublicKey =
-              returnedWarshipData.signaturePublicKey ||
-              existingWarship.signaturePublicKey ||
-              null;
+            existingWarship.accuracyImprovement = returnedWarshipData.accuracyImprovement;
+            existingWarship.nameSignature = returnedWarshipData.nameSignature || existingWarship.nameSignature || "";
+            existingWarship.signaturePublicKey = returnedWarshipData.signaturePublicKey || existingWarship.signaturePublicKey || null;
             existingWarship.isDispatched = false;
 
             logAction(
@@ -4241,7 +4255,7 @@ window.nextTurn = async function () {
         );
         previousExecutedAction = "concentratedFire";
         continue;
-      }  
+      }
       logAction(`(${targetX},${targetY}) へ集中砲撃を開始します。`);
       const canParticipate = (ship) => {
         const dist = Math.max(
@@ -4256,103 +4270,104 @@ window.nextTurn = async function () {
       for (const ship of availableWarships) {
         if (!canParticipate(ship)) continue;
 
-      let hitChance = 0.1; // Base 10%
-      if (ship.accuracyImprovement === 1) {
-        hitChance = 0.15;
-      } else if (ship.accuracyImprovement === 2) {
-        hitChance = 0.22;
-      }
-      let protectingDefenseFacility = null;
-      const attackLimit = ship.mainGun + ship.torpedo;
-      let executed = 0;
-      for (let n = 0; n < attackLimit; n++) {
-        const attackDamage = getWarshipAttackDamage(ship, n);
-      if (Math.random() < hitChance) {
-          if (ship.currentAmmo <= 0 || ship.currentFuel <= 0) {
-            registerWarshipMiss(ship);
-            break;
-          }
-          ship.currentAmmo -= 1;
-          ship.currentFuel = Math.max(0, ship.currentFuel - 1);
-          executed++;
-          const monsterHit = monsters.find(
-            (m) => m.x === targetX && m.y === targetY,
-          );
-          if (monsterHit) {
-            monsterHit.hp -= 1;
-            registerWarshipHit(ship);
-            const monsterName = MONSTER_TYPES[monsterHit.typeId]
-              ? MONSTER_TYPES[monsterHit.typeId].name
-              : "怪獣";
-            if (monsterHit.hp <= 0) {
-              handleMonsterDefeat(
-                monsterHit,
-                `${monsterName} は集中砲撃により討伐されました！`,
-              );
-              ship.exp += 1;
-            } else {
-              logAction(`${monsterName} に命中！ (残り体力: ${monsterHit.hp})`);
-              ship.exp += 1;
+        let hitChance = 0.1; // Base 10%
+        if (ship.accuracyImprovement === 1) {
+          hitChance = 0.15;
+        } else if (ship.accuracyImprovement === 2) {
+          hitChance = 0.22;
+        }
+        let protectingDefenseFacility = null;
+        const attackLimit = ship.mainGun + ship.torpedo;
+        let executed = 0;
+        for (let n = 0; n < attackLimit; n++) {
+          const attackDamage = getWarshipAttackDamage(ship, n);
+          if (Math.random() < hitChance) {
+            if (ship.currentAmmo <= 0 || ship.currentFuel <= 0) {
+              registerWarshipMiss(ship);
+              break;
             }
-            continue;
-          }
-          const targetTile = map[targetY][targetX];
-          if (targetTile.terrain === "mountain") {
-            registerWarshipMiss(ship);
-            logAction(
-              `集中砲撃は山に着弾しましたが、被害はありませんでした。 (${targetX},${targetY})`,
+            ship.currentAmmo -= 1;
+            ship.currentFuel = Math.max(0, ship.currentFuel - 1);
+            executed++;
+            const monsterHit = monsters.find(
+              (m) => m.x === targetX && m.y === targetY,
             );
-            continue;
-          }
-          if (targetTile.terrain === "sea") {
-            if (targetTile.facility === "port") {
+            if (monsterHit) {
+              monsterHit.hp -= 1;
               registerWarshipHit(ship);
-              targetTile.facility = null;
-              logAction(
-                `集中砲撃により (${targetX},${targetY}) の港が破壊されました。`,
-              );
-              continue;
-            }
-            const targetWarship = warships.find(
-              (w) => w.x === targetX && w.y === targetY && w !== ship,
-            );
-            if (targetWarship && !targetWarship.isDispatched) {
-              registerWarshipHit(ship);
-              targetWarship.currentDurability -= attackDamage;
-              registerWarshipDamageTaken(targetWarship, attackDamage);
-              if (targetWarship.currentDurability <= 0) {
-                targetWarship.currentDurability = 0;
-                targetWarship.currentAmmo = 0;
-                targetWarship.currentFuel = 0;
-                registerWarshipSink(ship);
-                logAction(
-                  `集中砲撃により軍艦「${targetWarship.name}」が撃沈されました！`,
-                );
-              } else {
-                logAction(
-                  `集中砲撃が軍艦「${targetWarship.name}」に命中！ (残り耐久: ${targetWarship.currentDurability})`,
+              const monsterName = MONSTER_TYPES[monsterHit.typeId]
+                ? MONSTER_TYPES[monsterHit.typeId].name
+                : "怪獣";
+              if (monsterHit.hp <= 0) {
+                handleMonsterDefeat(
+                  monsterHit,
+                  `${monsterName} は集中砲撃により討伐されました！`,
                 );
                 ship.exp += 1;
+              } else {
+                logAction(`${monsterName} に命中！ (残り体力: ${monsterHit.hp})`);
+                ship.exp += 1;
               }
-            } else {
-              registerWarshipMiss(ship);
-              logAction(`集中砲撃は海に着弾しました。 (${targetX},${targetY})`);
-            }
-          } else {
-            registerWarshipHit(ship);
-            if (targetTile.facility === "house") {
-              applyHouseBombardmentDamage(targetTile);
               continue;
             }
-            targetTile.facility = null;
-            targetTile.enhanced = false;
-            targetTile.terrain = "waste";
-            logAction(
-              `集中砲撃により (${targetX},${targetY}) が破壊されました。`,
-            );
+            const targetTile = map[targetY][targetX];
+            if (targetTile.terrain === "mountain") {
+              registerWarshipMiss(ship);
+              logAction(
+                `集中砲撃は山に着弾しましたが、被害はありませんでした。 (${targetX},${targetY})`,
+              );
+              continue;
+            }
+            if (targetTile.terrain === "sea") {
+              if (targetTile.facility === "port") {
+                registerWarshipHit(ship);
+                targetTile.facility = null;
+                logAction(
+                  `集中砲撃により (${targetX},${targetY}) の港が破壊されました。`,
+                );
+                continue;
+              }
+              const targetWarship = warships.find(
+                (w) => w.x === targetX && w.y === targetY && w !== ship,
+              );
+              if (targetWarship && !targetWarship.isDispatched) {
+                registerWarshipHit(ship);
+                targetWarship.currentDurability -= attackDamage;
+                registerWarshipDamageTaken(targetWarship, attackDamage);
+                if (targetWarship.currentDurability <= 0) {
+                  targetWarship.currentDurability = 0;
+                  targetWarship.currentAmmo = 0;
+                  targetWarship.currentFuel = 0;
+                  registerWarshipSink(ship);
+                  logAction(
+                    `集中砲撃により軍艦「${targetWarship.name}」が撃沈されました！`,
+                  );
+                } else {
+                  logAction(
+                    `集中砲撃が軍艦「${targetWarship.name}」に命中！ (残り耐久: ${targetWarship.currentDurability})`,
+                  );
+                  ship.exp += 1;
+                }
+              } else {
+                registerWarshipMiss(ship);
+                logAction(`集中砲撃は海に着弾しました。 (${targetX},${targetY})`);
+              }
+            } else {
+              registerWarshipHit(ship);
+              if (targetTile.facility === "house") {
+                applyHouseBombardmentDamage(targetTile);
+                continue;
+              }
+              targetTile.facility = null;
+              targetTile.enhanced = false;
+              targetTile.terrain = "waste";
+              logAction(
+                `集中砲撃により (${targetX},${targetY}) が破壊されました。`,
+              );
+            }
           }
-        }}
-      
+        }
+
         if (executed > 0) {
           logAction(
             `軍艦「${ship.name}」が集中砲撃を ${executed} 回実行しました。`,
@@ -5962,7 +5977,7 @@ window.nextTurn = async function () {
         if (adjacentWarships.length > 0) {
           const target =
             adjacentWarships[
-              Math.floor(Math.random() * adjacentWarships.length)
+            Math.floor(Math.random() * adjacentWarships.length)
             ];
           const useRoar = Math.random() < 0.5;
           const damage = useRoar ? 14 : 21;

@@ -18,119 +18,131 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. -->
-<html><head>
+<html>
+
+<head>
   <meta charset="UTF-8">
-  <title>MSR式箱庭ゲーム　Ver.5.1</title>
+  <title>MSR式箱庭諸島 Ver.5.1</title>
   <script src="src/master.js"></script>
   <script src="src/import/ethers_6-17-0.js"></script>
   <link rel="stylesheet" href="src/css/style.css">
   <link rel="icon" href="icon.png">
   <noscript>
-  <meta http-equiv="refresh" content="0; url=NoScript.html">
+    <meta http-equiv="refresh" content="0; url=NoScript.html">
   </noscript>
 </head>
+
 <body>
-<header>
-  <!-- サイトのロゴ -->
-  <h1><a href="https://masaru-star.github.io/JS.Hakoniwa-Island/">M式・低予算の箱庭</a></h1>
-  <!-- グローバルナビゲーション -->
-  <nav>
-    <ul>
-      <li><a target="_blank" rel="noopener noreferrer" href="tutorial.html">🔰 チュートリアル</a></li>
-      <li><a target="_blank" rel="noopener noreferrer" href="online.html">🌐Supabase管理版(Beta)</a></li>
-      <li><a target="_blank" rel="noopener noreferrer" href="https://discord.gg/VbP49uqUF">コミュニティページ</a></li>
-    </ul>
-  </nav>
-</header>
-<div style="margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f966;">
-<label><input type="checkbox" id="PR"> 宣伝を表示する</label><p id="prText" style="display: none;"></p>
-</div>
-<div id="gameControls" style="margin-bottom: 1em;">
-  <label for="islandNameInput">島の名前:</label>
-  <input type="text" id="islandNameInput" value="MyIsland">
-  <button onclick="saveGame()">セーブ</button>
-  <button onclick="loadGame()">ロード</button>
-  <textarea id="saveLoadData" name="Load" rows="5" cols="60" placeholder="ここにセーブデータが表示されます。ロードする際はここにデータを貼り付けてください。" style="display: block; margin-top: 1em;"></textarea>
-  <p style="font-size: 0.8em; color: gray;">
-    ※セーブデータは直接ファイルとして保存されません。上記のテキストエリアに表示されたデータをコピーして、テキストファイルに貼り付けて保存してください。<br>
-    ロードする際は、保存したデータを上記のテキストエリアに貼り付けてから「ロード」ボタンを押してください。
-  </p>
-</div>
-<button id="openBtn">諸設定/貢献者の一覧/ソースコード</button>
-<div id="modalOverlay" class="overlay">
-  <div class="modal-content">
-    <h2>諸設定</h2>
-    <p class="settings-note">この諸設定は現在開いている画面でのみ有効です。ブラウザストレージには保存しません。</p>
-    <div id="settingsList" class="settings-list">
-      <label><input type="checkbox" id="settingShowClearTileSelection">「タイル選択の解除」ボタンを表示する</label>
-      <label><input type="checkbox" id="settingShowKeepOptionSelected" checked>「オプションを先頭に戻さない」チェックボックスを表示する</label>
-      <label><input type="checkbox" id="settingShowFundingTrackingControls">「トラッキング解除」「トラッキングを固定」を表示する</label>
-      <label><input type="checkbox" id="settingShowEconomicCrisisRate">「経済危機発生率」を表示する</label>
-      <label><input type="checkbox" id="settingEnablePlanTracking">「計画トラッキング」を実行し、表示する</label>
-      <label><input type="checkbox" id="settingConfirmOnSelectedTileClick">計画一覧で選択中に選択済みタイルを再クリックしたら決定する</label>
-      <label><input type="checkbox" id="settingEnhanceWarshipToExpLimit">軍艦増強を実行したとき、経験値の限界まで実行する</label>
-      <label><input type="checkbox" id="settingAutoBombardCountToGuns">砲撃数を選択したとき入力される値は常に可能台数に合わせる</label>
-      <label><input type="checkbox" id="settingAutoExportFoodMax">食料輸出を選択したとき入力される値は常に限界値にする</label>
-      <label><input type="checkbox" id="settingAutoSupplyMax">燃料および弾薬補給を選択したとき入力される値は常に限界値にする</label>
-    </div>
-    <hr>
-    <h2>自島の公開鍵(島ID)</h2>
-    <p class="settings-note">軍艦名署名の検証に使われる公開鍵です。</p>
-    <textarea id="islandPublicKeyDisplay" class="island-public-key" readonly>公開鍵はまだ作成されていません。</textarea>
-    <hr>
-    <h2>List of contributors</h2>
-        <p>本作は「箱庭諸島」のリスペクト作品です。<br>This work is a tribute to "箱庭諸島".<br><br>
+  <header>
+    <!-- サイトのロゴ -->
+    <h1><a href="https://masaru-star.github.io/JS.Hakoniwa-Island/">M式・低予算の箱庭</a></h1>
+    <!-- グローバルナビゲーション -->
+    <nav>
+      <ul>
+        <li><a target="_blank" rel="noopener noreferrer" href="tutorial.html">🔰 チュートリアル</a></li>
+        <li><a target="_blank" rel="noopener noreferrer" href="online.html">🌐Supabase管理版(Beta)</a></li>
+        <li><a target="_blank" rel="noopener noreferrer" href="https://discord.gg/VbP49uqUF">コミュニティページ</a></li>
+      </ul>
+    </nav>
+  </header>
+  <div style="margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f966;">
+    <label><input type="checkbox" id="PR"> 宣伝を表示する</label>
+    <p id="prText" style="display: none;"></p>
+  </div>
+  <div id="gameControls" style="margin-bottom: 1em;">
+    <label for="islandNameInput">島の名前:</label>
+    <input type="text" id="islandNameInput" value="MyIsland">
+    <button onclick="saveGame()">セーブ</button>
+    <button onclick="loadGame()">ロード</button>
+    <textarea id="saveLoadData" name="Load" rows="5" cols="60" placeholder="ここにセーブデータが表示されます。ロードする際はここにデータを貼り付けてください。"
+      style="display: block; margin-top: 1em;"></textarea>
+    <p style="font-size: 0.8em; color: gray;">
+      ※セーブデータは直接ファイルとして保存されません。上記のテキストエリアに表示されたデータをコピーして、テキストファイルに貼り付けて保存してください。<br>
+      ロードする際は、保存したデータを上記のテキストエリアに貼り付けてから「ロード」ボタンを押してください。
+    </p>
+  </div>
+  <button id="openBtn">諸設定/貢献者の一覧/ソースコード</button>
+  <div id="modalOverlay" class="overlay">
+    <div class="modal-content">
+      <h2>諸設定</h2>
+      <p class="settings-note">この諸設定は現在開いている画面でのみ有効です。ブラウザストレージには保存しません。</p>
+      <div id="settingsList" class="settings-list">
+        <label><input type="checkbox" id="settingShowClearTileSelection">「タイル選択の解除」ボタンを表示する</label>
+        <label><input type="checkbox" id="settingShowKeepOptionSelected" checked>「オプションを先頭に戻さない」チェックボックスを表示する</label>
+        <label><input type="checkbox" id="settingShowFundingTrackingControls">「トラッキング解除」「トラッキングを固定」を表示する</label>
+        <label><input type="checkbox" id="settingShowEconomicCrisisRate">「経済危機発生率」を表示する</label>
+        <label><input type="checkbox" id="settingEnablePlanTracking">「計画トラッキング」を実行し、表示する</label>
+        <label><input type="checkbox" id="settingConfirmOnSelectedTileClick">計画一覧で選択中に選択済みタイルを再クリックしたら決定する</label>
+        <label><input type="checkbox" id="settingEnhanceWarshipToExpLimit">軍艦増強を実行したとき、経験値の限界まで実行する</label>
+        <label><input type="checkbox" id="settingAutoBombardCountToGuns">砲撃数を選択したとき入力される値は常に可能台数に合わせる</label>
+        <label><input type="checkbox" id="settingAutoExportFoodMax">食料輸出を選択したとき入力される値は常に限界値にする</label>
+        <label><input type="checkbox" id="settingAutoSupplyMax">燃料および弾薬補給を選択したとき入力される値は常に限界値にする</label>
+      </div>
+      <hr>
+      <h2>自島の公開鍵(島ID)</h2>
+      <p class="settings-note">軍艦名署名の検証に使われる公開鍵です。</p>
+      <textarea id="islandPublicKeyDisplay" class="island-public-key" readonly>公開鍵はまだ作成されていません。</textarea>
+      <hr>
+      <h2>List of contributors</h2>
+      <p>本作は「箱庭諸島」のリスペクト作品です。<br>This work is a tribute to "箱庭諸島".<br><br>
         Original: 徳岡宏樹（箱庭諸島）<br>
         Inspiration: <a href="https://hako2d-mj.xii.jp/" target="_blank" rel="noopener noreferrer">RED(二次元箱庭諸島)</a><br>
         Developer: <a href="https://github.com/masaru-star" target="_blank" rel="noopener noreferrer">masaru-star</a>
-        </p>
-        <a href="https://codeberg.org/masaru-star/JS.Hakoniwa-Island" target="_blank" rel="noopener noreferrer"><img alt="Static Badge" src="https://img.shields.io/badge/Codeberg-%232185D0?style=flat&logo=codeberg&logoColor=white"></a>
-        <a href="https://github.com/masaru-star/JS.Hakoniwa-Island" target="_blank" rel="noopener noreferrer"><img alt="Static Badge" src="https://img.shields.io/badge/GitHub-%23000?style=flat&logo=github&logoColor=white"></a>
-    <br><button id="closeBtn">close</button>
-  </div>
-</div>
-<details>
-  <summary>Ver.5.1.0 リリースノート</summary><p>
-    <div style="margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f966;">
-[追加]各種高速計画の実装<br>
-[追加]採掘場を追加<br>
-[修正]市街地人口上限を10000人に変更<br>
-<br>
-[予告]10月初頭に完了予定<br>
-・軍艦強化量の曲線化（今のうちに増強を済ませておくことをお勧めします）<br>
-・旧バージョンセーブコード互換の撤廃（予告済み）<br>
-・デイリーミッション・ウィークリーミッションの追加<br>
-・Snsprojectと連携したオンライン通信体制の強化<br>
-[予告]11月初頭に完了予定<br>
-・島コードへの公開鍵組み込み<br>
-・実績ポイントのバックエンド処理化<br>
-・同盟機能の追加（延期になる可能性高）<br>
+      </p>
+      <a href="https://codeberg.org/masaru-star/JS.Hakoniwa-Island" target="_blank" rel="noopener noreferrer"><img
+          alt="Static Badge"
+          src="https://img.shields.io/badge/Codeberg-%232185D0?style=flat&logo=codeberg&logoColor=white"></a>
+      <a href="https://github.com/masaru-star/JS.Hakoniwa-Island" target="_blank" rel="noopener noreferrer"><img
+          alt="Static Badge"
+          src="https://img.shields.io/badge/GitHub-%23000?style=flat&logo=github&logoColor=white"></a>
+      <br><button id="closeBtn">close</button>
     </div>
-</p></details>
-<br><br>
-<table style="width: 85%; background-color: #add; color: #444;">
+  </div>
+  <details>
+    <summary>Ver.5.1.0 リリースノート</summary>
+    <p>
+    <div style="margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f966;">
+      [追加]各種高速計画の実装<br>
+      [追加]採掘場を追加<br>
+      [修正]市街地人口上限を10000人に変更<br>
+      <br>
+      [予告]10月初頭に完了予定<br>
+      ・軍艦強化量の曲線化（今のうちに増強を済ませておくことをお勧めします）<br>
+      ・旧バージョンセーブコード互換の撤廃（予告済み）<br>
+      ・デイリーミッション・ウィークリーミッションの追加<br>
+      ・Snsprojectと連携したオンライン通信体制の強化<br>
+      [予告]11月初頭に完了予定<br>
+      ・島コードへの公開鍵組み込み<br>
+      ・実績ポイントのバックエンド処理化<br>
+      ・同盟機能の追加（延期になる可能性高）<br>
+    </div>
+    </p>
+  </details>
+  <br><br>
+  <table style="width: 85%; background-color: #add; color: #444;">
     <th>島の名前: <span id="currentIslandName"></span></th>
     <th>ターン: <span id="turn">0</span></th>
-  <tr>
-    <td>人口: <span id="population">0</span>人</td>
-    <td>資金: <span id="money">1000</span>G</td>
-    <td>食料: <span id="food">500</span></td>
-  </tr>
-  <tr>
-    <td>陸地面積: <span id="landArea">0</span>Km²</td>
-    <td>砲撃可能数上限: <span id="gunCount">0</span></td>
-    <td>実績Pt: <span id="achievementPoints">0</span>Pt</td>
-  </tr>
-</table>
-<div>
+    <tr>
+      <td>人口: <span id="population">0</span>人</td>
+      <td>資金: <span id="money">1000</span>G</td>
+      <td>食料: <span id="food">500</span></td>
+    </tr>
+    <tr>
+      <td>陸地面積: <span id="landArea">0</span>Km²</td>
+      <td>砲撃可能数上限: <span id="gunCount">0</span></td>
+      <td>実績Pt: <span id="achievementPoints">0</span>Pt</td>
+    </tr>
+  </table>
+  <div>
     <label for="otherIslandActionInput">他島の行動:</label>
-    <input type="text" id="otherIslandActionInput" style="width: 400px; margin-bottom: 5px;" placeholder="ここに他島からの行動を入力してください">
-</div>
-<div>
+    <input type="text" id="otherIslandActionInput" style="width: 400px; margin-bottom: 5px;"
+      placeholder="ここに他島からの行動を入力してください">
+  </div>
+  <div>
     <label for="actionForOtherIslandOutput">他島への行動:</label>
     <input type="text" id="actionForOtherIslandOutput" style="width: 400px; margin-bottom: 5px;" readonly>
-</div>
-<div style="margin-top: 2px;">
+  </div>
+  <div style="margin-top: 2px;">
     <span id="keepOptionSettingControl">
       <input type="checkbox" id="keepOptionSelected">
       <label for="keepOptionSelected">オプションを先頭に戻さない</label>
@@ -140,186 +152,185 @@ SOFTWARE. -->
       <input type="checkbox" id="pinFundingFailureTracking" style="margin-left: 8px;">
       <label for="pinFundingFailureTracking">トラッキングを固定</label>
     </span>
-</div>
-<button onclick="nextTurn()">▶ ターンを進める</button>
-<br>
-<select id="actionSelect" onchange="updateConfirmButton()">
-  <option value="">計画一覧</option>
-  <option value="buildFarm" data-myisland="true">農場建設 (100G)</option>
-  <option value="buildFactory" data-myisland="true">工場建設 (100G)</option>
-  <option value="buildMiningSite" data-myisland="true">採掘場整備 (100000G)</option>
-  <option value="enhanceFacility" data-myisland="true">設備強化 (10000G)</option>
-  <option value="buildPort" data-myisland="true">港建設 (3000G)</option>
-  <option value="buildGun" data-myisland="true">砲台建設 (1200G)</option>
-  <option value="buildDefenseFacility" data-myisland="true">防衛施設建設 (5000G)</option>
-  <option value="flatten" data-myisland="true">整地 (20G)</option>
-  <option value="landfill" data-myisland="true">埋め立て (600G)</option>
-  <option value="dig" data-myisland="true">掘削 (300G)</option>
-  <option value="cutForest" data-myisland="true">伐採 (無料)</option>
-  <option value="plantForest" data-myisland="true">植林 (200G)</option>
-  <option value="exportFood" data-myisland="true">食料輸出 (食料20)</option>
-  <option value="bombard" data-anyisland="true">砲撃 (120G)</option>
-  <option value="spreadBombard" data-anyisland="true">拡散弾砲撃 (500G)</option>
-  <option value="ppBombard" data-anyisland="true">PP弾砲撃 (10000000G)</option>
-  <option value="randomBombard" data-anyisland="true">ランダム弾砲撃 (500000G)</option>
-  <option value="concentratedFire" data-myisland="true">集中砲撃</option>
-  <option value="selfDestructMilitaryFacility" data-myisland="true">軍事施設自爆 (無料)</option>
-  <option value="goToOtherIsland" data-myisland="true">他の島に行く</option>
-  <option value="returnToMyIsland" data-anyisland="true">自島に戻る</option>
-  <option value="delayAction" data-myisland="true">遅延行動</option>
-  <option value="buildWarship" data-myisland="true">軍艦建造</option>
-  <option value="warshipTool" data-myisland="true">軍艦ツール</option>
-  <option value="fastPlanTool" data-myisland="true">高速計画実行</option>
-  <option value="bulkPlanTool" data-myisland="true">一括計画ツール</option>
-  <option value="buildMonument" data-myisland="true">石碑建設 (500000000G)</option>
-  <option value="upgradeMonument" data-myisland="true">石碑強化 (500000000G)</option>
-  <option value="sellMonument" data-myisland="true">石碑売却 (無料)</option>
-  <option value="sellMonumentPartial" data-myisland="true">石碑部分売却 (10Lv単位)</option>
-  <option value="inviteResidents" data-myisland="true">誘致活動 (10000000G)</option>
-  <option value="initializeIsland" data-myisland="true">島の初期化</option>
-</select><select id="warshipSubSelect" onchange="updateConfirmButton()" style="width: 140px; display: none;">
-  <option value="">軍艦ツールを選択</option>
-  <option value="refuelWarship" data-myisland="true">燃料補給</option>
-  <option value="resupplyWarshipAmmo" data-myisland="true">弾薬補給</option>
-  <option value="repairWarship" data-myisland="true">軍艦修理</option>
-  <option value="setWarshipNickname" data-myisland="true">二つ名指定 (100000G)</option>
-  <option value="showWarshipDetails" data-myisland="true">詳細情報提示</option>
-  <option value="convertAchievementToExp" data-myisland="true">実績pt変換</option>
-  <option value="remodelWarshipWeapon" data-myisland="true">武器換装</option>
-  <option value="enhanceWarship" data-myisland="true">軍艦増強</option>
-  <option value="decommissionWarship" data-myisland="true">軍艦除籍</option>
-  <option value="discardWarshipWreckage" data-myisland="true">残骸破棄</option>
-  <option value="dispatchWarship" data-myisland="true">軍艦派遣</option>
-  <option value="requestWarshipReturn" data-myisland="true">軍艦帰還要請</option>
-  <option value="emergencyReturn" data-myisland="true">緊急帰還 (80000000G)</option>
-  <option value="moveWarshipToDock" data-myisland="true">船渠へ移動</option>
-  <option value="returnWarshipFromDock" data-myisland="true">海域へ復帰</option>
-</select><!-- <select id="AutocommandSubSelect" onchange="updateConfirmButton()" style="width: 140px; display: none;">
-  <option value="">自動送信ツールを選択</option>
-  <option value="autoflatten" data-myisland="true">整地自動送信</option>
-  <option value="autofarm" data-myisland="true">農場整備自動送信</option>
-  <option value="autofactory" data-myisland="true">工場建設自動送信</option>
-  <option value="autolandfill" data-myisland="true">埋め立て自動送信</option>
-</select> -->
-<select id="fastPlanSubSelect" onchange="updateConfirmButton()" style="width: 180px; display: none;">
-  <option value="">高速計画を選択</option>
-  <option value="fastBuildFarm" data-myisland="true">高速農場建設 (10000G)</option>
-  <option value="fastBuildFactory" data-myisland="true">高速工場建設 (10000G)</option>
-  <option value="fastBuildGun" data-myisland="true">高速砲台建設 (120000G)</option>
-  <option value="fastBuildDefenseFacility" data-myisland="true">高速防衛施設建設 (500000G)</option>
-  <option value="fastFlattenAll" data-myisland="true">一括地ならし (荒地数 × 200G)</option>
-  <option value="fastFlatten" data-myisland="true">地ならし (200G)</option>
-  <option value="fastLandfill" data-myisland="true">高速埋め立て (60000G)</option>
-  <option value="fastPlantForest" data-myisland="true">高速植林 (20000G)</option>
-</select>
-<select id="bulkPlanSubSelect" onchange="updateConfirmButton()" style="width: 180px; display: none;">
-  <option value="">一括計画を選択</option>
-  <option value="bulkFlattenWaste" data-myisland="true">整地一括入力</option>
-</select>
-<input type="number" id="exportAmount" placeholder="輸出数" min="1" style="width: 60px; display: none;">
-<input type="number" id="bombardCount" placeholder="攻撃数" min="1" style="width: 60px; display: none;">
-<input type="number" id="refuelAmount" placeholder="補給数" min="1" style="width: 60px; display: none;">
-<input type="number" id="resupplyAmmoAmount" placeholder="補給数" min="1" style="width: 60px; display: none;">
-<input type="number" id="repairAmount" placeholder="回復耐久値" min="1" style="width: 90px; display: none;">
-<input type="text" id="warshipNicknameInput" placeholder="二つ名(10文字以内)" maxlength="10" style="width: 150px; display: none;">
-<input type="number" id="achievementConvertAmount" placeholder="消費Pt" min="1" style="width: 70px; display: none;">
-<select id="weaponRemodelType" style="display: none;">
-  <option value="mainGun">主砲+1</option>
-  <option value="torpedo">魚雷+1</option>
-</select>
-<input type="number" id="oilDrillFactor" placeholder="発掘率(任意)" min="1" max="10" value="" style="width: 90px; display: none;">
-<input type="text" id="touristCodeInput" placeholder="観光者コードを入力" style="width: 250px; display: none;">
-<div id="warshipBuildInputs">
+  </div>
+  <button onclick="nextTurn()">▶ ターンを進める</button>
+  <br>
+  <select id="actionSelect" onchange="updateConfirmButton()">
+    <option value="">計画一覧</option>
+    <option value="buildFarm" data-myisland="true">農場建設 (100G)</option>
+    <option value="buildFactory" data-myisland="true">工場建設 (100G)</option>
+    <option value="buildMiningSite" data-myisland="true">採掘場整備 (100000G)</option>
+    <option value="enhanceFacility" data-myisland="true">設備強化 (10000G)</option>
+    <option value="buildPort" data-myisland="true">港建設 (3000G)</option>
+    <option value="buildGun" data-myisland="true">砲台建設 (1200G)</option>
+    <option value="buildDefenseFacility" data-myisland="true">防衛施設建設 (5000G)</option>
+    <option value="flatten" data-myisland="true">整地 (20G)</option>
+    <option value="landfill" data-myisland="true">埋め立て (600G)</option>
+    <option value="dig" data-myisland="true">掘削 (300G)</option>
+    <option value="cutForest" data-myisland="true">伐採 (無料)</option>
+    <option value="plantForest" data-myisland="true">植林 (200G)</option>
+    <option value="exportFood" data-myisland="true">食料輸出 (食料20)</option>
+    <option value="bombard" data-anyisland="true">砲撃 (120G)</option>
+    <option value="spreadBombard" data-anyisland="true">拡散弾砲撃 (500G)</option>
+    <option value="ppBombard" data-anyisland="true">PP弾砲撃 (10000000G)</option>
+    <option value="randomBombard" data-anyisland="true">ランダム弾砲撃 (500000G)</option>
+    <option value="concentratedFire" data-myisland="true">集中砲撃</option>
+    <option value="selfDestructMilitaryFacility" data-myisland="true">軍事施設自爆 (無料)</option>
+    <option value="goToOtherIsland" data-myisland="true">他の島に行く</option>
+    <option value="returnToMyIsland" data-anyisland="true">自島に戻る</option>
+    <option value="delayAction" data-myisland="true">遅延行動</option>
+    <option value="buildWarship" data-myisland="true">軍艦建造</option>
+    <option value="warshipTool" data-myisland="true">軍艦ツール</option>
+    <option value="fastPlanTool" data-myisland="true">高速計画実行</option>
+    <option value="bulkPlanTool" data-myisland="true">一括計画ツール</option>
+    <option value="buildMonument" data-myisland="true">石碑建設 (500000000G)</option>
+    <option value="upgradeMonument" data-myisland="true">石碑強化 (500000000G)</option>
+    <option value="sellMonument" data-myisland="true">石碑売却 (無料)</option>
+    <option value="sellMonumentPartial" data-myisland="true">石碑部分売却 (10Lv単位)</option>
+    <option value="inviteResidents" data-myisland="true">誘致活動 (10000000G)</option>
+    <option value="initializeIsland" data-myisland="true">島の初期化</option>
+  </select><select id="warshipSubSelect" onchange="updateConfirmButton()" style="width: 140px; display: none;">
+    <option value="">軍艦ツールを選択</option>
+    <option value="refuelWarship" data-myisland="true">燃料補給</option>
+    <option value="resupplyWarshipAmmo" data-myisland="true">弾薬補給</option>
+    <option value="repairWarship" data-myisland="true">軍艦修理</option>
+    <option value="setWarshipNickname" data-myisland="true">二つ名指定 (100000G)</option>
+    <option value="showWarshipDetails" data-myisland="true">詳細情報提示</option>
+    <option value="convertAchievementToExp" data-myisland="true">実績pt変換</option>
+    <option value="remodelWarshipWeapon" data-myisland="true">武器換装</option>
+    <option value="enhanceWarship" data-myisland="true">軍艦増強</option>
+    <option value="decommissionWarship" data-myisland="true">軍艦除籍</option>
+    <option value="discardWarshipWreckage" data-myisland="true">残骸破棄</option>
+    <option value="dispatchWarship" data-myisland="true">軍艦派遣</option>
+    <option value="requestWarshipReturn" data-myisland="true">軍艦帰還要請</option>
+    <option value="emergencyReturn" data-myisland="true">緊急帰還 (80000000G)</option>
+    <option value="moveWarshipToDock" data-myisland="true">船渠へ移動</option>
+    <option value="returnWarshipFromDock" data-myisland="true">海域へ復帰</option>
+  </select>
+  <select id="fastPlanSubSelect" onchange="updateConfirmButton()" style="width: 180px; display: none;">
+    <option value="">高速計画を選択</option>
+    <option value="fastBuildFarm" data-myisland="true">高速農場建設 (10000G)</option>
+    <option value="fastBuildFactory" data-myisland="true">高速工場建設 (10000G)</option>
+    <option value="fastBuildGun" data-myisland="true">高速砲台建設 (120000G)</option>
+    <option value="fastBuildDefenseFacility" data-myisland="true">高速防衛施設建設 (500000G)</option>
+    <option value="fastFlattenAll" data-myisland="true">一括地ならし (荒地数 × 200G)</option>
+    <option value="fastFlatten" data-myisland="true">地ならし (200G)</option>
+    <option value="fastLandfill" data-myisland="true">高速埋め立て (60000G)</option>
+    <option value="fastPlantForest" data-myisland="true">高速植林 (20000G)</option>
+  </select>
+  <select id="bulkPlanSubSelect" onchange="updateConfirmButton()" style="width: 180px; display: none;">
+    <option value="">一括計画を選択</option>
+    <option value="bulkFlattenWaste" data-myisland="true">整地一括入力</option>
+  </select>
+  <input type="number" id="exportAmount" placeholder="輸出数" min="1" style="width: 60px; display: none;">
+  <input type="number" id="bombardCount" placeholder="攻撃数" min="1" style="width: 60px; display: none;">
+  <input type="number" id="refuelAmount" placeholder="補給数" min="1" style="width: 60px; display: none;">
+  <input type="number" id="resupplyAmmoAmount" placeholder="補給数" min="1" style="width: 60px; display: none;">
+  <input type="number" id="repairAmount" placeholder="回復耐久値" min="1" style="width: 90px; display: none;">
+  <input type="text" id="warshipNicknameInput" placeholder="二つ名(10文字以内)" maxlength="10"
+    style="width: 150px; display: none;">
+  <input type="number" id="achievementConvertAmount" placeholder="消費Pt" min="1" style="width: 70px; display: none;">
+  <select id="weaponRemodelType" style="display: none;">
+    <option value="mainGun">主砲+1</option>
+    <option value="torpedo">魚雷+1</option>
+  </select>
+  <input type="number" id="oilDrillFactor" placeholder="発掘率(任意)" min="1" max="10" value=""
+    style="width: 90px; display: none;">
+  <input type="text" id="touristCodeInput" placeholder="観光者コードを入力" style="width: 250px; display: none;">
+  <div id="warshipBuildInputs">
     <h3>軍艦建造パラメータ</h3>
     <div>
-        <label for="warshipName">艦名:</label>
-        <input type="text" id="warshipName" maxlength="15" value="無銘艦">
+      <label for="warshipName">艦名:</label>
+      <input type="text" id="warshipName" maxlength="15" value="無銘艦">
     </div>
     <div>
-        <label for="warshipDurability">耐久度:</label>
-        <input type="number" id="warshipDurability" min="2" max="15" value="2"> (2～15, 1あたり10,000,000G)
+      <label for="warshipDurability">耐久度:</label>
+      <input type="number" id="warshipDurability" min="2" max="15" value="2"> (2～15, 1あたり10,000,000G)
     </div>
     <div>
-        <label for="warshipMainGun">主砲:</label>
-        <input type="number" id="warshipMainGun" min="1" max="5" value="1"> (1～5, 1あたり12,000,000G)
+      <label for="warshipMainGun">主砲:</label>
+      <input type="number" id="warshipMainGun" min="1" max="5" value="1"> (1～5, 1あたり12,000,000G)
     </div>
     <div>
-        <label for="warshipTorpedo">魚雷:</label>
-        <input type="number" id="warshipTorpedo" min="0" max="3" value="0"> (0～3, 1あたり10,000,000G)
+      <label for="warshipTorpedo">魚雷:</label>
+      <input type="number" id="warshipTorpedo" min="0" max="3" value="0"> (0～3, 1あたり10,000,000G)
     </div>
     <div>
-        <label for="warshipAntiAir">対空砲:</label>
-        <input type="number" id="warshipAntiAir" min="1" max="6" value="1"> (1～6, 1あたり5,000,000G)
+      <label for="warshipAntiAir">対空砲:</label>
+      <input type="number" id="warshipAntiAir" min="1" max="6" value="1"> (1～6, 1あたり5,000,000G)
     </div>
     <div>
-        <label for="warshipAmmo">弾薬庫:</label>
-        <input type="number" id="warshipAmmo" min="10" max="500" value="10"> (10～500, 1あたり100,000G)
+      <label for="warshipAmmo">弾薬庫:</label>
+      <input type="number" id="warshipAmmo" min="10" max="500" value="10"> (10～500, 1あたり100,000G)
     </div>
     <div>
-        <label for="warshipRecon">偵察機:</label>
-        <input type="number" id="warshipRecon" min="0" max="2" value="0"> (0～2, 1あたり12,500,000G)
+      <label for="warshipRecon">偵察機:</label>
+      <input type="number" id="warshipRecon" min="0" max="2" value="0"> (0～2, 1あたり12,500,000G)
     </div>
     <div>
-        <label for="warshipAccuracy">射撃精度向上:</label>
-        <input type="number" id="warshipAccuracy" min="0" max="2" value="0"> (0～2, 1あたり50,000,000G)
-    </div>
-</div>
-<button onclick="confirmAction()" id="confirmBtn" disabled>決定</button>
-<button onclick="clearTileSelection()" id="clearTileSelectionBtn" style="display: none;">タイル選択の解除</button>
-<span id="tileInfo"></span>
-  <div id="gameContainer" style="display: flex; gap: 5px;">
-    <table id="map"></table>
-    <div id="actionQueueDisplay" style="font-size: 0.7em;margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">
-      <h4>計画キュー</h4><ul id="actionQueueList" style="list-style-type: none; padding: 0;"></ul>設定した計画はクリックで撤回可能です。
+      <label for="warshipAccuracy">射撃精度向上:</label>
+      <input type="number" id="warshipAccuracy" min="0" max="2" value="0"> (0～2, 1あたり50,000,000G)
     </div>
   </div>
-<br>
-<details>
-<summary>船渠</summary>
-  <div id="warshipDockDisplay" class="warship-dock-display"></div>
-</details>
-<div id="logStatusLine1"></div>
-<div id="logStatusLine2"></div>
-<div id="log" style="margin-top:1em;"></div>
-<script>
-fetch("https://raw.githubusercontent.com/masaru-star/masaru-star/refs/heads/main/others/publicity.html")
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error("ファイルの読み込みに失敗しました");
-    }
-    return response.text();
-  })
-  .then((data) => {
-    // id="prText" の要素の中に取得したHTMLを代入する
-    document.getElementById("prText").innerHTML = data;
-  })
-  .catch((error) => {
-    console.error("エラー:", error);
-    document.getElementById("prText").textContent = "読み込みに失敗しました。";
-  });
-const openBtn = document.getElementById("openBtn");
-const closeBtn = document.getElementById("closeBtn");
-const modal = document.getElementById("modalOverlay");
-openBtn.addEventListener("click", () => {
-  modal.style.display = "flex";
-});
-closeBtn.addEventListener("click", () => {
-  modal.style.display = "none";
-});
-window.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    modal.style.display = "none";
-  }
-});
-const checkbox = document.getElementById("PR");
-const text = document.getElementById("prText");
-checkbox.addEventListener("change", function () {
-  if (this.checked) {
-    text.style.display = "block";
-  } else {
-    text.style.display = "none";
-  }
-});
-</script>
+  <button onclick="confirmAction()" id="confirmBtn" disabled>決定</button>
+  <button onclick="clearTileSelection()" id="clearTileSelectionBtn" style="display: none;">タイル選択の解除</button>
+  <span id="tileInfo"></span>
+  <div id="gameContainer" style="display: flex; gap: 5px;">
+    <table id="map"></table>
+    <div id="actionQueueDisplay"
+      style="font-size: 0.7em;margin-top: 1em; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">
+      <h4>計画キュー</h4>
+      <ul id="actionQueueList" style="list-style-type: none; padding: 0;"></ul>設定した計画はクリックで撤回可能です。
+    </div>
+  </div>
+  <br>
+  <details>
+    <summary>船渠</summary>
+    <div id="warshipDockDisplay" class="warship-dock-display"></div>
+  </details>
+  <div id="logStatusLine1"></div>
+  <div id="logStatusLine2"></div>
+  <div id="log" style="margin-top:1em;"></div>
+  <script>
+    fetch("https://raw.githubusercontent.com/masaru-star/masaru-star/refs/heads/main/others/publicity.html")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("ファイルの読み込みに失敗しました");
+        }
+        return response.text();
+      })
+      .then((data) => {
+        // id="prText" の要素の中に取得したHTMLを代入する
+        document.getElementById("prText").innerHTML = data;
+      })
+      .catch((error) => {
+        console.error("エラー:", error);
+        document.getElementById("prText").textContent = "読み込みに失敗しました。";
+      });
+    const openBtn = document.getElementById("openBtn");
+    const closeBtn = document.getElementById("closeBtn");
+    const modal = document.getElementById("modalOverlay");
+    openBtn.addEventListener("click", () => {
+      modal.style.display = "flex";
+    });
+    closeBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+    const checkbox = document.getElementById("PR");
+    const text = document.getElementById("prText");
+    checkbox.addEventListener("change", function () {
+      if (this.checked) {
+        text.style.display = "block";
+      } else {
+        text.style.display = "none";
+      }
+    });
+  </script>
 </body>
+
 </html>

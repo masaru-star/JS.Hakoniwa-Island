@@ -1,242 +1,242 @@
-        // --- 1. タイル種類と定義 ---
-        const TILE_TYPES = {
-            sea: { name: '海', desc: '島の周囲を囲む海です。船の移動経路や海底油田の建設対象になります。' },
-            port: { name: '港', desc: '海に面した輸送・補給基地。艦船を生産することができます。' },
-            oilRig: { name: '海底油田', desc: '海上に設置された採掘施設。毎ターン島に多額の資金を供給します。' },
-            plain: { name: '平地', desc: '何もない平原。あらゆる陸上建造物の基礎となる最も重要な土地です。' },
-            waste: { name: '荒れ地', desc: '荒廃した土地。そのままでは建設ができません。まずは整地を行いましょう。' },
-            forest: { name: '森', desc: '豊かな自然。伐採して資金にするか、災害からの防風林になります。' },
-            mountain: { name: '山', desc: '険しい山岳。そのままでは建物は建てられませんが、自然の防御壁となります。' },
-            farm: { name: '農場', desc: '食料を生産する場所。島民が生活を維持するために不可欠なエリアです。' },
-            house: { name: '住宅', desc: '島民が暮らすエリア。多いほどより高い税収が期待できます。' },
-            factory: { name: '工場', desc: '産業の中心。島民が働くことで大きな資金を提供します。' },
-            gun: { name: '砲台', desc: '国防、または他島への攻撃用ミサイル基地。' },
-            defenseFacility: { name: '防衛施設', desc: '周囲のタイルへの攻撃を防ぐ強力な盾です。' },
-            Monument: { name: '記念碑', desc: '島の発展を象徴する巨大なモニュメント。' },
-            warship: { name: '軍艦', desc: '港の近くに配備できる護衛用の艦船です。耐久、燃料、弾薬の概念があります。' },
-            'warship-dispatched': { name: '出撃中軍艦', desc: '他島への遠洋哨戒や任務に就いている軍艦。' },
-            'warship-wreckage': { name: '軍艦の残骸', desc: '戦闘などで沈没した船の残骸。' },
-            monster: { name: '怪獣', desc: '島を襲う巨大生物。「シマオロシ」や「キングガロス」等が存在し、放置すると都市を破壊します。' }
-        };
+// --- 1. タイル種類と定義 ---
+const TILE_TYPES = {
+  sea: { name: '海', desc: '島の周囲を囲む海です。船の移動経路や海底油田の建設対象になります。' },
+  port: { name: '港', desc: '海に面した輸送・補給基地。艦船を生産することができます。' },
+  oilRig: { name: '海底油田', desc: '海上に設置された採掘施設。毎ターン島に多額の資金を供給します。' },
+  plain: { name: '平地', desc: '何もない平原。あらゆる陸上建造物の基礎となる最も重要な土地です。' },
+  waste: { name: '荒れ地', desc: '荒廃した土地。そのままでは建設ができません。まずは整地を行いましょう。' },
+  forest: { name: '森', desc: '豊かな自然。伐採して資金にするか、災害からの防風林になります。' },
+  mountain: { name: '山', desc: '険しい山岳。そのままでは建物は建てられませんが、自然の防御壁となります。' },
+  farm: { name: '農場', desc: '食料を生産する場所。島民が生活を維持するために不可欠なエリアです。' },
+  house: { name: '住宅', desc: '島民が暮らすエリア。多いほどより高い税収が期待できます。' },
+  factory: { name: '工場', desc: '産業の中心。島民が働くことで大きな資金を提供します。' },
+  gun: { name: '砲台', desc: '国防、または他島への攻撃用ミサイル基地。' },
+  defenseFacility: { name: '防衛施設', desc: '周囲のタイルへの攻撃を防ぐ強力な盾です。' },
+  Monument: { name: '記念碑', desc: '島の発展を象徴する巨大なモニュメント。' },
+  warship: { name: '軍艦', desc: '港の近くに配備できる護衛用の艦船です。耐久、燃料、弾薬の概念があります。' },
+  'warship-dispatched': { name: '出撃中軍艦', desc: '他島への遠洋哨戒や任務に就いている軍艦。' },
+  'warship-wreckage': { name: '軍艦の残骸', desc: '戦闘などで沈没した船の残骸。' },
+  monster: { name: '怪獣', desc: '島を襲う巨大生物。「シマオロシ」や「キングガロス」等が存在し、放置すると都市を破壊します。' }
+};
 
-        const INITIAL_MAP = [
-            ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
-            ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
-            ['sea','sea','sea','sea','plain','plain','plain','forest','mountain','plain','sea','sea','sea','sea','sea','sea'],
-            ['sea','sea','sea','plain','plain','waste','waste','forest','mountain','mountain','plain','sea','sea','sea','sea','sea'],
-            ['sea','sea','plain','plain','plain','plain','plain','forest','plain','plain','plain','sea','sea','sea','sea','sea'],
-            ['sea','sea','plain','plain','plain','plain','plain','plain','plain','waste','plain','plain','sea','sea','sea','sea'],
-            ['sea','sea','plain','plain','plain','plain','plain','plain','plain','waste','plain','plain','sea','sea','sea','sea'],
-            ['sea','sea','plain','plain','plain','plain','plain','plain','plain','plain','plain','plain','plain','sea','sea','sea'],
-            ['sea','sea','plain','plain','plain','plain','plain','plain','plain','plain','plain','plain','plain','sea','sea','sea'],
-            ['sea','sea','plain','plain','plain','plain','plain','plain','plain','plain','plain','plain','plain','sea','sea','sea'],
-            ['sea','sea','plain','plain','plain','plain','plain','plain','plain','plain','plain','plain','sea','sea','sea','sea'],
-            ['sea','sea','sea','plain','plain','plain','plain','plain','plain','plain','plain','sea','sea','sea','sea','sea'],
-            ['sea','sea','sea','sea','sea','plain','plain','plain','plain','sea','sea','sea','sea','sea','sea','sea'],
-            ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
-            ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
-            ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea']
-        ];
+const INITIAL_MAP = [
+  ['sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'sea', 'sea', 'plain', 'plain', 'plain', 'forest', 'mountain', 'plain', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'sea', 'plain', 'plain', 'waste', 'waste', 'forest', 'mountain', 'mountain', 'plain', 'sea', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'plain', 'plain', 'plain', 'plain', 'plain', 'forest', 'plain', 'plain', 'plain', 'sea', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'waste', 'plain', 'plain', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'waste', 'plain', 'plain', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'sea', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'plain', 'sea', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'sea', 'sea', 'sea', 'plain', 'plain', 'plain', 'plain', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea'],
+  ['sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea', 'sea']
+];
 
-        const EMOJI_MAP = {
-            'port': '⚓', 'oilRig': '🛢️', 'forest': '', 'mountain': '',
-            'farm': '🌾', 'house': '🏠', 'factory': '🏭', 'gun': '🔫',
-            'defenseFacility': '🛡️', 'Monument': '🗿', 'warship': '🚢',
-            'warship-dispatched': '⛶', 'warship-wreckage': 'x', 'monster': '👾'
-        };
+const EMOJI_MAP = {
+  'port': '⚓', 'oilRig': '🛢️', 'forest': '', 'mountain': '',
+  'farm': '🌾', 'house': '🏠', 'factory': '🏭', 'gun': '🔫',
+  'defenseFacility': '🛡️', 'Monument': '🗿', 'warship': '🚢',
+  'warship-dispatched': '⛶', 'warship-wreckage': 'x', 'monster': '👾'
+};
 
-        // --- 2. チュートリアル 全8章構成 ---
-        const TUTORIAL_CHAPTERS = [
-            {
-                id: 0,
-                title: "1. 島の観察と基本の整地",
-                emoji: "🔍",
-                summary: "島の地形を把握し、荒れ地を開発可能な「平地」へ変える基礎工事（ミッション01）を学びます。",
-                slides: [
-                    {
-                        task: "【ミッション01】島の地形の理解",
-                        message: "司令官、着任おめでとうございます！まずはこの「16×16」の環境を把握しましょう。島には【海】【平地】【森】【山】【荒れ地】などの自然地形が存在します。",
-                        demos: []
-                    },
-                    {
-                        task: "【ミッション01】整地による開拓",
-                        message: "建物を建てるには【平地】⬜が必要です。【荒れ地】⚙️には何も建設できないため、まずは「整地」計画を実行して平地に変える必要があります。",
-                        demos: [
-                            { row: 3, col: 5, type: 'plain', delay: 500 },
-                            { row: 3, col: 6, type: 'plain', delay: 1000 }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 1,
-                title: "2. 産業と資金供給",
-                emoji: "🌾",
-                summary: "農場や工場、そして高額な海底油田による「ターンごとの資金」獲得の仕組み（ミッション02）を学びます。",
-                slides: [
-                    {
-                        task: "【ミッション02】産業基盤の建設",
-                        message: "開発には多額の「資金(G)」が必要です。平地に【農場】🌾や【工場】🏭を建設することで、ターンごとに安定した資金と食料を生み出すことができます。",
-                        demos: [
-                            { row: 4, col: 6, type: 'farm', delay: 400 },
-                            { row: 7, col: 7, type: 'farm', delay: 400 },
-                            { row: 4, col: 8, type: 'factory', delay: 1100 }
-                        ]
-                    },
-                    {
-                        task: "【ミッション02】海底油田の掘削",
-                        message: "さらに海上で「掘削」を行うと【海底油田】🛢️を建設できます。非常に高コストですが、莫大な資金を毎ターン供給する国家の生命線となります！",
-                        demos: [
-                            { row: 13, col: 4, type: 'oilRig', delay: 600 }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 2,
-                title: "3. 人口と都市の成長",
-                emoji: "🏠",
-                summary: "住宅を建てて人口を増やし、安定した収入を得る国家運営の要（ミッション03）を学びます。",
-                slides: [
-                    {
-                        task: "【ミッション03】島民を迎え入れる",
-                        message: "働く島民がいなければ産業は十分に機能しません。農場の周辺に【住宅】🏠が発生するので、人々が移住してくる環境を整えましょう。",
-                        demos: [
-                            { row: 6, col: 6, type: 'house', delay: 400 },
-                            { row: 6, col: 7, type: 'house', delay: 1000 },
-                            { row: 7, col: 6, type: 'house', delay: 1600 }
-                        ]
-                    },
-                    {
-                        task: "【ミッション03】人口と税収",
-                        message: "人口が増えると、工場による収入が増加します。住宅地を中心に都市を拡大させていきましょう！",
-                        demos: []
-                    }
-                ]
-            },
-            {
-                id: 3,
-                title: "4. 防衛と自爆戦術",
-                emoji: "🛡️",
-                summary: "台風や敵から都市を守る防衛施設と、いざという時の「軍事施設自爆」戦術（ミッション04）です。",
-                slides: [
-                    {
-                        task: "【ミッション04】盾となる防衛施設",
-                        message: "平和な都市にも災害（台風や隕石）や外敵の脅威が訪れます。重要な建物の近くには【防衛施設】🛡️を置き、周囲の被害を無効化させましょう。",
-                        demos: [
-                            { row: 5, col: 7, type: 'defenseFacility', delay: 500 }
-                        ]
-                    },
-                    {
-                        task: "【ミッション04】ミサイルと自爆",
-                        message: "また【砲台】🔫を設置すれば迎撃が可能ですが、最悪の場合は『軍事施設自爆』を実行することで周囲の敵を爆発に巻き込む強力な戦術も使えます。",
-                        demos: [
-                            { row: 8, col: 9, type: 'gun', delay: 500 },
-                            { row: 8, col: 9, type: 'sea', delay: 2500, explode: true },
-                            { row: 8, col: 8, type: 'waste', delay: 2500, explode: true },
-                            { row: 8, col: 10, type: 'waste', delay: 2500, explode: true },
-                            { row: 7, col: 9, type: 'waste', delay: 2500, explode: true },
-                            { row: 9, col: 9, type: 'waste', delay: 2500, explode: true },
-                            { row: 9, col: 8, type: 'waste', delay: 2500, explode: true },
-                            { row: 7, col: 8, type: 'waste', delay: 2500, explode: true },
-                            { row: 7, col: 10, type: 'waste', delay: 2500, explode: true },
-                            { row: 9, col: 10, type: 'waste', delay: 2500, explode: true }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 4,
-                title: "5. 軍艦の運用基礎",
-                emoji: "🚢",
-                summary: "港から軍艦を建造し、燃料・弾薬・耐久の管理や、火災・浸水などの異常状態（ミッション05）を学びます。",
-                slides: [
-                    {
-                        task: "【ミッション05】港と軍艦の建造",
-                        message: "海沿いに【港】⚓を建設すると、【軍艦】🚢を建造できるようになります。軍艦には耐久、燃料、弾薬、主砲、対空などの詳細なパラメータが存在します。",
-                        demos: [
-                            { row: 7, col: 1, type: 'port', delay: 400 },
-                            { row: 7, col: 0, type: 'warship', delay: 1200 }
-                        ]
-                    },
-                    {
-                        task: "【ミッション05】補給と異常状態",
-                        message: "活動には「燃料」と「弾薬」の補給が必須です。また、被弾時には【火災】や【浸水】【弾薬庫発火】などの異常状態が発生することがあり、早急な修理が求められます。",
-                        demos: []
-                    }
-                ]
-            },
-            {
-                id: 5,
-                title: "6. 怪獣迎撃戦",
-                emoji: "👾",
-                summary: "人口が増えると襲来する「シマオロシ」や「テラガロス」の迎撃方法と討伐報奨（ミッション06）です。",
-                slides: [
-                    {
-                        task: "【ミッション06】怪獣の出現",
-                        message: "島が発展し人口が10万人を超えると、「怪獣シマオロシ」や「怪獣テラガロス」👾などが上陸してくることがあります！",
-                        demos: [
-                            { row: 7, col: 12, type: 'monster', delay: 500 }
-                        ]
-                    },
-                    {
-                        task: "【ミッション06】砲撃と討伐報酬",
-                        message: "放置すれば都市が破壊(荒れ地化)されてしまいます。砲台からの【砲撃】や軍艦で迎撃し討伐できれば、多額の討伐報奨金と実績ptを獲得できます！",
-                        demos: [
-                            { row: 7, col: 12, type: 'waste', delay: 2000, explode: true }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 6,
-                title: "7. 艦隊派遣と署名技術",
-                emoji: "🛳️",
-                summary: "P-256暗号署名による艦船の所有証明や、他島への派遣、そして勲章システム（ミッション07）を解説します。",
-                slides: [
-                    {
-                        task: "【ミッション07】暗号技術による所有証明",
-                        message: "高度な技術として、Web Crypto APIを用いた「P-256署名鍵ペア」を生成し、自軍の軍艦に署名を付与し、所有者の偽装を防いでいます。",
-                        demos: []
-                    },
-                    {
-                        task: "【ミッション07】他島への派遣と船渠",
-                        message: "観光者コードを使って他島へ軍艦を【派遣】🛳️し、哨戒任務を行わせることも可能です。また、使用しない艦は【船渠(ドック)】に収納して保管できます。",
-                        demos: [
-                            { row: 7, col: 0, type: 'warship-dispatched', delay: 500 }
-                        ]
-                    },
-                    {
-                        task: "【ミッション07】二つ名と勲章",
-                        message: "軍艦が活躍すると「殲滅王」や「奇跡の生還者」といった【勲章】を授与され、任意の「二つ名」をつけることも可能になります。",
-                        demos: []
-                    }
-                ]
-            },
-            {
-                id: 7,
-                title: "8. 経済危機と計画管理",
-                emoji: "📊",
-                summary: "資金を溜めすぎた際のリスク「経済危機」と、安全な資金繰りのための「トラッキング」（ミッション08）です。",
-                slides: [
-                    {
-                        task: "【ミッション08】経済危機リスク",
-                        message: "司令官、注意してください。保有資金が1億Gを超えると、超過額に応じて【経済危機】の発生確率が上昇します！発生すると資金が長期間凍結されてしまいます。",
-                        demos: []
-                    },
-                    {
-                        task: "【ミッション08】計画のトラッキング",
-                        message: "無駄に資金を貯めず投資に回すのがコツです。「資金不足による計画失敗」が起きた際は、目標額まで自動でトラッキングして進捗を知らせてくれる機能があります。",
-                        demos: []
-                    },
-                    {
-                        task: "司令官、出撃の時です！",
-                        message: "これで全8章の基本カリキュラムは終了です。島の名前を付け、数々の計画を立案し、自分だけの最強の島を作り上げてください！",
-                        demos: []
-                    }
-                ]
-            }
-        ];
+// --- 2. チュートリアル 全8章構成 ---
+const TUTORIAL_CHAPTERS = [
+  {
+    id: 0,
+    title: "1. 島の観察と基本の整地",
+    emoji: "🔍",
+    summary: "島の地形を把握し、荒れ地を開発可能な「平地」へ変える基礎工事（ミッション01）を学びます。",
+    slides: [
+      {
+        task: "【ミッション01】島の地形の理解",
+        message: "司令官、着任おめでとうございます！まずはこの「16×16」の環境を把握しましょう。島には【海】【平地】【森】【山】【荒れ地】などの自然地形が存在します。",
+        demos: []
+      },
+      {
+        task: "【ミッション01】整地による開拓",
+        message: "建物を建てるには【平地】⬜が必要です。【荒れ地】⚙️には何も建設できないため、まずは「整地」計画を実行して平地に変える必要があります。",
+        demos: [
+          { row: 3, col: 5, type: 'plain', delay: 500 },
+          { row: 3, col: 6, type: 'plain', delay: 1000 }
+        ]
+      }
+    ]
+  },
+  {
+    id: 1,
+    title: "2. 産業と資金供給",
+    emoji: "🌾",
+    summary: "農場や工場、そして高額な海底油田による「ターンごとの資金」獲得の仕組み（ミッション02）を学びます。",
+    slides: [
+      {
+        task: "【ミッション02】産業基盤の建設",
+        message: "開発には多額の「資金(G)」が必要です。平地に【農場】🌾や【工場】🏭を建設することで、ターンごとに安定した資金と食料を生み出すことができます。",
+        demos: [
+          { row: 4, col: 6, type: 'farm', delay: 400 },
+          { row: 7, col: 7, type: 'farm', delay: 400 },
+          { row: 4, col: 8, type: 'factory', delay: 1100 }
+        ]
+      },
+      {
+        task: "【ミッション02】海底油田の掘削",
+        message: "さらに海上で「掘削」を行うと【海底油田】🛢️を建設できます。非常に高コストですが、莫大な資金を毎ターン供給する国家の生命線となります！",
+        demos: [
+          { row: 13, col: 4, type: 'oilRig', delay: 600 }
+        ]
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "3. 人口と都市の成長",
+    emoji: "🏠",
+    summary: "住宅を建てて人口を増やし、安定した収入を得る国家運営の要（ミッション03）を学びます。",
+    slides: [
+      {
+        task: "【ミッション03】島民を迎え入れる",
+        message: "働く島民がいなければ産業は十分に機能しません。農場の周辺に【住宅】🏠が発生するので、人々が移住してくる環境を整えましょう。",
+        demos: [
+          { row: 6, col: 6, type: 'house', delay: 400 },
+          { row: 6, col: 7, type: 'house', delay: 1000 },
+          { row: 7, col: 6, type: 'house', delay: 1600 }
+        ]
+      },
+      {
+        task: "【ミッション03】人口と税収",
+        message: "人口が増えると、工場による収入が増加します。住宅地を中心に都市を拡大させていきましょう！",
+        demos: []
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "4. 防衛と自爆戦術",
+    emoji: "🛡️",
+    summary: "台風や敵から都市を守る防衛施設と、いざという時の「軍事施設自爆」戦術（ミッション04）です。",
+    slides: [
+      {
+        task: "【ミッション04】盾となる防衛施設",
+        message: "平和な都市にも災害（台風や隕石）や外敵の脅威が訪れます。重要な建物の近くには【防衛施設】🛡️を置き、周囲の被害を無効化させましょう。",
+        demos: [
+          { row: 5, col: 7, type: 'defenseFacility', delay: 500 }
+        ]
+      },
+      {
+        task: "【ミッション04】ミサイルと自爆",
+        message: "また【砲台】🔫を設置すれば迎撃が可能ですが、最悪の場合は『軍事施設自爆』を実行することで周囲の敵を爆発に巻き込む強力な戦術も使えます。",
+        demos: [
+          { row: 8, col: 9, type: 'gun', delay: 500 },
+          { row: 8, col: 9, type: 'sea', delay: 2500, explode: true },
+          { row: 8, col: 8, type: 'waste', delay: 2500, explode: true },
+          { row: 8, col: 10, type: 'waste', delay: 2500, explode: true },
+          { row: 7, col: 9, type: 'waste', delay: 2500, explode: true },
+          { row: 9, col: 9, type: 'waste', delay: 2500, explode: true },
+          { row: 9, col: 8, type: 'waste', delay: 2500, explode: true },
+          { row: 7, col: 8, type: 'waste', delay: 2500, explode: true },
+          { row: 7, col: 10, type: 'waste', delay: 2500, explode: true },
+          { row: 9, col: 10, type: 'waste', delay: 2500, explode: true }
+        ]
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "5. 軍艦の運用基礎",
+    emoji: "🚢",
+    summary: "港から軍艦を建造し、燃料・弾薬・耐久の管理や、火災・浸水などの異常状態（ミッション05）を学びます。",
+    slides: [
+      {
+        task: "【ミッション05】港と軍艦の建造",
+        message: "海沿いに【港】⚓を建設すると、【軍艦】🚢を建造できるようになります。軍艦には耐久、燃料、弾薬、主砲、対空などの詳細なパラメータが存在します。",
+        demos: [
+          { row: 7, col: 1, type: 'port', delay: 400 },
+          { row: 7, col: 0, type: 'warship', delay: 1200 }
+        ]
+      },
+      {
+        task: "【ミッション05】補給と異常状態",
+        message: "活動には「燃料」と「弾薬」の補給が必須です。また、被弾時には【火災】や【浸水】【弾薬庫発火】などの異常状態が発生することがあり、早急な修理が求められます。",
+        demos: []
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: "6. 怪獣迎撃戦",
+    emoji: "👾",
+    summary: "人口が増えると襲来する「シマオロシ」や「テラガロス」の迎撃方法と討伐報奨（ミッション06）です。",
+    slides: [
+      {
+        task: "【ミッション06】怪獣の出現",
+        message: "島が発展し人口が10万人を超えると、「怪獣シマオロシ」や「怪獣テラガロス」👾などが上陸してくることがあります！",
+        demos: [
+          { row: 7, col: 12, type: 'monster', delay: 500 }
+        ]
+      },
+      {
+        task: "【ミッション06】砲撃と討伐報酬",
+        message: "放置すれば都市が破壊(荒れ地化)されてしまいます。砲台からの【砲撃】や軍艦で迎撃し討伐できれば、多額の討伐報奨金と実績ptを獲得できます！",
+        demos: [
+          { row: 7, col: 12, type: 'waste', delay: 2000, explode: true }
+        ]
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: "7. 艦隊派遣と署名技術",
+    emoji: "🛳️",
+    summary: "P-256暗号署名による艦船の所有証明や、他島への派遣、そして勲章システム（ミッション07）を解説します。",
+    slides: [
+      {
+        task: "【ミッション07】暗号技術による所有証明",
+        message: "高度な技術として、Web Crypto APIを用いた「P-256署名鍵ペア」を生成し、自軍の軍艦に署名を付与し、所有者の偽装を防いでいます。",
+        demos: []
+      },
+      {
+        task: "【ミッション07】他島への派遣と船渠",
+        message: "観光者コードを使って他島へ軍艦を【派遣】🛳️し、哨戒任務を行わせることも可能です。また、使用しない艦は【船渠(ドック)】に収納して保管できます。",
+        demos: [
+          { row: 7, col: 0, type: 'warship-dispatched', delay: 500 }
+        ]
+      },
+      {
+        task: "【ミッション07】二つ名と勲章",
+        message: "軍艦が活躍すると「殲滅王」や「奇跡の生還者」といった【勲章】を授与され、任意の「二つ名」をつけることも可能になります。",
+        demos: []
+      }
+    ]
+  },
+  {
+    id: 7,
+    title: "8. 経済危機と計画管理",
+    emoji: "📊",
+    summary: "資金を溜めすぎた際のリスク「経済危機」と、安全な資金繰りのための「トラッキング」（ミッション08）です。",
+    slides: [
+      {
+        task: "【ミッション08】経済危機リスク",
+        message: "司令官、注意してください。保有資金が1億Gを超えると、超過額に応じて【経済危機】の発生確率が上昇します！発生すると資金が長期間凍結されてしまいます。",
+        demos: []
+      },
+      {
+        task: "【ミッション08】計画のトラッキング",
+        message: "無駄に資金を貯めず投資に回すのがコツです。「資金不足による計画失敗」が起きた際は、目標額まで自動でトラッキングして進捗を知らせてくれる機能があります。",
+        demos: []
+      },
+      {
+        task: "司令官、出撃の時です！",
+        message: "これで全8章の基本カリキュラムは終了です。島の名前を付け、数々の計画を立案し、自分だけの最強の島を作り上げてください！",
+        demos: []
+      }
+    ]
+  }
+];
 // 状態管理
 let currentMapState = [];
 let currentChapterIdx = 0;

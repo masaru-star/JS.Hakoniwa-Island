@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,9 @@
     <link rel="stylesheet" href="src/css/tutorial.css">
     <link rel="icon" href="icon.png">
 </head>
-<body class="bg-slate-50 text-slate-800 h-screen flex flex-col justify-between font-sans overflow-hidden selection:bg-blue-200 selection:text-blue-900">
+
+<body
+    class="bg-slate-50 text-slate-800 h-screen flex flex-col justify-between font-sans overflow-hidden selection:bg-blue-200 selection:text-blue-900">
     <header class="bg-white border-b border-slate-200 py-2.5 px-4 shadow-sm shrink-0">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-2 cursor-pointer" onclick="backToMenu()">
@@ -20,21 +23,24 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <span id="global-status-badge" class="text-[10px] bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full text-blue-600 font-bold flex items-center gap-1">
+                <span id="global-status-badge"
+                    class="text-[10px] bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full text-blue-600 font-bold flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
                     <span id="status-text">メニュー画面</span>
                 </span>
             </div>
         </div>
     </header>
-    <div id="tap-anywhere-overlay" class="fixed inset-0 z-30 cursor-pointer hidden pointer-events-auto" onclick="handleScreenTap(event)">
-        <div class="absolute bottom-[92px] left-1/2 transform -translate-x-1/2 bg-blue-600/90 text-white px-5 py-1.5 rounded-full shadow-md flex items-center gap-1.5 text-xs font-bold tracking-wider pointer-events-none tap-pulse-text transition-all duration-300">
+    <div id="tap-anywhere-overlay" class="fixed inset-0 z-30 cursor-pointer hidden pointer-events-auto"
+        onclick="handleScreenTap(event)">
+        <div
+            class="absolute bottom-[92px] left-1/2 transform -translate-x-1/2 bg-blue-600/90 text-white px-5 py-1.5 rounded-full shadow-md flex items-center gap-1.5 text-xs font-bold tracking-wider pointer-events-none tap-pulse-text transition-all duration-300">
             <span>🖱️ 画面タップで解説を進める</span>
             <span id="tap-arrow" class="text-[10px]">▶</span>
         </div>
     </div>
     <main class="max-w-7xl mx-auto w-full p-3 lg:p-4 flex-grow overflow-y-auto flex flex-col justify-start pb-[100px]">
-        
+
         <div id="menu-view" class="w-full space-y-4 py-2">
             <div class="text-center max-w-xl mx-auto space-y-1">
                 <h2 class="text-xl md:text-2xl font-black text-slate-900">島の開発と国家運営をマスターしよう！</h2>
@@ -44,9 +50,11 @@
             </div>
 
 
-            <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div
+                class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-xl text-blue-600">📊</div>
+                    <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-xl text-blue-600">
+                        📊</div>
                     <div>
                         <div class="text-xs font-bold text-slate-700">全体トレーニング進捗</div>
                         <div class="text-[10px] text-slate-400">各テーマを進めてチュートリアルミッションを達成しましょう</div>
@@ -58,7 +66,8 @@
                         <span id="menu-progress-percent">0%</span>
                     </div>
                     <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                        <div id="menu-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        <div id="menu-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
                     </div>
                 </div>
             </div>
@@ -71,47 +80,58 @@
 
 
         <div id="tutorial-view" class="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 items-start hidden py-1">
-            
+
             <!-- 左側：16x16 マップ -->
-            <div class="lg:col-span-6 bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center max-w-[440px] mx-auto w-full">
+            <div
+                class="lg:col-span-6 bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center max-w-[440px] mx-auto w-full">
                 <div class="w-full flex justify-between items-center mb-2">
                     <div class="flex items-center gap-1.5">
-                        <span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono font-bold">GRID 16×16</span>
-                        <span id="active-mode-badge" class="text-[9px] bg-emerald-50 border border-emerald-200 text-emerald-600 px-2 py-0.5 rounded font-bold">🔍 観測モード</span>
+                        <span
+                            class="text-[9px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono font-bold">GRID
+                            16×16</span>
+                        <span id="active-mode-badge"
+                            class="text-[9px] bg-emerald-50 border border-emerald-200 text-emerald-600 px-2 py-0.5 rounded font-bold">🔍
+                            観測モード</span>
                     </div>
-                    <span id="hovered-tile-info" class="text-[11px] font-semibold text-blue-600 truncate max-w-[200px]">地形にポインターを合わせて情報を取得</span>
+                    <span id="hovered-tile-info"
+                        class="text-[11px] font-semibold text-blue-600 truncate max-w-[200px]">地形にポインターを合わせて情報を取得</span>
                 </div>
-                
+
                 <!-- マップグリッド -->
-                <div id="game-map" class="grid-container w-full border border-slate-200 rounded-lg overflow-hidden shadow-sm bg-blue-100">
+                <div id="game-map"
+                    class="grid-container w-full border border-slate-200 rounded-lg overflow-hidden shadow-sm bg-blue-100">
                     <!-- JSで動的生成 -->
                 </div>
             </div>
 
             <!-- 右側：チュートリアル管理・凡例 -->
             <div class="lg:col-span-6 flex flex-col gap-4">
-                
+
                 <!-- チュートリアルナビゲーター -->
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm relative z-40">
                     <div class="flex justify-between items-center mb-2">
                         <h2 class="text-xs font-bold text-slate-700 flex items-center gap-1">
                             <span>🧭</span> 学習進捗
                         </h2>
-                        <button onclick="backToMenu()" class="text-[10px] font-bold text-slate-400 hover:text-red-500 hover:bg-slate-50 px-2 py-1 rounded transition">
+                        <button onclick="backToMenu()"
+                            class="text-[10px] font-bold text-slate-400 hover:text-red-500 hover:bg-slate-50 px-2 py-1 rounded transition">
                             ✕ メニュー
                         </button>
                     </div>
-                    
+
                     <!-- 進捗バー -->
                     <div class="w-full bg-slate-100 rounded-full h-1.5 mb-3 overflow-hidden">
-                        <div id="progress-bar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        <div id="progress-bar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                            style="width: 0%"></div>
                     </div>
 
                     <div class="space-y-3">
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 min-h-[90px]">
                             <div class="flex justify-between items-center mb-1">
                                 <div class="text-[9px] text-blue-600 font-bold uppercase tracking-wider">現在の課題</div>
-                                <div id="substep-badge" class="text-[9px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.2 rounded-full">スライド 1 / 3</div>
+                                <div id="substep-badge"
+                                    class="text-[9px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.2 rounded-full">
+                                    スライド 1 / 3</div>
                             </div>
                             <div id="step-title" class="font-bold text-slate-900 text-sm mb-1">タイトル</div>
                             <p id="step-task" class="text-[11px] text-slate-500 leading-relaxed">
@@ -121,10 +141,12 @@
 
                         <!-- 操作ボタン -->
                         <div class="flex gap-2">
-                            <button id="btn-prev" onclick="changeStep(-1, event)" class="flex-1 bg-slate-100 hover:bg-slate-200 active:scale-95 transition text-slate-700 font-bold py-2 px-3 rounded-lg border border-slate-200 disabled:opacity-40 disabled:pointer-events-none text-[11px]">
+                            <button id="btn-prev" onclick="changeStep(-1, event)"
+                                class="flex-1 bg-slate-100 hover:bg-slate-200 active:scale-95 transition text-slate-700 font-bold py-2 px-3 rounded-lg border border-slate-200 disabled:opacity-40 disabled:pointer-events-none text-[11px]">
                                 ◀ 戻る
                             </button>
-                            <button id="btn-next" onclick="changeStep(1, event)" class="flex-1 bg-blue-600 hover:bg-blue-500 active:scale-95 transition text-white font-bold py-2 px-3 rounded-lg shadow shadow-blue-100 flex items-center justify-center gap-1 text-[11px]">
+                            <button id="btn-next" onclick="changeStep(1, event)"
+                                class="flex-1 bg-blue-600 hover:bg-blue-500 active:scale-95 transition text-white font-bold py-2 px-3 rounded-lg shadow shadow-blue-100 flex items-center justify-center gap-1 text-[11px]">
                                 <span id="btn-next-text">次へ進む</span> <span id="btn-next-arrow">➔</span>
                             </button>
                         </div>
@@ -135,18 +157,40 @@
                 <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
                     <h3 class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-2">主要地形・ユニット凡例</h3>
                     <div class="grid grid-cols-4 gap-1.5 text-[9px] font-medium text-slate-600">
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded plain border border-black/10 shrink-0"></span>平地</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded waste border border-black/10 shrink-0"></span>荒れ地</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded farm flex items-center justify-center text-[7px] border border-black/10 shrink-0">🌾</span>農場</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded factory flex items-center justify-center text-[7px] border border-black/10 shrink-0">🏭</span>工場</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded oilRig flex items-center justify-center text-[7px] border border-black/10 shrink-0">🛢️</span>油田</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded house flex items-center justify-center text-[7px] border border-black/10 shrink-0">🏠</span>住宅</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded gun flex items-center justify-center text-[7px] border border-black/10 shrink-0">🔫</span>砲台</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded defenseFacility flex items-center justify-center text-[7px] border border-black/10 shrink-0">🛡️</span>防衛</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded warship flex items-center justify-center text-[7px] border border-black/10 shrink-0">🚢</span>軍艦</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded warship-dispatched flex items-center justify-center text-[7px] border border-black/10 shrink-0">🛳️</span>派遣中</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded warship-wreckage flex items-center justify-center text-[7px] border border-black/10 shrink-0">x</span>残骸</div>
-                        <div class="flex items-center gap-1"><span class="w-3 h-3 rounded monster flex items-center justify-center text-[7px] border border-black/10 shrink-0">👾</span>怪獣</div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded plain border border-black/10 shrink-0"></span>平地</div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded waste border border-black/10 shrink-0"></span>荒れ地</div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded farm flex items-center justify-center text-[7px] border border-black/10 shrink-0">🌾</span>農場
+                        </div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded factory flex items-center justify-center text-[7px] border border-black/10 shrink-0">🏭</span>工場
+                        </div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded oilRig flex items-center justify-center text-[7px] border border-black/10 shrink-0">🛢️</span>油田
+                        </div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded house flex items-center justify-center text-[7px] border border-black/10 shrink-0">🏠</span>住宅
+                        </div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded gun flex items-center justify-center text-[7px] border border-black/10 shrink-0">🔫</span>砲台
+                        </div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded defenseFacility flex items-center justify-center text-[7px] border border-black/10 shrink-0">🛡️</span>防衛
+                        </div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded warship flex items-center justify-center text-[7px] border border-black/10 shrink-0">🚢</span>軍艦
+                        </div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded warship-dispatched flex items-center justify-center text-[7px] border border-black/10 shrink-0">🛳️</span>派遣中
+                        </div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded warship-wreckage flex items-center justify-center text-[7px] border border-black/10 shrink-0">x</span>残骸
+                        </div>
+                        <div class="flex items-center gap-1"><span
+                                class="w-3 h-3 rounded monster flex items-center justify-center text-[7px] border border-black/10 shrink-0">👾</span>怪獣
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,11 +198,13 @@
     </main>
 
     <!-- 下部：解説メッセージ用スペース -->
-    <footer id="footer-helper" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-3 px-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-50">
+    <footer id="footer-helper"
+        class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-3 px-4 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-50">
         <div class="max-w-7xl mx-auto flex gap-3 items-center">
             <!-- アシスタントキャラクター -->
             <div class="flex items-center gap-2 shrink-0">
-                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl shadow border-2 border-blue-400 shrink-0">
+                <div
+                    class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl shadow border-2 border-blue-400 shrink-0">
                     🤖
                 </div>
                 <div class="hidden sm:block">
@@ -166,13 +212,18 @@
                     <p class="text-[9px] text-blue-600 font-mono font-bold">STATUS: ACTIVE</p>
                 </div>
             </div>
-            
+
             <!-- メッセージ表示エリア -->
-            <div id="msg-box-container" class="flex-grow bg-slate-50 border border-slate-200 p-3 rounded-xl min-h-[56px] flex items-center relative overflow-hidden transition-all duration-350">
-                <div class="absolute top-1 right-2 text-[8px] font-mono font-bold text-slate-400 select-none">MESSAGE LOG</div>
-                <p id="explain-box" class="text-xs md:text-sm leading-relaxed text-slate-700 font-medium tracking-wide typing-cursor select-none pr-4"></p>
+            <div id="msg-box-container"
+                class="flex-grow bg-slate-50 border border-slate-200 p-3 rounded-xl min-h-[56px] flex items-center relative overflow-hidden transition-all duration-350">
+                <div class="absolute top-1 right-2 text-[8px] font-mono font-bold text-slate-400 select-none">MESSAGE
+                    LOG</div>
+                <p id="explain-box"
+                    class="text-xs md:text-sm leading-relaxed text-slate-700 font-medium tracking-wide typing-cursor select-none pr-4">
+                </p>
             </div>
         </div>
     </footer>
 </body>
+
 </html>

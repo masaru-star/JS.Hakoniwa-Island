@@ -10,14 +10,14 @@ let isCooldown = false;
 function switchTab(tabId) {
   document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  
+
   document.getElementById(tabId).classList.add('active');
-  
+
   if (typeof event !== 'undefined' && event && event.currentTarget) {
     event.currentTarget.classList.add('active');
   }
 
-  if(tabId === 'tab-view') loadPosts();
+  if (tabId === 'tab-view') loadPosts();
 }
 
 async function hashPassword(password) {
@@ -94,14 +94,14 @@ async function registerUser() {
 
     showStatus(reg_status, "登録が完了しました！投稿してみましょう。", "success");
     document.getElementById("reg_password").value = "";
-    
+
     await fetch(`${SUPABASE_URL}/rest/v1/posts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({
-          message: `ようこそ、${name}さん！`,
-          user_id: "07003402-51ea-4a7c-8279-0ef4258250af"
-        })
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({
+        message: `ようこそ、${name}さん！`,
+        user_id: "07003402-51ea-4a7c-8279-0ef4258250af"
+      })
     });
 
   } catch (e) {
@@ -209,7 +209,7 @@ function updateCharCount() {
   const currentLength = messageArea.value.length;
   const remaining = 150 - currentLength;
   countDisplay.textContent = `残り: ${remaining}文字`;
-  
+
   if (remaining < 0) {
     countDisplay.style.color = "red";
   } else {
@@ -223,9 +223,9 @@ async function loadPosts() {
 
   try {
     const [postsRes, usersRes, bannedRes] = await Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/posts?select=id,message,created_at,user_id,device_id&order=created_at.desc`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }}),
-      fetch(`${SUPABASE_URL}/rest/v1/users?select=id,name,role,is_banned,device_id`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }}),
-      fetch(`${SUPABASE_URL}/rest/v1/banned_devices?select=device_id`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }})
+      fetch(`${SUPABASE_URL}/rest/v1/posts?select=id,message,created_at,user_id,device_id&order=created_at.desc`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }),
+      fetch(`${SUPABASE_URL}/rest/v1/users?select=id,name,role,is_banned,device_id`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }),
+      fetch(`${SUPABASE_URL}/rest/v1/banned_devices?select=device_id`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } })
     ]);
 
     if (!postsRes.ok) throw new Error(`posts取得失敗: ${postsRes.status} ${await postsRes.text()}`);
@@ -245,7 +245,7 @@ async function loadPosts() {
     posts.forEach(post => {
       const user = userMap[post.user_id];
       if (!user || user.is_banned || bannedSet.has(user.device_id) || (post.device_id && bannedSet.has(post.device_id))) return;
-      const time = new Date(post.created_at).toLocaleString("ja-JP", { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      const time = new Date(post.created_at).toLocaleString("ja-JP", { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
       const name = user.name ?? "名無しさん";
       const role = user.role ?? "User";
       const roleClass = role.toLowerCase() === 'admin' ? 'post-role role-admin' : 'post-role';
@@ -265,7 +265,7 @@ async function loadPosts() {
       list.appendChild(li);
     });
     if (list.innerHTML === "") {
-        list.innerHTML = "<p style='text-align:center;color:#64748b;'>投稿がまだありません。</p>";
+      list.innerHTML = "<p style='text-align:center;color:#64748b;'>投稿がまだありません。</p>";
     }
   } catch (e) {
     console.error("loadPosts Error:", e);
@@ -280,7 +280,7 @@ function showStatus(el, msg, type) {
 }
 
 function escapeHTML(str) {
-  return str.replace(/[&<>"']/g, function(m) {
+  return str.replace(/[&<>"']/g, function (m) {
     return {
       '&': '&amp;',
       '<': '&lt;',
@@ -294,7 +294,7 @@ function escapeHTML(str) {
 document.addEventListener("DOMContentLoaded", () => {
   loadPosts();
   loadCredentials();
-  
+
   const messageArea = document.getElementById("message");
   if (messageArea) {
     messageArea.addEventListener("input", updateCharCount);
