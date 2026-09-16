@@ -21,9 +21,6 @@ const CONSTANT = {
     ppBombard: 100000000,
     randomBombard: 10000000,
   }
-  chance: {
-
-  }
 }
 const MONSTER_TYPES = {
   1: {
