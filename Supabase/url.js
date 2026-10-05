@@ -1,2 +1,0 @@
-const SUPABASE_URL = "https://crnadiscmpzetjwxxdal.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNybmFkaXNjbXB6ZXRqd3h4ZGFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDA2MDIsImV4cCI6MjA5NTU3NjYwMn0.5Llk-rEvLj2buDYAh3PxZEyVZ8paxv3jtoHfyYtL1Kk";
